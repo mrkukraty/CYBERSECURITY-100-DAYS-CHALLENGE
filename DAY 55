@@ -1,0 +1,975 @@
+# DAY 55 — DATA EXFILTRATION TECHNIQUES
+
+## Topic
+**Learn methods for extracting sensitive data.**
+
+> **Safety:** This topic is presented from a cybersecurity and defensive perspective. In practical exercises, use synthetic or deliberately created test data and an isolated lab. Do not extract real sensitive information without explicit authorization.
+
+---
+
+# 1. What is Data Exfiltration?
+
+**Data exfiltration** is the unauthorized transfer of data from a system or organization to an external or unauthorized destination.
+
+### Simple definition
+
+> **Data exfiltration = Unauthorized movement of data out of a protected environment.**
+
+---
+
+# 2. Basic Exfiltration Flow
+
+```text
+Sensitive Data
+      ↓
+Collection
+      ↓
+Preparation
+      ↓
+Transfer
+      ↓
+External Destination
+```
+
+For defenders:
+
+```text
+Collection
+   ↓
+Detection
+   ↓
+Containment
+   ↓
+Investigation
+```
+
+---
+
+# 3. What Data Might Be Targeted?
+
+Attackers may target:
+
+- Credentials
+- Personal information
+- Financial information
+- Intellectual property
+- Documents
+- Source code
+- Database records
+- Configuration files
+- Internal communications
+
+---
+
+# 4. Data Exfiltration vs Data Theft
+
+These terms are related.
+
+### Data theft
+
+The unauthorized acquisition of data.
+
+### Data exfiltration
+
+The movement of data from the protected environment to another location.
+
+Example:
+
+```text
+Internal Database
+      ↓
+Unauthorized transfer
+      ↓
+External destination
+```
+
+This is exfiltration.
+
+---
+
+# 5. Common Exfiltration Channels
+
+From a defensive perspective, common channels include:
+
+- HTTP/HTTPS
+- DNS
+- Email
+- Cloud storage
+- File-sharing services
+- Removable media
+- Messaging platforms
+- Direct network connections
+
+### Important
+
+Legitimate services can also be used for normal business purposes.
+
+Therefore:
+
+> **The destination alone is not enough to determine malicious activity.**
+
+---
+
+# 6. HTTP/HTTPS Exfiltration
+
+Data may be transferred through web traffic.
+
+Conceptually:
+
+```text
+Compromised Endpoint
+       ↓
+Web Request
+       ↓
+External Server
+```
+
+### Defensive indicators
+
+Look for:
+
+- Unusual upload volume
+- Unexpected destinations
+- Rare domains
+- Abnormal request patterns
+- Unusual endpoint behavior
+
+HTTPS encrypts traffic, making content inspection more difficult in some environments.
+
+---
+
+# 7. DNS-Based Exfiltration
+
+DNS normally resolves domain names.
+
+Conceptually:
+
+```text
+Computer
+   ↓
+DNS Query
+   ↓
+DNS Resolver
+```
+
+In a malicious scenario, unusual data may be encoded into DNS-related traffic.
+
+### Defensive indicators
+
+Look for:
+
+- Extremely long subdomains
+- High query volume
+- High-entropy labels
+- Many unique subdomains
+- Unusual domains
+- Repetitive query patterns
+
+### Important
+
+A single unusual DNS request does not prove exfiltration.
+
+---
+
+# 8. Email Exfiltration
+
+Sensitive information may be sent through email.
+
+Defenders can monitor:
+
+- Large attachments
+- Unusual recipients
+- External forwarding
+- Unexpected email volume
+- Sensitive-data patterns
+
+---
+
+# 9. Cloud Storage
+
+Attackers may attempt to move data to external cloud services.
+
+Defenders should monitor:
+
+- Unusual uploads
+- New cloud applications
+- Large transfers
+- Unknown destinations
+- Abnormal user behavior
+
+---
+
+# 10. Removable Media
+
+USB devices can be used to move data physically.
+
+Possible indicators include:
+
+- Unexpected USB insertion
+- Large file copies
+- Sensitive documents copied externally
+- Use outside normal working patterns
+
+Organizations can use:
+
+- Device control
+- DLP
+- Endpoint monitoring
+- Access policies
+
+---
+
+# 11. Data Staging
+
+Before exfiltration, an attacker may gather data into a temporary location.
+
+Conceptually:
+
+```text
+Many Files
+   ↓
+Collection
+   ↓
+Staging Area
+   ↓
+Transfer
+```
+
+### Defensive clue
+
+An unusual concentration of sensitive files in a previously unused directory may deserve investigation.
+
+---
+
+# 12. Data Compression
+
+Large amounts of data may be compressed before transfer.
+
+Benefits from an attacker's perspective could include:
+
+- Reduced transfer size
+- Easier organization of collected data
+
+Defensive indicators can include:
+
+- Unexpected archive creation
+- Large archive files
+- Archives containing sensitive data
+- Archive creation followed by unusual outbound traffic
+
+---
+
+# 13. Encryption
+
+Encryption can protect transferred information from being easily inspected.
+
+Conceptually:
+
+```text
+Sensitive Data
+      ↓
+Encryption
+      ↓
+Network Transfer
+```
+
+### Defensive challenge
+
+The content may not be directly visible.
+
+Therefore defenders can use:
+
+- Metadata
+- Endpoint telemetry
+- Destination reputation
+- Traffic volume
+- Timing
+- Behavioral analysis
+
+---
+
+# 14. DLP
+
+**DLP = Data Loss Prevention**
+
+DLP technologies attempt to identify and prevent unauthorized movement of sensitive information.
+
+They may inspect:
+
+- Files
+- Emails
+- Web uploads
+- Cloud activity
+- Endpoint transfers
+
+---
+
+# 15. DLP Example
+
+```text
+Employee
+   ↓
+Attempts to upload sensitive file
+   ↓
+DLP detects sensitive content
+   ↓
+Policy evaluated
+   ↓
+Allow / Block / Alert
+```
+
+---
+
+# 16. Network Monitoring
+
+Network defenders can monitor:
+
+- Source
+- Destination
+- Port
+- Protocol
+- Volume
+- Frequency
+- Timing
+
+Example:
+
+```text
+Normal:
+Small periodic uploads
+
+Suspicious:
+Sudden large outbound transfer
+```
+
+But context is critical.
+
+A legitimate backup could also generate large traffic.
+
+---
+
+# 17. Beaconing vs Exfiltration
+
+These are different.
+
+### Beaconing
+
+Periodic communication between a system and another endpoint.
+
+```text
+Endpoint
+ ↓
+Communication
+ ↓
+Server
+ ↓
+Wait
+ ↓
+Communication
+```
+
+### Exfiltration
+
+Transfer of data out of the environment.
+
+```text
+Internal Data
+     ↓
+External Destination
+```
+
+They may occur together but are not identical.
+
+---
+
+# 18. Data Loss Prevention Indicators
+
+Potential indicators include:
+
+- Large unexpected uploads
+- Sensitive files leaving approved locations
+- Unusual external recipients
+- Unexpected cloud uploads
+- USB transfers
+- Unusual archive creation
+- Repeated DNS queries
+- Unusual outbound traffic
+
+---
+
+# 19. User Behavior
+
+Contextual information is important.
+
+Example:
+
+```text
+User normally uploads 20 MB/day
+       ↓
+Suddenly uploads 20 GB
+       ↓
+Investigate
+```
+
+This does not automatically prove malicious activity.
+
+Possible legitimate reasons include:
+
+- Backup
+- Project delivery
+- Software deployment
+- Data migration
+
+---
+
+# 20. Exfiltration Detection Workflow
+
+```text
+Monitor
+   ↓
+Identify Anomaly
+   ↓
+Validate Context
+   ↓
+Identify Data
+   ↓
+Identify Destination
+   ↓
+Determine Authorization
+   ↓
+Contain if Necessary
+   ↓
+Investigate
+   ↓
+Document
+```
+
+---
+
+# 21. Incident Response to Suspected Exfiltration
+
+A defender may:
+
+### 1. Identify
+
+Determine:
+
+- What data?
+- Which system?
+- Which account?
+- Which destination?
+
+### 2. Contain
+
+Depending on policy:
+
+- Isolate endpoint
+- Block destination
+- Disable compromised credentials
+- Stop unauthorized transfer
+
+### 3. Preserve evidence
+
+Collect:
+
+- Logs
+- Endpoint telemetry
+- Network records
+- File metadata
+- Authentication information
+
+### 4. Investigate
+
+Determine:
+
+- How access occurred
+- What data was accessed
+- Whether transfer actually occurred
+- How long the activity continued
+
+### 5. Recover
+
+Fix the underlying problem.
+
+---
+
+# 22. Important Evidence Sources
+
+Potential sources include:
+
+```text
+Endpoint Logs
+      +
+Firewall Logs
+      +
+Proxy Logs
+      +
+DNS Logs
+      +
+DLP Alerts
+      +
+Cloud Logs
+      +
+Authentication Logs
+      +
+Network Telemetry
+```
+
+Correlation is extremely important.
+
+---
+
+# 23. Data Exfiltration and Wireshark
+
+Wireshark can help analysts examine authorized packet captures.
+
+Useful observations include:
+
+- Source/destination IP
+- Protocol
+- DNS activity
+- Connection frequency
+- Packet sizes
+- Traffic volume
+- TLS metadata
+
+### Important
+
+Encrypted application content may not be directly visible.
+
+---
+
+# 24. Example Defensive Investigation
+
+Suppose an endpoint suddenly generates:
+
+```text
+Thousands of DNS queries
++
+Many unique subdomains
++
+Unusual external domain
++
+High-entropy labels
+```
+
+What should the analyst consider?
+
+**Possible DNS-based data exfiltration.**
+
+But the analyst should also check:
+
+- Legitimate application behavior
+- DNS software
+- User activity
+- Known services
+- Domain reputation
+- Endpoint processes
+
+---
+
+# 25. Another Investigation
+
+Suppose:
+
+```text
+Large archive created
+       ↓
+Archive contains sensitive files
+       ↓
+Shortly afterward:
+Large outbound transfer
+```
+
+This combination deserves investigation because the events may be related.
+
+---
+
+# 26. Exfiltration vs Normal Transfer
+
+Not every large transfer is malicious.
+
+Compare:
+
+| Activity | Possible Interpretation |
+|---|---|
+| Scheduled backup | Legitimate |
+| Large cloud upload during migration | Possibly legitimate |
+| Unexpected upload to unknown destination | Suspicious |
+| Sensitive file sent to unauthorized recipient | High concern |
+| Unusual DNS patterns carrying encoded-looking data | Suspicious |
+
+Context is essential.
+
+---
+
+# 27. Data Classification
+
+Organizations should classify data.
+
+Example:
+
+```text
+Public
+Internal
+Confidential
+Restricted
+```
+
+Higher-sensitivity data should have stronger controls.
+
+---
+
+# 28. Least Privilege
+
+Users and applications should only access the data necessary for their role.
+
+```text
+Less Access
+     ↓
+Less Data Available
+     ↓
+Lower Potential Impact
+```
+
+Least privilege helps reduce the amount of data an attacker can access after compromising an account.
+
+---
+
+# 29. Network Segmentation
+
+Segmentation limits unnecessary communication.
+
+```text
+User Network
+     X
+Sensitive Database
+     X
+Management Network
+```
+
+Controlled communication paths can reduce opportunities for data movement.
+
+---
+
+# 30. Egress Controls
+
+Organizations can control outbound communication.
+
+Examples:
+
+- Firewall rules
+- Proxy policies
+- DNS filtering
+- DLP
+- Cloud access controls
+
+The goal is:
+
+> **Allow legitimate business traffic while detecting or restricting suspicious outbound activity.**
+
+---
+
+# 31. Zero Trust Perspective
+
+Zero Trust emphasizes:
+
+> **Never automatically trust a user, device, or connection simply because it is inside the network.**
+
+Relevant controls include:
+
+- Strong authentication
+- Least privilege
+- Continuous verification
+- Device security
+- Segmentation
+- Monitoring
+
+---
+
+# 32. MCQs
+
+### Q1. What is data exfiltration?
+
+A. Authorized backup  
+B. Unauthorized movement of data out of a protected environment  
+C. File compression  
+D. Antivirus scanning  
+
+**Answer: B**
+
+---
+
+### Q2. What does DLP stand for?
+
+A. Data Loss Prevention  
+B. Digital Login Protection  
+C. Data Layer Protocol  
+D. Distributed Log Processing  
+
+**Answer: A**
+
+---
+
+### Q3. Which protocol can potentially be abused for covert data transfer?
+
+A. DNS  
+B. All network protocols are impossible to abuse  
+C. Only FTP  
+D. None  
+
+**Answer: A**
+
+---
+
+### Q4. Does a large outbound transfer automatically prove data theft?
+
+A. Yes  
+B. No  
+
+**Answer: B**
+
+---
+
+### Q5. What is data staging?
+
+A. Collecting data into a location before transfer  
+B. Deleting data  
+C. Encrypting a password  
+D. Installing an operating system  
+
+**Answer: A**
+
+---
+
+### Q6. Which is useful for detecting unusual outbound activity?
+
+A. Network telemetry  
+B. Wallpaper settings  
+C. Screen resolution  
+D. Keyboard layout  
+
+**Answer: A**
+
+---
+
+### Q7. Why can encrypted traffic complicate inspection?
+
+A. Its contents may not be directly readable  
+B. It cannot travel through networks  
+C. It always contains malware  
+D. It disables DNS  
+
+**Answer: A**
+
+---
+
+# 33. HARD SCENARIOS
+
+## Scenario 1
+
+A user normally transfers 50 MB per day but suddenly uploads 15 GB to an unfamiliar external destination.
+
+What should happen?
+
+**Answer:**
+
+Investigate the anomaly.
+
+Check:
+
+- User authorization
+- Destination
+- Files involved
+- Endpoint process
+- DLP alerts
+- Network logs
+- Business justification
+
+---
+
+## Scenario 2
+
+Thousands of unusual DNS queries appear from one workstation.
+
+Does this prove DNS exfiltration?
+
+**Answer: No.**
+
+Investigate possible:
+
+- Malware
+- Legitimate applications
+- Software updates
+- Misconfiguration
+- DNS tunneling/exfiltration
+
+Context is required.
+
+---
+
+## Scenario 3
+
+A large archive is created and then transferred externally.
+
+Why is this important?
+
+**Answer:**
+
+The sequence may indicate:
+
+```text
+Collection
+   ↓
+Staging
+   ↓
+Compression
+   ↓
+Exfiltration
+```
+
+The analyst should investigate the archive contents, creator process, user, destination, and network activity.
+
+---
+
+# 34. EXAM TRAPS
+
+> **"Large network traffic = data theft."**
+
+False.
+
+> **"HTTPS prevents exfiltration."**
+
+False.
+
+HTTPS protects traffic contents in transit but does not prevent an authorized or compromised endpoint from sending data.
+
+> **"DNS is only used for domain resolution."**
+
+False.
+
+DNS can be abused for various malicious purposes.
+
+> **"DLP automatically stops every data leak."**
+
+False.
+
+DLP effectiveness depends on configuration, visibility, policies, and the nature of the data.
+
+---
+
+# 35. MEMORY TRICK
+
+Remember:
+
+> **C-P-T**
+
+### C — Collect
+
+Gather target data.
+
+### P — Prepare
+
+Stage/compress/encrypt.
+
+### T — Transfer
+
+Move data outside.
+
+```text
+COLLECT
+   ↓
+PREPARE
+   ↓
+TRANSFER
+```
+
+---
+
+# 36. DEFENSIVE MEMORY TRICK
+
+Remember:
+
+> **D-L-C**
+
+### D — Detect
+
+Find unusual data movement.
+
+### L — Limit
+
+Control the transfer.
+
+### C — Correlate
+
+Combine endpoint, network, identity, and DLP evidence.
+
+---
+
+# 37. 30-SECOND REVISION
+
+```text
+DATA EXFILTRATION
+       ↓
+Unauthorized data movement
+       ↓
+Possible channels:
+HTTP/HTTPS
+DNS
+Email
+Cloud
+USB
+Other network paths
+       ↓
+DEFENSE
+       ↓
+DLP
++
+Egress Controls
++
+Network Monitoring
++
+Endpoint Telemetry
++
+DNS Monitoring
++
+User/Identity Monitoring
+       ↓
+Investigate + Contain + Recover
+```
+
+---
+
+# 38. DAY 55 FINAL TAKEAWAY
+
+> **Data exfiltration is the unauthorized transfer of information from a protected environment. Defenders detect it by combining endpoint, network, DNS, identity, cloud, and DLP telemetry rather than relying on a single indicator.**
+
+### Most important formula:
+
+```text
+COLLECT
+   ↓
+STAGE
+   ↓
+TRANSFER
+   ↓
+EXFILTRATION
+```
+
+### Defensive formula:
+
+```text
+MONITOR
+   ↓
+DETECT
+   ↓
+VALIDATE
+   ↓
+CONTAIN
+   ↓
+INVESTIGATE
+   ↓
+RECOVER
+```
+
+> **The goal of studying exfiltration techniques is not to steal data; it is to understand how unauthorized data movement occurs so that organizations can detect, prevent, and respond to it.**

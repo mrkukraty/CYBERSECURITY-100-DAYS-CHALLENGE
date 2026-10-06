@@ -1,0 +1,689 @@
+# DAY 95 — DESIGN A FULL PENTESTING WORKFLOW
+
+## Topic
+**Combine all learned techniques into a single, cohesive penetration-testing workflow.**
+
+---
+
+# 1. What is a Pentesting Workflow?
+
+A **penetration-testing workflow** is a structured sequence of activities used by an authorized security professional to identify, validate, document, and report security weaknesses.
+
+The overall process can be represented as:
+
+```text
+Authorization
+     ↓
+Planning
+     ↓
+Reconnaissance
+     ↓
+Scanning
+     ↓
+Enumeration
+     ↓
+Vulnerability Analysis
+     ↓
+Controlled Exploitation
+     ↓
+Privilege Assessment
+     ↓
+Post-Exploitation Assessment
+     ↓
+Evidence Collection
+     ↓
+Reporting
+     ↓
+Remediation
+     ↓
+Retesting
+```
+
+---
+
+# 2. Main Objective
+
+The goal of penetration testing is **not simply to exploit systems**.
+
+The goal is to answer:
+
+- What security weaknesses exist?
+- Can they actually be exploited?
+- What would be the potential impact?
+- Which security controls worked?
+- Which controls failed?
+- How can the organization fix the problem?
+
+---
+
+# 3. Phase 1 — Authorization
+
+Before testing begins, obtain explicit authorization.
+
+Important documents may define:
+
+- Target systems
+- IP ranges
+- Applications
+- Testing dates
+- Allowed techniques
+- Prohibited techniques
+- Emergency contacts
+- Stop conditions
+- Data-handling requirements
+
+### Important exam point
+
+> **No authorization = no legitimate penetration test.**
+
+---
+
+# 4. Phase 2 — Planning
+
+Define:
+
+### Scope
+
+What can be tested?
+
+### Objectives
+
+What are you trying to determine?
+
+### Rules of Engagement
+
+What activities are permitted?
+
+### Constraints
+
+What activities are prohibited?
+
+Example:
+
+```text
+IN SCOPE
+10.10.10.0/24
+Test Web Application
+
+OUT OF SCOPE
+Production Database
+Employee Devices
+Third-Party Systems
+```
+
+---
+
+# 5. Phase 3 — Reconnaissance
+
+Reconnaissance gathers information about the target.
+
+### Passive reconnaissance
+
+Uses publicly available information without directly interacting with the target infrastructure.
+
+Examples:
+
+- Public websites
+- DNS information
+- Public documents
+- Certificate information
+- Publicly available technology information
+
+### Active reconnaissance
+
+Directly interacts with authorized target systems.
+
+Examples:
+
+- Host discovery
+- Port scanning
+- Service identification
+
+---
+
+# 6. Phase 4 — Scanning
+
+Scanning identifies exposed services and potential weaknesses.
+
+Typical information:
+
+```text
+IP Address
+     ↓
+Open Ports
+     ↓
+Services
+     ↓
+Versions
+     ↓
+Potential Vulnerabilities
+```
+
+Tools learned earlier may include:
+
+- Nmap
+- Vulnerability scanners
+- Web scanners
+
+---
+
+# 7. Phase 5 — Enumeration
+
+Enumeration goes deeper than simple scanning.
+
+The tester may identify:
+
+- Services
+- Users
+- Shares
+- Web directories
+- DNS information
+- Application technologies
+- Security configurations
+
+### Memory trick
+
+> **Scanning asks: "What's there?"**
+
+> **Enumeration asks: "What exactly is there?"**
+
+---
+
+# 8. Phase 6 — Vulnerability Analysis
+
+Determine whether identified services have security weaknesses.
+
+Sources can include:
+
+- Scanner results
+- Configuration review
+- Application testing
+- Version information
+- Security advisories
+- Manual validation
+
+---
+
+# 9. Vulnerability Prioritization
+
+Not every vulnerability has the same importance.
+
+Consider:
+
+- Exploitability
+- Impact
+- Exposure
+- Authentication requirements
+- Data sensitivity
+- Business criticality
+
+Example:
+
+| Finding | Potential Risk |
+|---|---|
+| Outdated public-facing service | High |
+| Weak internal configuration | Medium |
+| Informational banner | Low |
+
+---
+
+# 10. Phase 7 — Controlled Exploitation
+
+Only vulnerabilities within the authorized scope should be validated.
+
+The objective is to demonstrate:
+
+> **"This vulnerability is actually exploitable."**
+
+A controlled exploit should minimize:
+
+- System disruption
+- Data modification
+- Data exposure
+- Persistence
+- Operational impact
+
+---
+
+# 11. Exploitation Evidence
+
+Record:
+
+- Vulnerability
+- Target
+- Date/time
+- Method
+- Result
+- Evidence
+- Impact
+
+Do not collect unnecessary sensitive information.
+
+---
+
+# 12. Phase 8 — Privilege Assessment
+
+If authorized, determine whether the compromised context can access higher privileges.
+
+Conceptually:
+
+```text
+Low Privilege
+     ↓
+Security Weakness
+     ↓
+Higher Privilege
+```
+
+The assessment should determine:
+
+- Why privilege escalation was possible
+- Which control failed
+- What access became available
+- How to remediate it
+
+---
+
+# 13. Phase 9 — Post-Exploitation Assessment
+
+Post-exploitation determines the potential impact of a compromise.
+
+Questions include:
+
+- What systems could be reached?
+- What information could be accessed?
+- Could lateral movement occur?
+- Could sensitive resources be accessed?
+- Which security controls detected the activity?
+
+### Important
+
+Post-exploitation does **not** mean unlimited access.
+
+Stay within scope and stop when the objective has been demonstrated.
+
+---
+
+# 14. Phase 10 — Persistence Assessment
+
+If explicitly authorized, determine whether an attacker could maintain access.
+
+Examples of areas to assess:
+
+- Startup mechanisms
+- Scheduled tasks
+- Service configurations
+- Account permissions
+- Application persistence
+
+For a normal pentest, avoid establishing unnecessary persistent access.
+
+---
+
+# 15. Phase 11 — Detection Assessment
+
+A modern pentest should also evaluate defensive controls.
+
+Check whether activity generated:
+
+- Firewall alerts
+- EDR alerts
+- SIEM events
+- IDS/IPS alerts
+- Authentication alerts
+
+Example:
+
+```text
+Test Activity
+     ↓
+Endpoint
+     ↓
+EDR
+     ↓
+SIEM
+     ↓
+SOC Alert
+```
+
+---
+
+# 16. Phase 12 — Evidence Collection
+
+Evidence should be:
+
+- Relevant
+- Accurate
+- Timestamped
+- Securely stored
+- Reproducible where appropriate
+
+Examples:
+
+- Screenshots
+- Logs
+- Scan results
+- Request/response information
+- Hashes
+- Configuration evidence
+
+---
+
+# 17. Phase 13 — Cleanup
+
+After testing:
+
+- Remove test accounts
+- Remove temporary files
+- Remove authorized test artifacts
+- Remove temporary configurations
+- Restore approved changes
+- Confirm system state
+
+### Important
+
+A professional tester should leave the environment in an agreed state.
+
+---
+
+# 18. Phase 14 — Reporting
+
+A professional penetration-testing report usually contains:
+
+## Executive Summary
+
+Written for management.
+
+## Technical Findings
+
+Detailed technical information.
+
+## Risk Rating
+
+Severity and business impact.
+
+## Evidence
+
+Proof of the finding.
+
+## Remediation
+
+Recommended fix.
+
+## Retest Results
+
+Whether the vulnerability was fixed.
+
+---
+
+# 19. Finding Structure
+
+A good finding can follow:
+
+```text
+Title
+↓
+Description
+↓
+Affected Asset
+↓
+Risk
+↓
+Evidence
+↓
+Impact
+↓
+Recommendation
+↓
+References
+```
+
+---
+
+# 20. Full Workflow
+
+```text
+1. Authorization
+       ↓
+2. Planning
+       ↓
+3. Reconnaissance
+       ↓
+4. Scanning
+       ↓
+5. Enumeration
+       ↓
+6. Vulnerability Analysis
+       ↓
+7. Controlled Exploitation
+       ↓
+8. Privilege Assessment
+       ↓
+9. Post-Exploitation
+       ↓
+10. Detection Assessment
+       ↓
+11. Evidence Collection
+       ↓
+12. Cleanup
+       ↓
+13. Reporting
+       ↓
+14. Remediation
+       ↓
+15. Retesting
+```
+
+---
+
+# 21. Example Lab Scenario
+
+Suppose a lab contains:
+
+```text
+Attacker VM
+     ↓
+Firewall
+     ↓
+Web Server
+     ↓
+Database Server
+```
+
+The workflow is:
+
+```text
+Define Scope
+     ↓
+Discover Web Server
+     ↓
+Identify Services
+     ↓
+Enumerate Application
+     ↓
+Identify Vulnerability
+     ↓
+Validate in Lab
+     ↓
+Assess Impact
+     ↓
+Check Detection
+     ↓
+Document
+     ↓
+Fix
+     ↓
+Retest
+```
+
+---
+
+# 22. Pentesting vs Vulnerability Scanning
+
+| Pentesting | Vulnerability Scanning |
+|---|---|
+| Human-guided | Often automated |
+| Validates vulnerabilities | Identifies potential vulnerabilities |
+| May involve controlled exploitation | Usually does not exploit |
+| Determines real-world impact | Produces findings |
+| Requires careful scope | Also requires authorization |
+
+---
+
+# 23. Pentesting vs Red Teaming
+
+### Pentest
+
+Usually focuses on identifying and validating vulnerabilities.
+
+### Red Team
+
+Usually simulates adversary behavior against broader objectives.
+
+```text
+Pentest
+→ Find and validate weaknesses
+
+Red Team
+→ Simulate realistic adversary objectives
+```
+
+---
+
+# 24. Common Mistakes
+
+Avoid:
+
+- Testing without authorization
+- Ignoring scope
+- Excessive exploitation
+- Collecting unnecessary sensitive data
+- Leaving persistence behind
+- Failing to document evidence
+- Ignoring cleanup
+- Reporting vulnerabilities without remediation guidance
+
+---
+
+# 25. MCQs
+
+### Q1. What should happen before penetration testing?
+
+A. Exploitation  
+B. Authorization and scope definition  
+C. Data deletion  
+D. Persistence  
+
+**Answer: B**
+
+### Q2. Which phase identifies exposed services?
+
+A. Scanning  
+B. Reporting  
+C. Cleanup  
+D. Remediation  
+
+**Answer: A**
+
+### Q3. What is the primary purpose of exploitation during a pentest?
+
+A. Cause maximum damage  
+B. Validate security weaknesses within scope  
+C. Steal all available data  
+D. Disable monitoring  
+
+**Answer: B**
+
+### Q4. What happens after remediation?
+
+A. Retesting  
+B. Random scanning  
+C. Data destruction  
+D. Scope expansion  
+
+**Answer: A**
+
+### Q5. What is evidence used for?
+
+A. Supporting security findings  
+B. Hiding vulnerabilities  
+C. Deleting logs  
+D. Bypassing authorization  
+
+**Answer: A**
+
+---
+
+# 26. HARD SCENARIO
+
+A tester discovers a vulnerability that could potentially compromise an entire production database.
+
+What should they do?
+
+### Answer
+
+Do **not** immediately attempt maximum exploitation.
+
+Instead:
+
+1. Confirm the vulnerability safely.
+2. Follow the Rules of Engagement.
+3. Collect minimum necessary evidence.
+4. Stop if the defined impact has been demonstrated.
+5. Notify the appropriate contact if required.
+6. Document the finding and potential impact.
+
+---
+
+# 27. MEMORY TRICK
+
+Remember:
+
+> **A-R-S-E-E-V-E-R-C-R**
+
+**A** — Authorization  
+**R** — Reconnaissance  
+**S** — Scanning  
+**E** — Enumeration  
+**E** — Exploitation  
+**V** — Validation  
+**E** — Evidence  
+**R** — Reporting  
+**C** — Cleanup  
+**R** — Retesting
+
+---
+
+# 28. 30-SECOND REVISION
+
+```text
+AUTHORIZE
+   ↓
+PLAN
+   ↓
+RECON
+   ↓
+SCAN
+   ↓
+ENUMERATE
+   ↓
+ANALYZE
+   ↓
+VALIDATE
+   ↓
+ASSESS IMPACT
+   ↓
+COLLECT EVIDENCE
+   ↓
+CLEAN UP
+   ↓
+REPORT
+   ↓
+REMEDIATE
+   ↓
+RETEST
+```
+
+# FINAL TAKEAWAY
+
+> **A professional penetration test is a controlled, authorized process that combines reconnaissance, scanning, enumeration, vulnerability analysis, controlled validation, impact assessment, evidence collection, reporting, remediation, and retesting.**

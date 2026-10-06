@@ -1,0 +1,727 @@
+# DAY 59 — LOG ANALYSIS
+
+## Topic
+**Use tools like Splunk for log monitoring.**
+
+---
+
+# 1. What is Log Analysis?
+
+**Log analysis** is the process of collecting, examining, correlating, and interpreting system and security logs to identify:
+
+- Normal activity
+- Errors
+- Security events
+- Suspicious behavior
+- Attacks
+- Policy violations
+- System failures
+
+### Simple definition
+
+> **Log analysis = Turning raw event records into useful security information.**
+
+---
+
+# 2. What is a Log?
+
+A **log** is a record of an event that occurred on a system, application, device, or network.
+
+Example:
+
+```text
+2026-10-06 10:35:21
+User: admin
+Action: Login
+Source: 192.168.1.50
+Status: Success
+```
+
+A log can tell an analyst:
+
+- Who performed the action
+- What happened
+- When it happened
+- Where it came from
+- Whether it succeeded or failed
+
+---
+
+# 3. Why Logs Are Important
+
+Logs help security teams:
+
+1. Detect attacks
+2. Investigate incidents
+3. Identify suspicious users
+4. Track system activity
+5. Troubleshoot problems
+6. Establish timelines
+7. Support forensic investigations
+8. Meet compliance requirements
+
+### Memory trick
+
+> **Logs = Evidence of activity**
+
+---
+
+# 4. Common Types of Logs
+
+## A. Authentication Logs
+
+Record:
+
+- Login attempts
+- Logout events
+- Failed authentication
+- Password changes
+- Account lockouts
+
+Example:
+
+```text
+User: john
+Login: Failed
+Source: 10.10.10.25
+```
+
+---
+
+## B. Windows Event Logs
+
+Important categories include:
+
+- Security
+- System
+- Application
+
+Security logs can contain events involving:
+
+- Authentication
+- Account activity
+- Privilege use
+- Policy changes
+
+---
+
+## C. Linux Logs
+
+Linux systems commonly maintain logs for:
+
+- Authentication
+- System activity
+- Services
+- Kernel events
+- Applications
+
+---
+
+## D. Firewall Logs
+
+Can record:
+
+- Allowed connections
+- Blocked connections
+- Source IP
+- Destination IP
+- Port
+- Protocol
+- Timestamp
+
+---
+
+## E. Web Server Logs
+
+May contain:
+
+- Client IP
+- HTTP method
+- Requested URL
+- Status code
+- User agent
+- Timestamp
+
+Example:
+
+```text
+10.0.0.15
+GET /login
+200
+```
+
+---
+
+## F. DNS Logs
+
+Can show:
+
+- DNS queries
+- Requested domains
+- Client systems
+- Query frequency
+- Response information
+
+Useful for detecting suspicious DNS activity.
+
+---
+
+## G. Endpoint/EDR Logs
+
+May record:
+
+- Process creation
+- File activity
+- Network connections
+- Registry activity
+- User activity
+
+---
+
+# 5. Important Log Fields
+
+A typical security event may contain:
+
+| Field | Meaning |
+|---|---|
+| Timestamp | When event occurred |
+| User | Account involved |
+| Source IP | Origin |
+| Destination IP | Target |
+| Host | System involved |
+| Event ID | Event identifier |
+| Action | Activity performed |
+| Status | Success/failure |
+| Process | Process involved |
+
+---
+
+# 6. Log Levels
+
+Applications commonly use levels such as:
+
+```text
+DEBUG
+INFO
+WARNING
+ERROR
+CRITICAL
+```
+
+### Meaning
+
+**DEBUG** → Detailed troubleshooting information
+
+**INFO** → Normal informational event
+
+**WARNING** → Potential problem
+
+**ERROR** → Operation failed
+
+**CRITICAL** → Serious failure
+
+---
+
+# 7. What is SIEM?
+
+**SIEM = Security Information and Event Management**
+
+A SIEM collects and analyzes security-related information from multiple sources.
+
+```text
+Firewall ──────┐
+Windows ───────┤
+Linux ─────────┤
+DNS ───────────┤
+EDR ───────────┤
+Applications ──┤
+               ↓
+              SIEM
+               ↓
+        Correlation/Analysis
+               ↓
+             Alert
+```
+
+---
+
+# 8. What is Splunk?
+
+**Splunk** is a platform used for collecting, searching, analyzing, monitoring, and visualizing machine-generated data such as logs and events.
+
+Security teams can use it to:
+
+- Search logs
+- Create dashboards
+- Correlate events
+- Create alerts
+- Investigate incidents
+- Monitor infrastructure
+
+---
+
+# 9. Splunk Basic Workflow
+
+```text
+Data Sources
+     ↓
+Data Collection
+     ↓
+Indexing
+     ↓
+Search
+     ↓
+Analysis
+     ↓
+Visualization
+     ↓
+Alert
+```
+
+---
+
+# 10. Splunk Concepts
+
+Important terms:
+
+### Event
+
+A single piece of recorded information.
+
+### Index
+
+A logical location where Splunk stores/searches data.
+
+### Search
+
+A query used to find relevant events.
+
+### Dashboard
+
+A visual display of important information.
+
+### Alert
+
+A notification generated when a defined condition occurs.
+
+---
+
+# 11. SPL
+
+Splunk uses **Search Processing Language (SPL)** for searching and analyzing data.
+
+Example conceptual search:
+
+```text
+index=security
+```
+
+This asks Splunk to search data associated with a particular index.
+
+A search can then be refined based on fields such as:
+
+```text
+user
+src_ip
+dest_ip
+action
+status
+```
+
+---
+
+# 12. Example: Failed Login Investigation
+
+Suppose an organization observes:
+
+```text
+10:01 Failed login
+10:02 Failed login
+10:03 Failed login
+10:04 Failed login
+10:05 Successful login
+```
+
+The analyst should investigate:
+
+- Username
+- Source IP
+- Number of attempts
+- Geographic/location context
+- Device
+- Successful session activity
+
+Possible explanation:
+
+> Brute-force or password-spraying activity.
+
+However, repeated failures do not automatically prove an attack.
+
+---
+
+# 13. Log Correlation
+
+One log alone may not tell the complete story.
+
+Example:
+
+```text
+Authentication Log
+        ↓
+Successful login
+        ↓
+Endpoint Log
+        ↓
+Suspicious process
+        ↓
+Firewall Log
+        ↓
+Unusual outbound connection
+```
+
+Together, these events provide stronger evidence.
+
+---
+
+# 14. Timeline Analysis
+
+Security analysts often create timelines.
+
+Example:
+
+```text
+09:15 — Failed login
+09:17 — Successful login
+09:20 — New process created
+09:22 — DNS request
+09:23 — External connection
+09:25 — Sensitive file accessed
+```
+
+This helps determine:
+
+> **What happened first, what happened next, and how the events are connected.**
+
+---
+
+# 15. Indicators in Logs
+
+Important indicators include:
+
+### Authentication
+
+- Multiple failed logins
+- Impossible travel
+- Login at unusual time
+- Privilege changes
+
+### Network
+
+- Unusual destination
+- Repeated connections
+- Unexpected ports
+- Large outbound transfers
+
+### Endpoint
+
+- Suspicious process
+- Unknown executable
+- Abnormal parent-child process relationship
+
+### Application
+
+- Repeated errors
+- Unexpected administrative actions
+- Suspicious requests
+
+---
+
+# 16. Log Normalization
+
+Different systems may use different formats.
+
+Example:
+
+```text
+Windows → Event format
+Linux   → Text/syslog
+Firewall → Vendor-specific format
+```
+
+**Normalization** converts information into a consistent structure.
+
+This makes correlation easier.
+
+---
+
+# 17. False Positives
+
+A **false positive** occurs when normal activity is incorrectly identified as suspicious.
+
+Example:
+
+```text
+100 failed logins
+```
+
+Could indicate:
+
+- Attack
+- Automated application
+- Misconfigured service
+- User mistake
+
+Therefore analysts must investigate context.
+
+---
+
+# 18. False Negatives
+
+A **false negative** occurs when malicious activity is not detected.
+
+This is dangerous because the attack may continue unnoticed.
+
+---
+
+# 19. Log Retention
+
+Organizations should determine:
+
+- Which logs to retain
+- How long to retain them
+- Who can access them
+- How they are protected
+
+Important considerations:
+
+- Storage capacity
+- Compliance
+- Investigation requirements
+- Security
+- Privacy
+
+---
+
+# 20. Log Integrity
+
+Logs should be protected from unauthorized modification or deletion.
+
+Controls may include:
+
+- Access control
+- Centralized collection
+- Integrity monitoring
+- Restricted permissions
+- Secure storage
+
+### Important principle
+
+> **An attacker who can freely modify security logs can make investigations much harder.**
+
+---
+
+# 21. Detection Example
+
+Suppose:
+
+```text
+One account
+↓
+Many failed logins
+↓
+Multiple systems
+↓
+Same source
+```
+
+This may indicate password spraying or brute-force activity.
+
+An analyst should correlate:
+
+- Account
+- Source IP
+- Target systems
+- Time
+- Authentication method
+
+---
+
+# 22. Practical Lab
+
+For a safe lab:
+
+### Step 1
+
+Generate normal login events.
+
+### Step 2
+
+Generate controlled failed-login events.
+
+### Step 3
+
+Collect the logs.
+
+### Step 4
+
+Import/search them in your SIEM or Splunk environment.
+
+### Step 5
+
+Create a search for repeated failures.
+
+### Step 6
+
+Create an alert.
+
+### Step 7
+
+Investigate the resulting event timeline.
+
+---
+
+# 23. MCQs
+
+### Q1. What is log analysis?
+
+A. Deleting logs  
+B. Examining event records to identify useful information  
+C. Encrypting passwords  
+D. Installing an operating system  
+
+**Answer: B**
+
+### Q2. What does SIEM stand for?
+
+A. Security Information and Event Management  
+B. System Internet Encryption Manager  
+C. Secure Internal Email Monitor  
+D. Security Interface Event Machine  
+
+**Answer: A**
+
+### Q3. What language does Splunk commonly use for searching?
+
+A. SPL  
+B. HTML  
+C. CSS  
+D. SQL only  
+
+**Answer: A**
+
+### Q4. What is a false positive?
+
+A. Attack missed by security controls  
+B. Legitimate activity incorrectly identified as suspicious  
+C. Deleted log  
+D. Successful attack  
+
+**Answer: B**
+
+### Q5. Why is log correlation useful?
+
+A. It connects events from different sources  
+B. It deletes duplicate logs  
+C. It disables security controls  
+D. It compresses files  
+
+**Answer: A**
+
+---
+
+# 24. HARD SCENARIO
+
+An analyst sees a successful login from an account at 02:00. Ten minutes later, the same system starts an unusual process and then establishes an outbound connection.
+
+What should the analyst do?
+
+### Answer
+
+Correlate:
+
+```text
+Authentication
+      ↓
+Process
+      ↓
+Network
+```
+
+Then determine:
+
+- Was the login legitimate?
+- Which user/device performed it?
+- What process started?
+- Where did the network connection go?
+- Was sensitive data accessed?
+
+Do not treat a single event as definitive proof of compromise.
+
+---
+
+# 25. EXAM TRAPS
+
+> **One suspicious log = confirmed attack**
+
+False.
+
+> **SIEM automatically understands every attack**
+
+False.
+
+> **Logs are only useful after an incident**
+
+False.
+
+Logs are also useful for proactive monitoring and detection.
+
+> **More logs always means better security**
+
+False.
+
+Poor-quality or excessive logs can create noise and increase storage/analysis costs.
+
+---
+
+# 26. MEMORY TRICK
+
+Remember:
+
+> **C-S-A-A**
+
+**C** — Collect  
+**S** — Search  
+**A** — Analyze  
+**A** — Alert
+
+```text
+Collect → Search → Analyze → Alert
+```
+
+---
+
+# 27. 30-SECOND REVISION
+
+```text
+LOG ANALYSIS
+      ↓
+Collect logs
+      ↓
+Normalize
+      ↓
+Search
+      ↓
+Correlate
+      ↓
+Analyze
+      ↓
+Detect
+      ↓
+Alert
+      ↓
+Investigate
+```
+
+# FINAL TAKEAWAY
+
+> **Log analysis transforms raw system and security events into actionable information. SIEM platforms such as Splunk help security teams collect, search, correlate, visualize, and alert on events from multiple sources.**

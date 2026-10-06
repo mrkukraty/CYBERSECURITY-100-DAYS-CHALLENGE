@@ -1,0 +1,735 @@
+# DAY 96 — DEVELOP A MULTI-FUNCTIONAL CYBERSECURITY TOOL
+
+## Topic
+**Create a Python tool with capabilities like scanning and exploitation.**
+
+> **Safety:** The practical tool below is designed as a defensive security-assessment utility for systems you own or are explicitly authorized to test. It performs safe host/port checks and vulnerability-oriented analysis without weaponized exploitation, credential theft, persistence, or destructive actions.
+
+---
+
+# 1. What is a Multi-Functional Cybersecurity Tool?
+
+A multi-functional cybersecurity tool combines several security capabilities into a single application.
+
+For example:
+
+```text
+Cybersecurity Tool
+       ↓
+ ┌─────┼─────┐
+ ↓     ↓     ↓
+Scan  Analyze  Report
+ ↓      ↓       ↓
+Ports  Rules   Results
+```
+
+---
+
+# 2. Possible Modules
+
+A training tool could contain:
+
+1. Host discovery
+2. Port checking
+3. Banner collection
+4. HTTP security checks
+5. Log analysis
+6. Hash calculation
+7. Risk scoring
+8. Report generation
+
+---
+
+# 3. Tool Architecture
+
+```text
+                MAIN MENU
+                    ↓
+        ┌───────────┼───────────┐
+        ↓           ↓           ↓
+      Scanner    Analyzer     Reporter
+        ↓           ↓           ↓
+       Ports       Logs       Results
+        ↓           ↓           ↓
+             Risk Assessment
+                    ↓
+                  Report
+```
+
+---
+
+# 4. Python Modules
+
+Useful Python modules include:
+
+```python
+socket
+hashlib
+json
+datetime
+argparse
+```
+
+These can support:
+
+- Network connections
+- Hashing
+- Structured output
+- Timestamps
+- Command-line arguments
+
+---
+
+# 5. Safe Port Scanner
+
+A basic authorized lab scanner can check whether selected TCP ports are reachable.
+
+```python
+import socket
+
+def check_port(host, port, timeout=1):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.settimeout(timeout)
+
+    try:
+        result = sock.connect_ex((host, port))
+        return result == 0
+    finally:
+        sock.close()
+
+
+host = "127.0.0.1"
+
+ports = [22, 80, 443, 3389]
+
+for port in ports:
+    if check_port(host, port):
+        print(f"[OPEN] {port}")
+    else:
+        print(f"[CLOSED/FILTERED] {port}")
+```
+
+### Important
+
+Use this against:
+
+- Your own computer
+- A dedicated lab
+- An explicitly authorized target
+
+---
+
+# 6. How the Scanner Works
+
+```text
+Target
+  ↓
+Select Port
+  ↓
+Attempt TCP Connection
+  ↓
+Connection Successful?
+  ↓
+YES → OPEN
+NO  → CLOSED/FILTERED
+```
+
+---
+
+# 7. Why Port Scanning Matters
+
+Port scanning helps identify:
+
+- Exposed services
+- Unexpected services
+- Attack surface
+- Network configuration problems
+
+Example:
+
+```text
+22   → SSH
+80   → HTTP
+443  → HTTPS
+3389 → RDP
+```
+
+Port numbers alone do not prove which service is actually running.
+
+---
+
+# 8. Banner Checking
+
+In an authorized environment, a tool can attempt to identify basic service information.
+
+Conceptually:
+
+```text
+Open Port
+   ↓
+Connect
+   ↓
+Receive Response
+   ↓
+Analyze Banner
+```
+
+### Security benefit
+
+Unexpected or outdated services may deserve investigation.
+
+---
+
+# 9. HTTP Security Check
+
+A defensive tool can inspect an authorized HTTP response for security headers.
+
+Examples:
+
+- Content-Security-Policy
+- X-Content-Type-Options
+- Strict-Transport-Security
+- Referrer-Policy
+
+The absence of a header does not automatically mean the application is vulnerable, but it can identify a configuration improvement.
+
+---
+
+# 10. Hashing Module
+
+A cybersecurity tool can calculate file hashes.
+
+```python
+import hashlib
+
+def sha256_file(path):
+    sha256 = hashlib.sha256()
+
+    with open(path, "rb") as file:
+        for block in iter(lambda: file.read(4096), b""):
+            sha256.update(block)
+
+    return sha256.hexdigest()
+
+
+print(sha256_file("sample.txt"))
+```
+
+This can help with:
+
+- File identification
+- Integrity checking
+- Malware-analysis workflows
+- Evidence tracking
+
+---
+
+# 11. Log Analysis Module
+
+The tool can also analyze security logs.
+
+Example:
+
+```text
+Failed login
+Failed login
+Failed login
+Failed login
+Failed login
+```
+
+The detection engine can produce:
+
+```text
+[ALERT]
+Repeated authentication failures detected.
+```
+
+This connects Day 61 with the larger tool.
+
+---
+
+# 12. Risk Scoring
+
+Each finding can receive a score.
+
+Example:
+
+```text
+Open unexpected service → +5
+Suspicious configuration → +5
+Repeated failed logins → +10
+Known vulnerable version → +15
+```
+
+Then:
+
+```text
+0–9    LOW
+10–19  MEDIUM
+20+    HIGH
+```
+
+This is a simplified educational model.
+
+---
+
+# 13. Safe "Exploitation" Module
+
+Instead of building a weaponized exploit module, create a **vulnerability validation module**.
+
+Its job is to determine whether a known security condition exists without causing damage.
+
+Example:
+
+```text
+Scanner
+  ↓
+Potential vulnerability
+  ↓
+Safe validation check
+  ↓
+Confirmed / Not confirmed
+  ↓
+Report
+```
+
+---
+
+# 14. Why Safe Validation Is Better
+
+A security tester usually needs to answer:
+
+> "Is this finding real?"
+
+They do not necessarily need to:
+
+- Destroy data
+- Steal credentials
+- Establish persistence
+- Disable security tools
+- Exfiltrate information
+
+A safe validation mechanism minimizes operational risk.
+
+---
+
+# 15. Multi-Functional Tool Workflow
+
+```text
+START
+  ↓
+Select Target
+  ↓
+Port Scan
+  ↓
+Service Analysis
+  ↓
+Configuration Checks
+  ↓
+Log Analysis
+  ↓
+Risk Scoring
+  ↓
+Safe Validation
+  ↓
+Generate Report
+```
+
+---
+
+# 16. Command-Line Interface
+
+A tool can provide a menu:
+
+```text
+================================
+ CYBERSECURITY ASSESSMENT TOOL
+================================
+
+1. Port Scan
+2. File Hash
+3. Log Analysis
+4. HTTP Security Check
+5. Risk Report
+6. Exit
+
+Select:
+```
+
+---
+
+# 17. Example Python Menu
+
+```python
+def show_menu():
+    print("""
+================================
+ CYBERSECURITY ASSESSMENT TOOL
+================================
+
+1. Port Scan
+2. File Hash
+3. Log Analysis
+4. Exit
+""")
+
+while True:
+    show_menu()
+
+    choice = input("Select: ")
+
+    if choice == "1":
+        print("Starting authorized port scan...")
+    elif choice == "2":
+        print("Starting file hash...")
+    elif choice == "3":
+        print("Starting log analysis...")
+    elif choice == "4":
+        print("Exiting.")
+        break
+    else:
+        print("Invalid selection.")
+```
+
+---
+
+# 18. Project Structure
+
+A clean project could look like:
+
+```text
+cyber_tool/
+│
+├── main.py
+├── scanner.py
+├── analyzer.py
+├── hashing.py
+├── logger.py
+├── reporter.py
+├── config.json
+└── reports/
+```
+
+---
+
+# 19. Module Responsibilities
+
+### `main.py`
+
+Controls application flow.
+
+### `scanner.py`
+
+Performs authorized network checks.
+
+### `analyzer.py`
+
+Analyzes findings.
+
+### `hashing.py`
+
+Calculates file hashes.
+
+### `logger.py`
+
+Records tool activity.
+
+### `reporter.py`
+
+Creates reports.
+
+---
+
+# 20. Report Example
+
+```text
+=====================================
+ SECURITY ASSESSMENT REPORT
+=====================================
+
+Target:
+127.0.0.1
+
+Open Services:
+22
+80
+
+Security Checks:
+HTTP security headers: Review recommended
+
+Risk:
+MEDIUM
+
+Recommendations:
+- Review exposed services
+- Disable unnecessary services
+- Apply security updates
+- Review firewall rules
+=====================================
+```
+
+---
+
+# 21. Error Handling
+
+A professional tool should handle:
+
+- Invalid IP addresses
+- Unreachable hosts
+- Timeouts
+- Permission errors
+- Missing files
+- Invalid input
+
+Example:
+
+```python
+try:
+    port = int(input("Port: "))
+except ValueError:
+    print("Invalid port.")
+```
+
+---
+
+# 22. Logging
+
+The tool should maintain its own logs.
+
+Example:
+
+```text
+2026-10-06 15:00:00 INFO Scan started
+2026-10-06 15:00:03 INFO Port 22 open
+2026-10-06 15:00:04 INFO Scan completed
+```
+
+This makes troubleshooting and auditing easier.
+
+---
+
+# 23. Input Validation
+
+Never blindly trust user input.
+
+Validate:
+
+- IP addresses
+- Port numbers
+- File paths
+- Options
+- Configuration values
+
+For example:
+
+```text
+Port must be:
+1–65535
+```
+
+---
+
+# 24. Security of the Tool Itself
+
+The tool should also be secure.
+
+Consider:
+
+- Least privilege
+- Safe input handling
+- Secure file permissions
+- Error handling
+- No hardcoded secrets
+- Protected reports
+- Audit logging
+
+---
+
+# 25. Extending the Tool
+
+Possible future modules:
+
+```text
+DNS Analyzer
+     ↓
+PCAP Analyzer
+     ↓
+Threat Intelligence
+     ↓
+Vulnerability Database
+     ↓
+Dashboard
+     ↓
+Alert System
+```
+
+---
+
+# 26. Why Modular Design Matters
+
+Without modularity:
+
+```text
+One Huge Script
+     ↓
+Hard to maintain
+```
+
+With modularity:
+
+```text
+Scanner
+Analyzer
+Reporter
+Logger
+Hashing
+     ↓
+Easy to update
+```
+
+---
+
+# 27. MCQs
+
+### Q1. What is the purpose of a multi-functional security tool?
+
+A. Combine multiple security-analysis capabilities  
+B. Destroy systems  
+C. Disable firewalls  
+D. Steal credentials  
+
+**Answer: A**
+
+### Q2. What does SHA-256 provide?
+
+A. A cryptographic hash  
+B. A network port  
+C. An IP address  
+D. A firewall rule  
+
+**Answer: A**
+
+### Q3. Why use modules?
+
+A. Better organization and maintainability  
+B. To make code impossible to debug  
+C. To disable security  
+D. To increase damage  
+
+**Answer: A**
+
+### Q4. What should vulnerability validation minimize?
+
+A. Operational risk  
+B. Documentation  
+C. Accuracy  
+D. Evidence  
+
+**Answer: A**
+
+### Q5. What should happen before scanning a target?
+
+A. Authorization  
+B. Data deletion  
+C. Credential theft  
+D. Persistence  
+
+**Answer: A**
+
+---
+
+# 28. HARD SCENARIO
+
+You build a scanner that identifies an outdated service.
+
+Should the tool immediately launch a destructive exploit?
+
+**Answer: No.**
+
+The correct workflow is:
+
+```text
+Identify
+  ↓
+Verify
+  ↓
+Assess Risk
+  ↓
+Safe Validation
+  ↓
+Document
+  ↓
+Recommend Fix
+```
+
+---
+
+# 29. EXAM TRAPS
+
+> **A port scanner is automatically an exploit tool.**
+
+False.
+
+> **An open port means the system is vulnerable.**
+
+False.
+
+> **A vulnerability scanner always proves exploitation.**
+
+False.
+
+> **More modules automatically make a tool better.**
+
+False.
+
+Quality, accuracy, safety, maintainability, and useful reporting are also important.
+
+---
+
+# 30. MEMORY TRICK
+
+Remember:
+
+> **S-A-V-R**
+
+**S** — Scan  
+**A** — Analyze  
+**V** — Validate  
+**R** — Report
+
+```text
+SCAN
+ ↓
+ANALYZE
+ ↓
+VALIDATE
+ ↓
+REPORT
+```
+
+---
+
+# 31. 30-SECOND REVISION
+
+```text
+MULTI-FUNCTIONAL SECURITY TOOL
+             ↓
+        Input/Target
+             ↓
+          Scanning
+             ↓
+         Analysis
+             ↓
+      Security Checks
+             ↓
+       Safe Validation
+             ↓
+        Risk Scoring
+             ↓
+          Reporting
+```
+
+# FINAL TAKEAWAY
+
+> **A multi-functional cybersecurity tool combines multiple security-assessment capabilities into a modular application. A well-designed tool should prioritize authorization, safe validation, accurate detection, error handling, logging, risk scoring, and useful reporting rather than destructive exploitation.**

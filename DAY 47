@@ -1,0 +1,1891 @@
+# DAY 47 – INTRODUCTION TO DIGITAL FORENSICS
+## Autopsy and Volatility
+
+> **Lab-only rule:** Perform forensic analysis only on systems, disk images, memory dumps, or files you are authorized to examine. Always preserve the original evidence and work from a verified copy whenever possible.
+
+---
+
+# 1. DAY 47 OBJECTIVES
+
+By the end of this lesson, you should understand:
+
+- What digital forensics is
+- Digital evidence
+- Forensic investigation workflow
+- Evidence preservation
+- Chain of custody
+- Hashing
+- Disk forensics
+- Memory forensics
+- File-system analysis
+- Timeline analysis
+- Deleted-file investigation
+- Browser artifacts
+- Windows artifacts
+- Autopsy
+- Sleuth Kit
+- Volatility
+- Volatility plugins
+- Indicators of compromise
+- Evidence reporting
+
+---
+
+# 2. WHAT IS DIGITAL FORENSICS?
+
+**Digital forensics** is the process of identifying, preserving, collecting, examining, analyzing, and reporting digital evidence.
+
+Simple definition:
+
+> **Digital forensics = scientifically examining digital evidence to determine what happened.**
+
+Examples of evidence:
+
+- Hard drives
+- SSDs
+- USB devices
+- Memory/RAM
+- Smartphones
+- Logs
+- Network captures
+- Cloud records
+- Browser artifacts
+- Files
+- Emails
+
+---
+
+# 3. WHY DIGITAL FORENSICS IS IMPORTANT
+
+Suppose an organization discovers:
+
+```text
+Suspicious Login
+      ↓
+Unknown Process
+      ↓
+Sensitive File Access
+      ↓
+Possible Data Theft
+```
+
+The security team needs to determine:
+
+- What happened?
+- When did it happen?
+- Which account was involved?
+- Which files were accessed?
+- What process executed?
+- Was malware present?
+- Did data leave the system?
+- What systems were affected?
+
+Digital forensics helps answer these questions.
+
+---
+
+# 4. DIGITAL FORENSICS VS CYBERSECURITY
+
+### Cybersecurity
+
+Focuses heavily on:
+
+```text
+Prevent
+Detect
+Protect
+Respond
+```
+
+### Digital forensics
+
+Focuses heavily on:
+
+```text
+Preserve
+Examine
+Analyze
+Reconstruct
+Report
+```
+
+They work together.
+
+```text
+Cyber Incident
+      ↓
+Detection
+      ↓
+Incident Response
+      ↓
+Forensic Investigation
+      ↓
+Evidence
+      ↓
+Root Cause
+      ↓
+Remediation
+```
+
+---
+
+# 5. DIGITAL FORENSICS TYPES
+
+| Type | Evidence |
+|---|---|
+| Disk forensics | HDD/SSD/filesystem |
+| Memory forensics | RAM |
+| Network forensics | Packets/flows |
+| Mobile forensics | Phones/tablets |
+| Email forensics | Email/mailboxes |
+| Cloud forensics | Cloud resources/logs |
+| Database forensics | Database activity |
+| Malware forensics | Malicious files/behavior |
+
+Day 47 focuses mainly on:
+
+> **Disk + Memory forensics**
+
+---
+
+# 6. DISK FORENSICS
+
+Disk forensics analyzes persistent storage.
+
+Potential evidence:
+
+```text
+Files
+Directories
+Deleted files
+Metadata
+Browser history
+Downloads
+USB history
+Logs
+Registry
+Application artifacts
+Timestamps
+```
+
+---
+
+# 7. MEMORY FORENSICS
+
+Memory forensics analyzes RAM.
+
+RAM may contain information that does not exist on disk.
+
+Examples:
+
+- Running processes
+- Network connections
+- Loaded modules
+- Command-line information
+- Process memory
+- Credentials/tokens in some circumstances
+- Malware artifacts
+
+Important:
+
+> **RAM is volatile evidence.**
+
+It can disappear when the system shuts down.
+
+---
+
+# 8. VOLATILE VS NON-VOLATILE EVIDENCE
+
+### Volatile
+
+Lost or changed when the system stops running.
+
+Examples:
+
+```text
+RAM
+Running processes
+Active network connections
+Temporary runtime information
+```
+
+### Non-volatile
+
+Generally persists after shutdown.
+
+Examples:
+
+```text
+Hard drive
+SSD
+USB
+Files
+Logs
+```
+
+Memory:
+
+> **RAM = volatile**
+
+> **Disk = persistent**
+
+---
+
+# 9. FORENSIC INVESTIGATION WORKFLOW
+
+Memorize:
+
+> **I-P-C-E-A-R**
+
+```text
+Identify
+   ↓
+Preserve
+   ↓
+Collect
+   ↓
+Examine
+   ↓
+Analyze
+   ↓
+Report
+```
+
+---
+
+# 10. FORENSIC WORKFLOW IN DETAIL
+
+## 1. Identify
+
+Determine:
+
+- Incident
+- Affected systems
+- Potential evidence
+- Investigation scope
+
+## 2. Preserve
+
+Prevent unnecessary evidence modification.
+
+## 3. Collect
+
+Acquire evidence appropriately.
+
+## 4. Examine
+
+Extract useful artifacts.
+
+## 5. Analyze
+
+Determine what the artifacts mean.
+
+## 6. Report
+
+Document conclusions and evidence.
+
+---
+
+# 11. EVIDENCE PRESERVATION
+
+The original evidence should be protected.
+
+Concept:
+
+```text
+Original Evidence
+       ↓
+Preserve
+       ↓
+Forensic Acquisition
+       ↓
+Verified Working Copy
+       ↓
+Analysis
+```
+
+Avoid unnecessary modification of the original.
+
+---
+
+# 12. CHAIN OF CUSTODY
+
+Chain of custody documents:
+
+- Who collected evidence
+- When it was collected
+- Where it came from
+- How it was handled
+- Where it was stored
+- Who accessed it
+- When it was transferred
+
+Concept:
+
+```text
+Collection
+    ↓
+Storage
+    ↓
+Transfer
+    ↓
+Analysis
+    ↓
+Reporting
+```
+
+---
+
+# 13. WHY CHAIN OF CUSTODY MATTERS
+
+Without proper documentation, questions can arise about:
+
+- Evidence authenticity
+- Evidence integrity
+- Who handled it
+- Whether it was modified
+- Whether the analysis was reliable
+
+Therefore:
+
+> **Evidence handling is as important as evidence analysis.**
+
+---
+
+# 14. HASHING
+
+A cryptographic hash can help verify evidence integrity.
+
+Common examples:
+
+```text
+SHA-256
+SHA-512
+MD5
+```
+
+For modern forensic integrity verification, SHA-256 is commonly preferred over MD5.
+
+Concept:
+
+```text
+Evidence
+   ↓
+SHA-256
+   ↓
+Hash A
+```
+
+Later:
+
+```text
+Evidence Copy
+   ↓
+SHA-256
+   ↓
+Hash B
+```
+
+If:
+
+```text
+Hash A = Hash B
+```
+
+the calculated hashes are consistent.
+
+---
+
+# 15. IMPORTANT HASHING POINT
+
+A hash does **not** prove that evidence is authentic by itself.
+
+It helps demonstrate:
+
+> **The examined data matches the data represented by the recorded hash.**
+
+Authenticity also depends on proper acquisition and chain of custody.
+
+---
+
+# 16. FORENSIC IMAGE
+
+A forensic image is a copy of storage media or relevant storage content acquired for examination.
+
+Concept:
+
+```text
+Original Disk
+     ↓
+Forensic Acquisition
+     ↓
+Image
+     ↓
+Hash Verification
+     ↓
+Analysis
+```
+
+Common image formats include:
+
+- RAW
+- E01
+
+---
+
+# 17. WRITE BLOCKING
+
+A write blocker helps prevent a forensic workstation from modifying the original storage device during acquisition.
+
+Concept:
+
+```text
+Evidence Disk
+     ↓
+Write Blocker
+     ↓
+Forensic Workstation
+```
+
+Main purpose:
+
+> **Prevent unintended writes to evidence.**
+
+---
+
+# 18. AUTOPSY
+
+**Autopsy** is a digital forensics platform that provides a graphical interface for forensic investigation.
+
+It is commonly used for:
+
+- Disk-image analysis
+- File-system analysis
+- Timeline analysis
+- Deleted-file investigation
+- Hash analysis
+- Keyword searching
+- Web artifacts
+- User activity analysis
+
+---
+
+# 19. SLEUTH KIT
+
+Autopsy works with components from the **Sleuth Kit** ecosystem.
+
+Simplified:
+
+```text
+Autopsy
+   ↓
+Forensic Interface
+   ↓
+Sleuth Kit capabilities
+   ↓
+Filesystem / Disk Analysis
+```
+
+Memory:
+
+> **Autopsy = forensic investigation platform**
+
+---
+
+# 20. AUTOPSY WORKFLOW
+
+Typical workflow:
+
+```text
+Create Case
+    ↓
+Add Data Source
+    ↓
+Process Evidence
+    ↓
+Analyze Artifacts
+    ↓
+Search
+    ↓
+Timeline
+    ↓
+Correlate
+    ↓
+Report
+```
+
+---
+
+# 21. CREATING A FORENSIC CASE
+
+A case normally contains information such as:
+
+- Case name
+- Case number
+- Examiner
+- Evidence source
+- Investigation notes
+
+Example:
+
+```text
+Case:
+INC-2026-047
+
+Examiner:
+Security Team
+
+Evidence:
+LAB-WIN11-01.E01
+```
+
+Use fictional/test data in your lab.
+
+---
+
+# 22. ADDING A DATA SOURCE
+
+Autopsy can work with forensic evidence such as:
+
+- Disk images
+- Logical files
+- Other supported evidence sources
+
+For a lab:
+
+```text
+Autopsy
+   ↓
+New Case
+   ↓
+Add Evidence
+   ↓
+Process
+```
+
+---
+
+# 23. AUTOPSY DATA PROCESSING
+
+Depending on configuration, Autopsy can extract artifacts such as:
+
+```text
+Files
+Web history
+Downloads
+Bookmarks
+Cookies
+Recent activity
+Deleted files
+Metadata
+Hash information
+Timeline events
+```
+
+Processing modules can vary by version and configuration.
+
+---
+
+# 24. FILE SYSTEM ANALYSIS
+
+Investigate:
+
+```text
+Root
+ ├── Users
+ ├── Windows
+ ├── Program Files
+ └── Other directories
+```
+
+Questions:
+
+- Which files were created?
+- Which were modified?
+- Which were deleted?
+- Who owns them?
+- What timestamps exist?
+- Are there suspicious executables?
+
+---
+
+# 25. DELETED FILES
+
+Deleting a file does not necessarily mean all traces disappear immediately.
+
+Forensic tools may identify:
+
+- Deleted directory entries
+- Recoverable file content
+- File metadata
+- References to deleted files
+
+However:
+
+> Recovery is not guaranteed.
+
+Factors include:
+
+- SSD behavior
+- TRIM
+- Overwriting
+- File-system structure
+- Encryption
+- Damage
+
+---
+
+# 26. TIMELINE ANALYSIS
+
+A timeline reconstructs events.
+
+Example:
+
+```text
+09:00 — User login
+09:05 — Browser download
+09:06 — Executable created
+09:07 — Process executes
+09:08 — Network connection
+09:10 — File modified
+```
+
+This can help investigators understand attack sequence.
+
+---
+
+# 27. MACB TIMESTAMPS
+
+Filesystem investigations often consider:
+
+- **M** = Modified
+- **A** = Accessed
+- **C** = Changed metadata/status
+- **B** = Birth/creation, where supported
+
+Memory:
+
+> **MACB = Modified, Accessed, Changed, Birth**
+
+Timestamp interpretation is filesystem- and platform-dependent.
+
+---
+
+# 28. TIMELINE WARNING
+
+A timestamp does not automatically prove who performed an action.
+
+For example:
+
+```text
+File Modified
+```
+
+does not automatically prove:
+
+```text
+Person X modified the file
+```
+
+Correlate:
+
+- User accounts
+- Process activity
+- Logs
+- Network events
+- Other timestamps
+
+---
+
+# 29. BROWSER FORENSICS
+
+Browser artifacts may contain:
+
+- History
+- Downloads
+- Cookies
+- Cache
+- Bookmarks
+- Search activity
+- Sessions in some circumstances
+
+These can help answer:
+
+> What websites or resources were accessed?
+
+---
+
+# 30. DOWNLOAD INVESTIGATION
+
+Suppose a suspicious executable appears on a workstation.
+
+Investigators can correlate:
+
+```text
+Browser History
+      ↓
+Download Record
+      ↓
+File Creation
+      ↓
+Execution Evidence
+      ↓
+Network Activity
+```
+
+This can help establish an event timeline.
+
+---
+
+# 31. WINDOWS REGISTRY FORENSICS
+
+The Windows Registry contains extensive configuration and activity information.
+
+Forensic investigation may examine artifacts related to:
+
+- User accounts
+- Installed software
+- USB devices
+- System configuration
+- User activity
+- Startup configuration
+
+Important:
+
+> Registry artifacts must be interpreted in context.
+
+---
+
+# 32. USB FORENSICS
+
+Investigators may examine evidence relating to removable devices.
+
+Questions include:
+
+- Was a USB device connected?
+- When?
+- What device information is available?
+- Which user/system was involved?
+
+USB evidence can help investigate possible data transfer.
+
+---
+
+# 33. AUTOPSY KEYWORD SEARCH
+
+Keyword searching can help locate relevant evidence.
+
+Examples:
+
+```text
+malware
+password
+secret
+invoice
+confidential
+suspicious.exe
+```
+
+Use appropriate investigation-specific terms.
+
+Important:
+
+> A keyword match is an investigative lead, not automatically proof of malicious activity.
+
+---
+
+# 34. HASH ANALYSIS
+
+Hash sets can help classify files.
+
+Concept:
+
+```text
+File
+ ↓
+Hash
+ ↓
+Compare with known-good / known-bad set
+```
+
+Possible results:
+
+```text
+Known good
+Known bad
+Unknown
+```
+
+Unknown does not mean malicious.
+
+---
+
+# 35. VOLATILITY
+
+**Volatility** is a memory-forensics framework.
+
+It is used to analyze memory dumps.
+
+Concept:
+
+```text
+RAM Image
+    ↓
+Volatility
+    ↓
+Processes
+Connections
+Modules
+Memory artifacts
+```
+
+---
+
+# 36. WHY MEMORY FORENSICS?
+
+A disk investigation may show:
+
+```text
+Suspicious.exe exists
+```
+
+But memory may reveal:
+
+```text
+Suspicious.exe
+   ↓
+Currently running
+   ↓
+Process information
+   ↓
+Network connection
+```
+
+Memory can therefore provide valuable runtime evidence.
+
+---
+
+# 37. VOLATILITY 3
+
+Modern Volatility workflows commonly use **Volatility 3**.
+
+General syntax:
+
+```bash
+python vol.py -f memory.raw <plugin>
+```
+
+The exact plugin name and supported artifacts depend on the Volatility version and memory image.
+
+---
+
+# 38. IMPORTANT VOLATILITY CONCEPT
+
+Volatility does not magically analyze every memory dump.
+
+Successful analysis depends on:
+
+- Correct memory image
+- Supported operating system
+- Appropriate symbols/plugins
+- Correct plugin selection
+- Image quality
+
+---
+
+# 39. PROCESS ANALYSIS
+
+A key memory-forensics task is identifying processes.
+
+Concept:
+
+```text
+Memory
+  ↓
+Process enumeration
+  ↓
+PID
+Name
+Parent
+Path
+Threads
+```
+
+Questions:
+
+- Which processes were running?
+- Which parent created them?
+- Is the process unusual?
+- Does its path make sense?
+
+---
+
+# 40. PROCESS TREE
+
+A process tree can be extremely useful.
+
+Example:
+
+```text
+explorer.exe
+    ↓
+browser.exe
+    ↓
+document.exe
+    ↓
+powershell.exe
+```
+
+A suspicious parent-child relationship may deserve investigation.
+
+Important:
+
+> A suspicious process tree is an indicator, not automatic proof of malware.
+
+---
+
+# 41. VOLATILITY NETWORK ANALYSIS
+
+Memory can contain evidence of network connections.
+
+Investigators may examine:
+
+- Local addresses
+- Remote addresses
+- Ports
+- Process association
+
+Concept:
+
+```text
+Process
+   ↓
+Network Connection
+   ↓
+Remote IP:Port
+```
+
+This can help correlate malware activity.
+
+---
+
+# 42. MEMORY MODULE ANALYSIS
+
+Memory analysis may identify loaded modules.
+
+Questions:
+
+- Which DLLs/modules are loaded?
+- Are any unexpected?
+- Do paths make sense?
+- Are there suspicious modules associated with processes?
+
+---
+
+# 43. COMMAND-LINE FORENSICS
+
+Process command-line information can reveal how a process was launched.
+
+Example concept:
+
+```text
+Process
+ ↓
+Command line
+ ↓
+Arguments
+```
+
+This can help investigators understand execution.
+
+---
+
+# 44. MALWARE IN MEMORY
+
+Malware may leave artifacts in RAM even if:
+
+- Its file was deleted
+- Its disk presence is obscured
+- It exists only temporarily
+- It injected code into another process
+
+Therefore:
+
+> **Memory forensics can complement disk forensics.**
+
+---
+
+# 45. DISK + MEMORY FORENSICS
+
+The strongest investigation often correlates both.
+
+```text
+             INCIDENT
+                ↓
+       ┌────────┴────────┐
+       ↓                 ↓
+     DISK               RAM
+       ↓                 ↓
+ Files/Logs          Processes
+ Browser             Connections
+ Registry             Modules
+       ↓                 ↓
+       └────────┬────────┘
+                ↓
+           CORRELATION
+                ↓
+            CONCLUSION
+```
+
+---
+
+# 46. AUTOPSY VS VOLATILITY
+
+| Autopsy | Volatility |
+|---|---|
+| Disk-focused | Memory-focused |
+| Files | Processes |
+| Filesystem | Runtime state |
+| Deleted files | Memory artifacts |
+| Browser artifacts | Processes/connections |
+| Timelines | Memory analysis |
+| Disk image | RAM image |
+
+Memory:
+
+> **Autopsy = Disk**
+
+> **Volatility = RAM**
+
+---
+
+# 47. DIGITAL FORENSICS VS INCIDENT RESPONSE
+
+### Incident Response
+
+Focus:
+
+```text
+Detect
+Contain
+Eradicate
+Recover
+```
+
+### Digital Forensics
+
+Focus:
+
+```text
+Preserve
+Examine
+Analyze
+Reconstruct
+Report
+```
+
+They overlap.
+
+---
+
+# 48. INDICATORS OF COMPROMISE
+
+Examples:
+
+- Unknown executable
+- Suspicious process
+- Unexpected account
+- Unusual login
+- Modified system file
+- Suspicious scheduled task
+- Unexpected network connection
+- Malicious hash
+- Suspicious browser download
+
+But:
+
+> **An IOC is an indicator, not automatically proof of compromise.**
+
+---
+
+# 49. CORRELATION EXAMPLE
+
+Suppose forensic evidence shows:
+
+```text
+10:01 — User login
+10:03 — Browser downloads file
+10:04 — File created
+10:05 — Process starts
+10:05 — Process connects externally
+10:06 — Suspicious persistence created
+```
+
+Individually:
+
+```text
+Download
+Process
+Connection
+Task
+```
+
+Together:
+
+```text
+Potential attack chain
+```
+
+This is why timeline correlation is powerful.
+
+---
+
+# 50. FORENSIC TRIAGE
+
+Triage determines:
+
+> **What should be investigated first?**
+
+Prioritize:
+
+1. Active compromise
+2. Volatile evidence
+3. High-value systems
+4. Critical accounts
+5. Suspicious processes
+6. Network connections
+7. Relevant files/logs
+
+---
+
+# 51. ORDER OF VOLATILE EVIDENCE
+
+A simplified concept is:
+
+```text
+Highly volatile
+      ↓
+RAM
+Active processes
+Network connections
+Temporary runtime state
+      ↓
+Less volatile
+      ↓
+Disk
+Logs
+Archived data
+```
+
+The exact acquisition order depends on the incident and forensic procedures.
+
+---
+
+# 52. FORENSIC EVIDENCE HANDLING
+
+Use:
+
+```text
+IDENTIFY
+   ↓
+PRESERVE
+   ↓
+ACQUIRE
+   ↓
+HASH
+   ↓
+ANALYZE COPY
+   ↓
+DOCUMENT
+   ↓
+REPORT
+```
+
+---
+
+# 53. FORENSIC REPORT
+
+A good report contains:
+
+### Case information
+
+- Case ID
+- Examiner
+- Date/time
+- Evidence source
+
+### Methodology
+
+- Acquisition method
+- Tools
+- Versions
+- Hashes
+
+### Findings
+
+- Evidence
+- Timeline
+- Artifacts
+- Indicators
+
+### Analysis
+
+- Interpretation
+- Correlation
+- Confidence/limitations
+
+### Conclusion
+
+- What happened
+- What evidence supports it
+- What remains uncertain
+
+---
+
+# 54. FORENSIC REPORT EXAMPLE
+
+### Finding
+
+Suspicious executable execution
+
+### Evidence
+
+- File present on disk
+- Browser download artifact
+- Process execution evidence
+- Network connection
+- Matching timeline
+
+### Conclusion
+
+Evidence indicates that the executable was downloaded and subsequently executed.
+
+### Limitation
+
+Available evidence cannot independently establish which individual physically operated the machine.
+
+This distinction is important.
+
+---
+
+# 55. FORENSIC TOOLCHAIN
+
+A simple workflow:
+
+```text
+Evidence
+   ↓
+Hash
+   ↓
+Autopsy
+   ↓
+Disk Artifacts
+   ↓
+Timeline
+   ↓
+Memory Image
+   ↓
+Volatility
+   ↓
+Runtime Artifacts
+   ↓
+Correlation
+   ↓
+Report
+```
+
+---
+
+# 56. SAFE AUTOPSY LAB
+
+Use a **copy of a test disk image**, not a production system.
+
+### Step 1
+
+Create a forensic case.
+
+### Step 2
+
+Add a test disk image.
+
+### Step 3
+
+Run available processing modules.
+
+### Step 4
+
+Inspect:
+
+```text
+Files
+Deleted Files
+Web Artifacts
+Timeline
+Hash Information
+```
+
+### Step 5
+
+Search for:
+
+```text
+test
+malware
+download
+```
+
+### Step 6
+
+Document findings.
+
+---
+
+# 57. SAFE VOLATILITY LAB
+
+Use a **training memory image**.
+
+Conceptual workflow:
+
+```text
+Memory Image
+      ↓
+Identify OS/context
+      ↓
+Process analysis
+      ↓
+Network analysis
+      ↓
+Command-line analysis
+      ↓
+Module analysis
+      ↓
+Correlate findings
+```
+
+Do not modify the original memory image.
+
+---
+
+# 58. VOLATILITY COMMAND CONCEPT
+
+General form:
+
+```bash
+python vol.py -f memory.raw <plugin>
+```
+
+Examples of common analytical categories include:
+
+```text
+Process listing
+Process tree
+Network connections
+Command lines
+Loaded modules
+```
+
+Plugin names can vary by Volatility version and operating-system support, so check the installed version's help/output before running a specific plugin.
+
+---
+
+# 59. FORENSIC VALIDATION
+
+Never conclude:
+
+> "This process is malware because its name looks suspicious."
+
+Instead ask:
+
+```text
+What is the executable path?
+Who launched it?
+What is its parent?
+When was it created?
+What does its command line contain?
+What network connections exist?
+What files did it access?
+Does its hash match known malware?
+Is it signed?
+Does the timeline support the theory?
+```
+
+---
+
+# 60. HARD SCENARIO MCQs
+
+## Q1
+
+What is digital forensics?
+
+A. Only deleting malware  
+B. Examining digital evidence to determine what happened  
+C. Only scanning ports  
+D. Encrypting hard drives
+
+**Answer: B**
+
+---
+
+## Q2
+
+Which is normally considered volatile evidence?
+
+A. RAM  
+B. Archived DVD  
+C. Printed document  
+D. Stored disk image
+
+**Answer: A**
+
+---
+
+## Q3
+
+Which tool is primarily associated with disk-based forensic investigation?
+
+A. Autopsy  
+B. Volatility  
+C. Nmap  
+D. Aircrack-ng
+
+**Answer: A**
+
+---
+
+## Q4
+
+Which tool is primarily associated with memory forensics?
+
+A. Autopsy  
+B. Volatility  
+C. Wireshark  
+D. Nikto
+
+**Answer: B**
+
+---
+
+## Q5
+
+Why is hashing useful in forensic investigations?
+
+A. It decrypts evidence  
+B. It helps verify data integrity  
+C. It automatically identifies the attacker  
+D. It recovers every deleted file
+
+**Answer: B**
+
+---
+
+# 61. HARDER SCENARIOS
+
+## Q6
+
+An investigator shuts down a compromised computer before collecting volatile evidence.
+
+What is the major concern?
+
+A. RAM-based evidence may be lost  
+B. The hard disk becomes encrypted automatically  
+C. Autopsy stops working permanently  
+D. Hashing becomes impossible
+
+**Answer: A**
+
+---
+
+## Q7
+
+A forensic image has a different SHA-256 hash from the originally recorded acquisition hash.
+
+What should the investigator do?
+
+A. Ignore it  
+B. Investigate the integrity discrepancy  
+C. Automatically declare malware  
+D. Delete the evidence
+
+**Answer: B**
+
+---
+
+## Q8
+
+Autopsy finds a suspicious executable. What should the investigator do next?
+
+A. Automatically conclude the user is malicious  
+B. Correlate file metadata, timeline, execution evidence, hashes and other artifacts  
+C. Delete the file  
+D. Shut down every system
+
+**Answer: B**
+
+---
+
+## Q9
+
+Volatility shows an unusual process in a memory image.
+
+What is the strongest next step?
+
+A. Immediately declare malware  
+B. Investigate its parent, path, command line, modules, network activity and timeline  
+C. Ignore it  
+D. Delete it from RAM
+
+**Answer: B**
+
+---
+
+## Q10
+
+A browser download occurred two minutes before a suspicious executable started.
+
+What does this provide?
+
+A. Useful timeline correlation  
+B. Proof of the user's criminal intent  
+C. Proof of root access  
+D. Proof that the browser is malware
+
+**Answer: A**
+
+---
+
+# 62. VERY HARD SCENARIO MCQs
+
+## Q11
+
+A disk image shows no suspicious executable, but a memory image contains a suspicious running process and network connection.
+
+What is the best conclusion?
+
+A. Memory evidence is irrelevant  
+B. The runtime evidence warrants investigation; the absence of a disk file does not rule out malicious activity  
+C. The computer cannot have been compromised  
+D. Volatility is incorrect
+
+**Answer: B**
+
+---
+
+## Q12
+
+An investigator discovers an unusual process called `svchost.exe`.
+
+What should they do?
+
+A. Automatically classify it as malware  
+B. Investigate its path, parent, command line, signature, behavior and context  
+C. Delete it immediately  
+D. Reinstall Windows
+
+**Answer: B**
+
+---
+
+## Q13
+
+A suspicious file has a known-malicious hash, but the investigator cannot determine how it entered the system.
+
+What does this establish?
+
+A. The file is associated with a known malicious hash  
+B. It proves which employee downloaded it  
+C. It proves the employee's intent  
+D. It proves persistence
+
+**Answer: A**
+
+---
+
+## Q14
+
+A timeline shows:
+
+```text
+Download
+→ File creation
+→ Process execution
+→ Network connection
+→ Persistence change
+```
+
+Why is this important?
+
+A. It provides a potentially coherent attack sequence  
+B. Each event automatically proves malicious activity  
+C. Timestamps are irrelevant  
+D. The timeline proves the identity of the attacker
+
+**Answer: A**
+
+---
+
+## Q15
+
+A forensic examiner analyzes the original evidence directly and accidentally changes metadata.
+
+What forensic principle was violated?
+
+A. Least privilege  
+B. Evidence preservation/integrity  
+C. Network segmentation  
+D. Encryption
+
+**Answer: B**
+
+---
+
+# 63. EXTREME SCENARIO QUESTIONS
+
+## Q16
+
+An investigator finds a suspicious process in RAM but cannot find its executable on disk.
+
+Which explanation is reasonable?
+
+A. The process cannot exist  
+B. The executable may have been deleted or the process may have runtime-only/in-memory artifacts  
+C. RAM cannot contain process information  
+D. The memory image must be empty
+
+**Answer: B**
+
+---
+
+## Q17
+
+A forensic image and its working copy have identical SHA-256 hashes.
+
+What does this primarily support?
+
+A. The contents represented by the hashes are consistent  
+B. The suspect is guilty  
+C. The malware was executed  
+D. The evidence is automatically admissible in every jurisdiction
+
+**Answer: A**
+
+---
+
+## Q18
+
+A process has a suspicious name but is located in the expected Windows system directory, is properly signed, has a normal parent process and normal behavior.
+
+What should an analyst do?
+
+A. Automatically classify it as malware  
+B. Consider the broader evidence and avoid relying on the name alone  
+C. Delete it  
+D. Reformat the machine
+
+**Answer: B**
+
+---
+
+## Q19
+
+An investigation identifies an unknown SSH key, a new service and a suspicious executable created within the same 10-minute period.
+
+What is the best approach?
+
+A. Analyze each artifact independently and stop  
+B. Correlate them as potentially related persistence indicators and investigate the timeline  
+C. Ignore the SSH key  
+D. Assume all three are legitimate
+
+**Answer: B**
+
+---
+
+## Q20
+
+Which conclusion is the most forensically defensible?
+
+A. "The employee definitely committed the attack."
+B. "The computer was definitely hacked by person X."
+C. "Evidence shows the executable was downloaded and executed, and it established an outbound connection; attribution to a specific individual cannot be established from these artifacts alone."
+D. "The filename proves malware."
+
+**Answer: C**
+
+---
+
+# 64. DAY 47 MEMORY TRICKS
+
+## Forensic workflow
+
+> **I-P-C-E-A-R**
+
+```text
+I = Identify
+P = Preserve
+C = Collect
+E = Examine
+A = Analyze
+R = Report
+```
+
+---
+
+## Autopsy
+
+> **AUTOPSY = DISK**
+
+Think:
+
+```text
+Files
+Filesystem
+Deleted Files
+Browser
+Timeline
+```
+
+---
+
+## Volatility
+
+> **VOLATILITY = RAM**
+
+Think:
+
+```text
+Processes
+Connections
+Modules
+Command Lines
+Runtime Artifacts
+```
+
+---
+
+## Evidence integrity
+
+> **HASH + CHAIN OF CUSTODY**
+
+---
+
+# 65. AUTOPSY VS VOLATILITY – EXAM TABLE
+
+| Question | Autopsy | Volatility |
+|---|---|---|
+| Disk image? | ✅ | ❌ |
+| RAM image? | ❌ | ✅ |
+| Files? | ✅ | Limited/different |
+| Deleted files? | ✅ | ❌ |
+| Browser artifacts? | ✅ | Sometimes memory artifacts |
+| Running processes? | Limited historical evidence | ✅ |
+| Active connections? | Limited | ✅ |
+| Filesystem timeline? | ✅ | ❌ |
+| Runtime state? | ❌ | ✅ |
+
+---
+
+# 66. MOST IMPORTANT EXAM POINTS
+
+Remember these:
+
+### 1.
+
+**Digital forensics = evidence investigation.**
+
+### 2.
+
+**RAM is volatile.**
+
+### 3.
+
+**Autopsy = disk/file-system investigation.**
+
+### 4.
+
+**Volatility = memory investigation.**
+
+### 5.
+
+**Hashing helps verify integrity.**
+
+### 6.
+
+**Chain of custody documents evidence handling.**
+
+### 7.
+
+**A suspicious artifact is an indicator, not automatically proof.**
+
+### 8.
+
+**Timeline correlation is extremely important.**
+
+### 9.
+
+**Analyze copies rather than unnecessarily modifying original evidence.**
+
+### 10.
+
+**Forensics should distinguish evidence from inference.**
+
+---
+
+# 67. 30-SECOND REVISION
+
+```text
+DIGITAL FORENSICS
+       ↓
+IDENTIFY
+       ↓
+PRESERVE
+       ↓
+COLLECT
+       ↓
+EXAMINE
+       ↓
+ANALYZE
+       ↓
+REPORT
+```
+
+### Disk
+
+```text
+AUTOPSY
+ ↓
+Files
+Deleted Files
+Browser
+Registry
+Timeline
+```
+
+### Memory
+
+```text
+VOLATILITY
+ ↓
+Processes
+Connections
+Modules
+Command Lines
+Runtime State
+```
+
+### Integrity
+
+```text
+HASH
+ +
+CHAIN OF CUSTODY
+```
+
+---
+
+# ⭐ ONE-LINE EXAM ANSWER
+
+> **Digital forensics is the systematic process of preserving, collecting, examining, analyzing, and reporting digital evidence to reconstruct events and determine what happened during a security incident.**
+
+# ⭐ GOLDEN RULE
+
+> **Preserve first, analyze carefully, correlate multiple artifacts, distinguish evidence from assumptions, and document everything.**

@@ -1,0 +1,942 @@
+# DAY 99 – DOCUMENTATION AND REPORTING
+## Write a Comprehensive Penetration Test Report
+
+> **A penetration test is incomplete until the results are clearly documented and communicated.**
+
+---
+
+# 1. DAY 99 OBJECTIVES
+
+Learn how to:
+
+- Document a penetration test
+- Structure a professional report
+- Write an executive summary
+- Document scope
+- Explain methodology
+- Record findings
+- Assign severity
+- Present evidence
+- Explain business impact
+- Provide remediation
+- Document limitations
+- Track retesting
+- Communicate technical results to management
+
+---
+
+# 2. WHAT IS A PENETRATION TEST REPORT?
+
+A penetration test report is the formal record of:
+
+- What was tested
+- Why it was tested
+- How it was tested
+- What was discovered
+- How serious the findings are
+- What evidence supports them
+- How they should be fixed
+
+---
+
+# 3. WHY REPORTING MATTERS
+
+A technically excellent test with a poor report may still fail its purpose.
+
+The report should help stakeholders answer:
+
+```text
+What happened?
+Why does it matter?
+What should we fix?
+How urgently?
+How do we verify the fix?
+```
+
+---
+
+# 4. REPORT STRUCTURE
+
+A professional report can contain:
+
+```text
+1. Cover Page
+2. Executive Summary
+3. Scope
+4. Rules of Engagement
+5. Methodology
+6. Limitations
+7. Risk Summary
+8. Findings
+9. Evidence
+10. Remediation
+11. Conclusion
+12. Retest Results
+13. Appendix
+```
+
+---
+
+# 5. COVER PAGE
+
+Include:
+
+- Report title
+- Client/organization
+- Assessment type
+- Assessment dates
+- Report date
+- Version
+- Classification
+- Author/team
+
+Example:
+
+```text
+AUTHORIZED SECURITY ASSESSMENT
+
+Web Application Penetration Test
+
+Assessment Period:
+01–05 October 2026
+
+Report Version:
+1.0
+```
+
+---
+
+# 6. CONFIDENTIALITY
+
+Security reports may contain sensitive information.
+
+Protect:
+
+- Credentials
+- Internal IP addresses
+- Vulnerability details
+- Architecture information
+- Screenshots
+- Personal information
+- Security configurations
+
+Use appropriate access controls and classification.
+
+---
+
+# 7. EXECUTIVE SUMMARY
+
+The executive summary is written for non-technical decision-makers.
+
+It should explain:
+
+- Overall security posture
+- Major risks
+- Critical findings
+- Business impact
+- Recommended priorities
+
+Avoid excessive technical terminology.
+
+---
+
+# 8. EXAMPLE EXECUTIVE SUMMARY
+
+> The authorized assessment identified several security weaknesses affecting authentication, access control and system configuration. The most significant finding could allow an unauthorized user to access information outside their intended permissions. Immediate remediation should prioritize access-control enforcement, followed by configuration hardening and improved monitoring.
+
+---
+
+# 9. SCOPE
+
+Clearly document:
+
+### In scope
+
+```text
+Web application
+API
+Test server
+```
+
+### Out of scope
+
+```text
+Production database
+Third-party systems
+Employee personal devices
+```
+
+Scope prevents misunderstandings.
+
+---
+
+# 10. RULES OF ENGAGEMENT
+
+Document:
+
+- Authorization
+- Testing dates
+- Approved targets
+- Testing windows
+- Allowed techniques
+- Prohibited actions
+- Emergency contacts
+- Stop conditions
+
+---
+
+# 11. METHODOLOGY
+
+Example:
+
+```text
+Planning
+ ↓
+Reconnaissance
+ ↓
+Enumeration
+ ↓
+Vulnerability Assessment
+ ↓
+Validation
+ ↓
+Controlled Exploitation
+ ↓
+Evidence Collection
+ ↓
+Reporting
+ ↓
+Remediation
+ ↓
+Retesting
+```
+
+---
+
+# 12. TOOLS
+
+Document relevant tools used.
+
+Examples:
+
+- Nmap
+- Burp Suite
+- OWASP ZAP
+- Wireshark
+- Nikto
+- Vulnerability scanners
+- Custom scripts
+
+Do not simply list tools.
+
+Explain:
+
+> **What was the tool used for?**
+
+---
+
+# 13. LIMITATIONS
+
+Be honest.
+
+Examples:
+
+- Limited testing window
+- Certain systems excluded
+- No denial-of-service testing
+- No social engineering
+- No physical testing
+- Third-party systems excluded
+- Authentication limitations
+
+A good report clearly states what was **not** tested.
+
+---
+
+# 14. FINDING STRUCTURE
+
+Every finding should have a consistent format.
+
+Recommended:
+
+```text
+Finding ID
+Title
+Severity
+Affected Asset
+Description
+Evidence
+Impact
+Likelihood
+Risk
+Recommendation
+References
+Validation Status
+```
+
+---
+
+# 15. FINDING ID
+
+Example:
+
+```text
+WEB-001
+WEB-002
+API-001
+AUTH-001
+```
+
+Unique IDs make remediation tracking easier.
+
+---
+
+# 16. FINDING TITLE
+
+Bad:
+
+> Security issue.
+
+Good:
+
+> Missing Server-Side Authorization Allows Unauthorized Record Access
+
+The title should communicate the issue clearly.
+
+---
+
+# 17. SEVERITY
+
+Common classification:
+
+| Severity | Meaning |
+|---|---|
+| Critical | Very serious risk requiring immediate action |
+| High | Significant security risk |
+| Medium | Important but lower immediate impact |
+| Low | Limited security impact |
+| Informational | Observation/recommendation |
+
+Use the organization's chosen methodology consistently.
+
+---
+
+# 18. CVSS
+
+If applicable, include:
+
+- CVSS version
+- Score
+- Vector
+- Rationale
+
+Do not blindly copy a score.
+
+Explain why the score applies to the tested environment.
+
+---
+
+# 19. DESCRIPTION
+
+Explain:
+
+- What is wrong?
+- Where is it?
+- Why does it exist?
+
+Example:
+
+> The application performs authentication but does not consistently verify whether the authenticated user is authorized to access the requested object.
+
+---
+
+# 20. EVIDENCE
+
+Evidence should allow another analyst to understand the finding.
+
+Possible evidence:
+
+- Screenshot
+- Request/response
+- Log entry
+- Configuration
+- Command output
+- Packet capture
+- Code fragment
+- File metadata
+
+---
+
+# 21. EVIDENCE PRINCIPLES
+
+Evidence should be:
+
+- Relevant
+- Accurate
+- Minimal
+- Reproducible
+- Sanitized when necessary
+
+Avoid unnecessarily exposing:
+
+- Passwords
+- Tokens
+- Personal information
+- Private keys
+
+---
+
+# 22. IMPACT
+
+Explain what could happen.
+
+Example:
+
+```text
+Unauthorized access
+        ↓
+Sensitive records exposed
+        ↓
+Privacy/business impact
+```
+
+Separate technical impact from business impact.
+
+---
+
+# 23. BUSINESS IMPACT
+
+Potential impacts include:
+
+- Confidentiality loss
+- Integrity loss
+- Availability loss
+- Financial loss
+- Regulatory consequences
+- Operational disruption
+- Reputation damage
+
+---
+
+# 24. REMEDIATION
+
+Recommendations should be actionable.
+
+Weak:
+
+> Fix authorization.
+
+Better:
+
+> Enforce server-side authorization checks for every object-access request and verify that the authenticated user has permission to access the requested resource.
+
+---
+
+# 25. REMEDIATION PRIORITY
+
+Consider:
+
+```text
+Severity
++
+Exploitability
++
+Exposure
++
+Business Impact
++
+Asset Criticality
+```
+
+---
+
+# 26. RISK SUMMARY
+
+Example:
+
+| Severity | Count |
+|---|---:|
+| Critical | 1 |
+| High | 3 |
+| Medium | 5 |
+| Low | 4 |
+| Informational | 6 |
+
+This gives management a quick overview.
+
+---
+
+# 27. RISK MATRIX
+
+Simplified:
+
+| Likelihood | Impact | Risk |
+|---|---|---|
+| High | High | Critical/High |
+| High | Medium | High |
+| Medium | Medium | Medium |
+| Low | Low | Low |
+
+The exact methodology should follow the assessment's defined risk framework.
+
+---
+
+# 28. TECHNICAL VS EXECUTIVE REPORTING
+
+### Executive
+
+```text
+Risk
+Impact
+Priority
+Business decision
+```
+
+### Technical
+
+```text
+Endpoint
+Parameter
+Evidence
+Root cause
+Remediation
+Validation
+```
+
+---
+
+# 29. SCREENSHOT RULES
+
+Good screenshot:
+
+- Relevant
+- Cropped
+- Clearly labeled
+- Sensitive data removed
+
+Bad screenshot:
+
+- Entire desktop
+- Unrelated information
+- Passwords visible
+- Tokens visible
+- Excessive data
+
+---
+
+# 30. REPORT WRITING RULES
+
+Use:
+
+- Clear language
+- Consistent terminology
+- Evidence-based claims
+- Short paragraphs
+- Tables
+- Numbered findings
+
+Avoid:
+
+- Exaggeration
+- Unsupported claims
+- Emotional language
+- Ambiguous severity
+- Unverified vulnerabilities
+
+---
+
+# 31. DO NOT SAY
+
+> "The system is completely insecure."
+
+Instead:
+
+> "The assessment identified weaknesses in authentication and access control that increase the risk of unauthorized access."
+
+Professional reporting is precise.
+
+---
+
+# 32. FINDING EXAMPLE
+
+## WEB-001 — Broken Access Control
+
+**Severity:** High
+
+**Affected Asset:** Test Web Application
+
+**Description:**
+
+The application does not consistently enforce server-side authorization when accessing user-owned records.
+
+**Impact:**
+
+An authenticated user may potentially access records belonging to another user.
+
+**Evidence:**
+
+Controlled testing demonstrated that changing the object identifier resulted in access to a record belonging to another authorized test account.
+
+**Recommendation:**
+
+Implement server-side authorization checks for every object-access request.
+
+**Retest:**
+
+Pending.
+
+---
+
+# 33. REPORT REFERENCES
+
+References may include:
+
+- OWASP
+- CWE
+- CVE
+- CVSS
+- Vendor advisories
+- Internal security standards
+
+Use references to support technical context rather than replacing your own evidence.
+
+---
+
+# 34. RETESTING
+
+After remediation:
+
+```text
+Original Finding
+      ↓
+Fix Applied
+      ↓
+Retest
+      ↓
+Pass / Fail / Partial
+```
+
+Possible statuses:
+
+```text
+Open
+Remediated
+Partially Remediated
+Risk Accepted
+False Positive
+Unable to Verify
+```
+
+---
+
+# 35. RETEST REPORT
+
+Example:
+
+> The application was retested after remediation. Server-side authorization was verified for the affected endpoint, and the previously demonstrated unauthorized access was no longer reproducible.
+
+---
+
+# 36. REPORT QUALITY CHECKLIST
+
+Before delivery:
+
+```text
+☐ Scope correct
+☐ Dates correct
+☐ Findings supported by evidence
+☐ Severity justified
+☐ Recommendations actionable
+☐ Sensitive information sanitized
+☐ Screenshots labeled
+☐ No unsupported claims
+☐ Executive summary understandable
+☐ Technical details reproducible
+☐ Retest status included
+```
+
+---
+
+# 37. COMMON REPORTING MISTAKES
+
+### Mistake 1
+
+Finding without evidence.
+
+### Mistake 2
+
+Severity without justification.
+
+### Mistake 3
+
+Technical jargon for executives.
+
+### Mistake 4
+
+No remediation guidance.
+
+### Mistake 5
+
+No scope information.
+
+### Mistake 6
+
+Exposing credentials in screenshots.
+
+### Mistake 7
+
+Reporting scanner output as confirmed exploitation.
+
+### Mistake 8
+
+Not documenting limitations.
+
+---
+
+# 38. PROFESSIONAL REPORT TEMPLATE
+
+```text
+==================================================
+PENETRATION TEST REPORT
+==================================================
+
+1. Executive Summary
+
+2. Assessment Scope
+
+3. Rules of Engagement
+
+4. Methodology
+
+5. Limitations
+
+6. Overall Risk Summary
+
+7. Findings
+
+   Finding ID:
+   Title:
+   Severity:
+   Asset:
+   Description:
+   Evidence:
+   Impact:
+   Recommendation:
+   References:
+   Retest Status:
+
+8. Conclusion
+
+9. Remediation Roadmap
+
+10. Retest Results
+
+11. Appendix
+```
+
+---
+
+# 39. DAY 99 PRACTICAL LAB
+
+Use findings from your previous authorized labs.
+
+Create:
+
+### Step 1
+
+List all findings.
+
+### Step 2
+
+Remove duplicates.
+
+### Step 3
+
+Validate each finding.
+
+### Step 4
+
+Assign severity.
+
+### Step 5
+
+Write impact.
+
+### Step 6
+
+Write remediation.
+
+### Step 7
+
+Add evidence.
+
+### Step 8
+
+Create executive summary.
+
+### Step 9
+
+Create technical findings.
+
+### Step 10
+
+Perform a quality review.
+
+---
+
+# 40. HARD SCENARIO MCQs
+
+### Q1
+
+A scanner reports a vulnerability that has not been manually validated.
+
+How should it be reported?
+
+A. As confirmed exploitation  
+B. As an unvalidated/potential finding until verified  
+C. As critical automatically  
+D. Omit all scanner results
+
+**Answer: B**
+
+### Q2
+
+Which section is primarily written for senior management?
+
+A. Executive Summary  
+B. Packet Capture  
+C. Raw Nmap output  
+D. Source code
+
+**Answer: A**
+
+### Q3
+
+A screenshot contains a real password.
+
+What should the tester do?
+
+A. Include it unchanged  
+B. Sanitize/redact sensitive information  
+C. Publish it  
+D. Add it to the executive summary
+
+**Answer: B**
+
+### Q4
+
+What makes remediation useful?
+
+A. "Fix it."  
+B. Specific actionable guidance addressing the root cause  
+C. No technical information  
+D. Only a CVSS score
+
+**Answer: B**
+
+### Q5
+
+Why document out-of-scope systems?
+
+A. To clearly establish assessment boundaries  
+B. To make the report longer  
+C. To hide findings  
+D. To increase severity
+
+**Answer: A**
+
+---
+
+# 41. HARDER SCENARIOS
+
+### Q6
+
+A critical finding has strong evidence but very low business impact in the tested environment.
+
+What should the report do?
+
+A. Explain the technical severity and environmental/business context separately  
+B. Automatically call it critical business risk  
+C. Remove the finding  
+D. Hide the evidence
+
+**Answer: A**
+
+### Q7
+
+A finding was fixed and successfully retested.
+
+What should be recorded?
+
+A. Remediation and retest evidence/status  
+B. Original finding only  
+C. Nothing  
+D. Delete the finding
+
+**Answer: A**
+
+### Q8
+
+An assessment did not test production because it was explicitly excluded.
+
+What should the report say?
+
+A. Production was not assessed and is outside the report's tested scope  
+B. Production is secure  
+C. Production was fully tested  
+D. Production has no vulnerabilities
+
+**Answer: A**
+
+### Q9
+
+A tester discovers a vulnerability but cannot reproduce it consistently.
+
+What should happen?
+
+A. Document the uncertainty and evidence rather than overstating the result  
+B. Claim guaranteed exploitation  
+C. Increase severity  
+D. Delete all evidence
+
+**Answer: A**
+
+### Q10
+
+Which statement is most professional?
+
+A. "The company has terrible security."  
+B. "The assessment identified weaknesses in access control that increase unauthorized-access risk."  
+C. "Everything is broken."  
+D. "The system is definitely hacked."
+
+**Answer: B**
+
+---
+
+# 42. DAY 99 MEMORY TRICK
+
+> **S-M-F-E-I-R**
+
+```text
+S = Scope
+M = Methodology
+F = Findings
+E = Evidence
+I = Impact
+R = Remediation
+```
+
+Then:
+
+> **Retest → Report Status**
+
+---
+
+# 43. ONE-LINE EXAM ANSWER
+
+> **A penetration test report documents the assessment scope, methodology, findings, evidence, risk, business impact, remediation recommendations, limitations and retest results in a clear format suitable for both technical and management audiences.**
+
+# DAY 99 GOLDEN RULE
+
+> **Never report what you cannot support with evidence, and never hide what stakeholders need to make a security decision.**

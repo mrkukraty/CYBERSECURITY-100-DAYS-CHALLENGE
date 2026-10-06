@@ -1,0 +1,897 @@
+# DAY 61 — BUILDING A THREAT DETECTION TOOL
+
+## Topic
+**Develop a Python-based alert system.**
+
+> **Goal:** Build a simple defensive Python tool that analyzes authorized log data and raises alerts when suspicious patterns are detected.
+
+---
+
+# 1. What is a Threat Detection Tool?
+
+A **threat detection tool** analyzes security-related data and identifies events that may indicate suspicious activity.
+
+Basic architecture:
+
+```text
+Log/Data
+   ↓
+Parser
+   ↓
+Detection Rules
+   ↓
+Risk/Score
+   ↓
+Alert
+   ↓
+Analyst
+```
+
+---
+
+# 2. Objective of the Tool
+
+Our simple Python tool will demonstrate detection of:
+
+- Repeated failed logins
+- Suspicious IP activity
+- Unusual login patterns
+- Potential brute-force behavior
+
+It will **not** attack systems.
+
+---
+
+# 3. Detection Tool Architecture
+
+```text
+             LOG FILE
+                 ↓
+              Python
+                 ↓
+             Parser
+                 ↓
+        Extract Important Fields
+                 ↓
+          Detection Engine
+                 ↓
+          Suspicious Pattern
+                 ↓
+              ALERT
+```
+
+---
+
+# 4. Example Log Format
+
+Our training log can look like:
+
+```text
+2026-10-06 10:00:01 user=admin src=192.168.1.10 action=login status=failed
+2026-10-06 10:00:05 user=admin src=192.168.1.10 action=login status=failed
+2026-10-06 10:00:09 user=admin src=192.168.1.10 action=login status=failed
+2026-10-06 10:00:15 user=admin src=192.168.1.10 action=login status=success
+```
+
+The tool can identify repeated failures from the same source.
+
+---
+
+# 5. Detection Rule
+
+Example rule:
+
+```text
+IF
+failed logins from same IP >= threshold
+
+THEN
+generate alert
+```
+
+For example:
+
+```text
+Threshold = 5
+```
+
+This means:
+
+```text
+5+ failed attempts
+        ↓
+Potential suspicious activity
+        ↓
+Generate alert
+```
+
+---
+
+# 6. Python Implementation
+
+```python
+from collections import defaultdict
+import re
+
+FAILED_LOGIN_THRESHOLD = 5
+
+failed_attempts = defaultdict(int)
+
+log_pattern = re.compile(
+    r"user=(\S+)\s+src=(\S+)\s+action=(\S+)\s+status=(\S+)"
+)
+
+with open("security.log", "r", encoding="utf-8") as file:
+    for line in file:
+        match = log_pattern.search(line)
+
+        if not match:
+            continue
+
+        user, source_ip, action, status = match.groups()
+
+        if action == "login" and status == "failed":
+            failed_attempts[source_ip] += 1
+
+            if failed_attempts[source_ip] == FAILED_LOGIN_THRESHOLD:
+                print(
+                    f"[ALERT] Possible brute-force activity "
+                    f"from {source_ip}"
+                )
+```
+
+---
+
+# 7. How the Code Works
+
+### Step 1
+
+Import required libraries.
+
+```python
+from collections import defaultdict
+import re
+```
+
+### Step 2
+
+Set the detection threshold.
+
+```python
+FAILED_LOGIN_THRESHOLD = 5
+```
+
+### Step 3
+
+Maintain a counter for each source IP.
+
+```python
+failed_attempts = defaultdict(int)
+```
+
+### Step 4
+
+Read the authorized log file.
+
+### Step 5
+
+Extract:
+
+- User
+- Source IP
+- Action
+- Status
+
+### Step 6
+
+Count failed login attempts.
+
+### Step 7
+
+Generate an alert when the threshold is reached.
+
+---
+
+# 8. Example Output
+
+```text
+[ALERT] Possible brute-force activity from 192.168.1.10
+```
+
+This does **not** mean an attack is confirmed.
+
+It means:
+
+> **The activity deserves investigation.**
+
+---
+
+# 9. Why Thresholds Are Useful
+
+A threshold reduces unnecessary alerts.
+
+Example:
+
+```text
+1 failed login
+    ↓
+Usually normal
+
+2 failed logins
+    ↓
+Probably normal
+
+5+ repeated failures
+    ↓
+Potentially suspicious
+```
+
+The correct threshold depends on the environment.
+
+---
+
+# 10. False Positive
+
+Suppose a user repeatedly enters the wrong password.
+
+The tool generates:
+
+```text
+ALERT
+```
+
+But there was no attacker.
+
+This is a:
+
+> **False positive**
+
+---
+
+# 11. False Negative
+
+Suppose an attacker performs activity that does not meet the detection rule.
+
+The tool produces:
+
+```text
+No Alert
+```
+
+even though suspicious activity occurred.
+
+This is a:
+
+> **False negative**
+
+---
+
+# 12. Improving the Detection
+
+Instead of checking only IP address, consider:
+
+- Username
+- Time
+- Number of systems
+- Device
+- Authentication method
+- Geographic context
+- Historical behavior
+
+Example:
+
+```text
+IP
+ +
+User
+ +
+Time
+ +
+Device
+```
+
+This creates a stronger detection signal.
+
+---
+
+# 13. Risk Scoring
+
+A detection system can assign scores.
+
+Example:
+
+| Event | Score |
+|---|---:|
+| 1 failed login | 1 |
+| 5 failed logins | 5 |
+| Multiple users targeted | 10 |
+| Suspicious destination | 10 |
+| Privilege change | 15 |
+
+Then:
+
+```text
+0–9   → Low
+10–19 → Medium
+20+   → High
+```
+
+This is only a training example.
+
+---
+
+# 14. Simple Risk-Scoring Code
+
+```python
+def risk_level(score):
+    if score >= 20:
+        return "HIGH"
+    elif score >= 10:
+        return "MEDIUM"
+    else:
+        return "LOW"
+
+
+score = 15
+
+print("Risk:", risk_level(score))
+```
+
+Output:
+
+```text
+Risk: MEDIUM
+```
+
+---
+
+# 15. Multiple Detection Rules
+
+A real tool should use multiple rules.
+
+Example:
+
+```text
+Rule 1:
+Repeated failed logins
+
+Rule 2:
+New administrative account
+
+Rule 3:
+Unusual outbound connection
+
+Rule 4:
+Suspicious process
+
+Rule 5:
+Unexpected sensitive-file access
+```
+
+---
+
+# 16. Rule Engine Concept
+
+```text
+              Log
+               ↓
+        ┌──────┴──────┐
+        ↓             ↓
+    Rule 1          Rule 2
+        ↓             ↓
+    Match?          Match?
+        ↓             ↓
+       Alert         Alert
+```
+
+A rule engine allows many detection conditions to operate together.
+
+---
+
+# 17. Alert Severity
+
+A useful alert should contain:
+
+- Severity
+- Timestamp
+- Source
+- User
+- Reason
+- Evidence
+
+Example:
+
+```text
+========================================
+SECURITY ALERT
+========================================
+Severity : HIGH
+Source   : 192.168.1.10
+User     : admin
+Reason   : Repeated failed authentication
+Evidence : 5 failed attempts
+========================================
+```
+
+---
+
+# 18. Why Context Matters
+
+Consider:
+
+```text
+100 failed login attempts
+```
+
+This might be:
+
+- Attack
+- Password testing
+- Misconfigured application
+- Security scanner
+- User error
+
+Therefore:
+
+> **Detection creates an investigation opportunity, not an automatic verdict.**
+
+---
+
+# 19. Add Alert Logging
+
+A detection tool should save alerts rather than only print them.
+
+Example:
+
+```python
+from datetime import datetime
+
+def write_alert(message):
+    timestamp = datetime.now().isoformat()
+
+    with open("alerts.log", "a", encoding="utf-8") as file:
+        file.write(f"{timestamp} ALERT {message}\n")
+
+
+write_alert("Possible brute-force activity")
+```
+
+---
+
+# 20. Basic Tool Architecture
+
+A more complete system could look like:
+
+```text
+                 LOG SOURCES
+                      ↓
+               Data Collector
+                      ↓
+                  Parser
+                      ↓
+               Normalization
+                      ↓
+               Rule Engine
+                      ↓
+              Risk Assessment
+                      ↓
+                  Alerting
+                      ↓
+                Alert Storage
+                      ↓
+                  Analyst
+```
+
+---
+
+# 21. Real-Time vs Batch Detection
+
+### Batch detection
+
+Processes logs periodically.
+
+```text
+Logs
+ ↓
+Every 5 minutes
+ ↓
+Analyze
+```
+
+### Real-time detection
+
+Processes events as they arrive.
+
+```text
+Event
+ ↓
+Detection
+ ↓
+Alert
+```
+
+Real-time detection can reduce response time but is more complex.
+
+---
+
+# 22. Important Components
+
+### Parser
+
+Converts raw log lines into structured information.
+
+### Detection Engine
+
+Applies detection rules.
+
+### Scoring Engine
+
+Determines severity.
+
+### Alert Manager
+
+Creates alerts.
+
+### Storage
+
+Stores alerts for investigation.
+
+---
+
+# 23. Detection Pipeline
+
+Remember:
+
+```text
+INPUT
+ ↓
+PARSE
+ ↓
+NORMALIZE
+ ↓
+DETECT
+ ↓
+SCORE
+ ↓
+ALERT
+ ↓
+INVESTIGATE
+```
+
+---
+
+# 24. Testing the Tool
+
+Use synthetic logs.
+
+### Normal event
+
+```text
+user=alice src=192.168.1.20 action=login status=success
+```
+
+### Suspicious test event
+
+```text
+user=admin src=192.168.1.99 action=login status=failed
+```
+
+Repeat enough times to trigger the training rule.
+
+---
+
+# 25. Unit Testing
+
+A detection tool should test:
+
+### Normal activity
+
+Expected:
+
+```text
+No alert
+```
+
+### Threshold activity
+
+Expected:
+
+```text
+Alert
+```
+
+### Malformed log
+
+Expected:
+
+```text
+Ignore safely
+```
+
+### Multiple users
+
+Expected:
+
+```text
+Track separately
+```
+
+---
+
+# 26. Example Test
+
+```python
+def detect_failed_logins(attempts, threshold=5):
+    return attempts >= threshold
+
+
+print(detect_failed_logins(3))
+print(detect_failed_logins(5))
+```
+
+Expected:
+
+```text
+False
+True
+```
+
+---
+
+# 27. Limitations of a Simple Python Detector
+
+A basic script may have:
+
+- False positives
+- False negatives
+- Limited context
+- No distributed correlation
+- No advanced behavioral analytics
+- No authentication with log sources
+- Limited scalability
+
+Therefore:
+
+> **A simple Python detector is educational, not a replacement for a production SIEM/EDR platform.**
+
+---
+
+# 28. How to Improve It
+
+Future versions could include:
+
+### Input
+
+- JSON logs
+- CSV
+- Syslog
+- Windows event exports
+
+### Detection
+
+- Multiple rules
+- Time windows
+- Baselines
+- Risk scoring
+
+### Output
+
+- Console alerts
+- JSON alerts
+- Dashboard
+- Email/notification integration
+
+### Advanced capabilities
+
+- Statistical anomaly detection
+- Machine learning
+- Threat intelligence correlation
+
+---
+
+# 29. Detection Tool vs SIEM
+
+| Python Detector | SIEM |
+|---|---|
+| Small/custom | Enterprise-scale |
+| Simple rules | Complex correlation |
+| Limited data sources | Many data sources |
+| Educational/research | Production security monitoring |
+| Customizable | Centralized platform |
+
+---
+
+# 30. MCQs
+
+### Q1. What is the main purpose of a threat detection tool?
+
+A. Attack random systems  
+B. Identify potentially suspicious activity  
+C. Delete logs  
+D. Disable antivirus  
+
+**Answer: B**
+
+### Q2. What is a detection threshold?
+
+A. A condition that determines when an alert should be generated  
+B. A password  
+C. A firewall port  
+D. An encryption key  
+
+**Answer: A**
+
+### Q3. What is a false positive?
+
+A. Attack not detected  
+B. Legitimate activity incorrectly flagged  
+C. Correct alert  
+D. Deleted event  
+
+**Answer: B**
+
+### Q4. What is a false negative?
+
+A. Legitimate activity flagged  
+B. Malicious activity not detected  
+C. Successful backup  
+D. Valid login  
+
+**Answer: B**
+
+### Q5. Which component applies detection rules?
+
+A. Detection engine  
+B. Monitor  
+C. Keyboard  
+D. Compiler only  
+
+**Answer: A**
+
+---
+
+# 31. HARD SCENARIO
+
+A Python detector reports 20 failed login attempts from an IP address.
+
+Should the SOC immediately declare a breach?
+
+**Answer: No.**
+
+The analyst should investigate:
+
+```text
+IP
+ ↓
+Users targeted
+ ↓
+Time
+ ↓
+Devices
+ ↓
+Authentication results
+ ↓
+Successful login afterward?
+ ↓
+Other suspicious activity?
+```
+
+Only after correlation should the event be classified.
+
+---
+
+# 32. HARDER SCENARIO
+
+A detector generates thousands of alerts every day, most of which are legitimate.
+
+What problem exists?
+
+**Answer: Alert fatigue / excessive false positives.**
+
+Possible improvements:
+
+- Tune thresholds
+- Add context
+- Improve rules
+- Establish baselines
+- Prioritize high-risk events
+- Correlate multiple signals
+
+---
+
+# 33. EXAM TRAPS
+
+> **An alert means an attack definitely occurred.**
+
+False.
+
+> **A simple detection script replaces a SIEM.**
+
+False.
+
+> **More alerts always mean better security.**
+
+False.
+
+> **A threshold should be the same for every organization.**
+
+False.
+
+> **Threat detection is only about IP addresses.**
+
+False.
+
+Modern detection combines identity, endpoint, network, application, and behavioral information.
+
+---
+
+# 34. MEMORY TRICK
+
+Remember:
+
+> **P-D-S-A**
+
+**P** — Parse  
+**D** — Detect  
+**S** — Score  
+**A** — Alert
+
+```text
+Parse
+ ↓
+Detect
+ ↓
+Score
+ ↓
+Alert
+```
+
+Then:
+
+> **Alert → Investigate → Respond**
+
+---
+
+# 35. 30-SECOND REVISION
+
+```text
+PYTHON THREAT DETECTION TOOL
+             ↓
+          Read Logs
+             ↓
+            Parse
+             ↓
+         Normalize
+             ↓
+       Apply Detection Rules
+             ↓
+         Risk Scoring
+             ↓
+           Alert
+             ↓
+        Investigation
+             ↓
+       Response/Improvement
+```
+
+# FINAL TAKEAWAY
+
+> **A Python-based threat detection tool can demonstrate how security monitoring works by collecting authorized log data, parsing events, applying detection rules, assigning risk levels, and generating alerts. The key challenge is balancing detection accuracy with false positives and false negatives.**
+
+### Core formula:
+
+```text
+LOG
+ ↓
+PARSE
+ ↓
+DETECT
+ ↓
+SCORE
+ ↓
+ALERT
+ ↓
+INVESTIGATE
+ ↓
+RESPOND
+```

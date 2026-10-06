@@ -1,0 +1,1125 @@
+# DAY 64 – REVIEW AND PRACTICE
+## Consolidate Blue Team Defensive Skills
+
+> **Day 64 connects the defensive topics from monitoring and detection to secure coding, incident response, malware analysis and system hardening.**
+
+---
+
+# 1. DAY 64 OBJECTIVES
+
+Review:
+
+- Blue-team fundamentals
+- Defense in depth
+- SIEM
+- Log analysis
+- SOC operations
+- Detection engineering
+- Incident response
+- Digital forensics
+- Malware analysis
+- Network monitoring
+- Endpoint security
+- Secure coding
+- Authentication
+- Authorization
+- Vulnerability management
+- Patch management
+- Threat intelligence
+- Incident reporting
+
+---
+
+# 2. WHAT IS A BLUE TEAM?
+
+A **blue team** is responsible for defending systems, detecting threats, investigating incidents and improving security controls.
+
+Simple:
+
+> **Red Team attacks. Blue Team defends. Purple Team improves both.**
+
+---
+
+# 3. BLUE TEAM MASTER WORKFLOW
+
+```text
+PREVENT
+  ↓
+MONITOR
+  ↓
+DETECT
+  ↓
+ANALYZE
+  ↓
+RESPOND
+  ↓
+CONTAIN
+  ↓
+ERADICATE
+  ↓
+RECOVER
+  ↓
+LEARN
+  ↓
+IMPROVE
+```
+
+---
+
+# 4. DEFENSE IN DEPTH
+
+Never rely on one control.
+
+Example:
+
+```text
+MFA
+ ↓
+Firewall
+ ↓
+EDR
+ ↓
+SIEM
+ ↓
+Network Segmentation
+ ↓
+Backups
+ ↓
+Incident Response
+```
+
+If one control fails, others provide protection.
+
+---
+
+# 5. SIEM REVISION
+
+SIEM:
+
+> **Collect → Normalize → Correlate → Alert → Investigate → Respond**
+
+Data sources:
+
+- Windows
+- Linux
+- Firewall
+- DNS
+- EDR
+- AD
+- Cloud
+- Applications
+
+---
+
+# 6. DETECTION ENGINEERING
+
+Detection engineering creates rules that identify suspicious behavior.
+
+Example:
+
+```text
+Multiple failed logins
+        +
+Successful login
+        +
+Unusual source
+        ↓
+Potential account compromise
+```
+
+A good detection should have:
+
+- Clear logic
+- Useful context
+- Appropriate severity
+- Low unnecessary noise
+- Test coverage
+
+---
+
+# 7. ALERT FATIGUE
+
+Too many alerts can cause analysts to miss important ones.
+
+Solution:
+
+```text
+Tune
+ ↓
+Correlate
+ ↓
+Prioritize
+ ↓
+Reduce noise
+ ↓
+Review
+```
+
+---
+
+# 8. INCIDENT RESPONSE REVISION
+
+Master lifecycle:
+
+```text
+Preparation
+ ↓
+Detection
+ ↓
+Analysis
+ ↓
+Containment
+ ↓
+Eradication
+ ↓
+Recovery
+ ↓
+Lessons Learned
+```
+
+Memory:
+
+> **P-D-A-C-E-R-L**
+
+---
+
+# 9. CONTAINMENT VS ERADICATION VS RECOVERY
+
+| Phase | Purpose |
+|---|---|
+| Containment | Limit spread/impact |
+| Eradication | Remove threat/root cause |
+| Recovery | Restore trusted operation |
+
+Exam trap:
+
+> **Deleting malware is not automatically complete eradication.**
+
+---
+
+# 10. FORENSICS REVISION
+
+Digital forensics attempts to determine:
+
+- What happened?
+- When?
+- How?
+- Which systems?
+- Which accounts?
+- What evidence exists?
+- What actions occurred?
+
+Evidence can include:
+
+- Disk
+- Memory
+- Logs
+- Network captures
+- Browser artifacts
+- File metadata
+- Authentication records
+
+---
+
+# 11. ORDER OF VOLATILITY
+
+Simplified:
+
+```text
+RAM
+ ↓
+Running processes/network state
+ ↓
+Temporary data
+ ↓
+Disk
+ ↓
+Archives/backups
+```
+
+More volatile information may disappear quickly.
+
+---
+
+# 12. MALWARE ANALYSIS REVISION
+
+### Static Analysis
+
+Examine without executing.
+
+Examples:
+
+- Hash
+- Strings
+- Metadata
+- Imports
+- File structure
+
+### Dynamic Analysis
+
+Observe behavior during controlled execution.
+
+Examples:
+
+- Processes
+- Files
+- Registry
+- Network
+- DNS
+
+---
+
+# 13. STATIC VS DYNAMIC
+
+| Static | Dynamic |
+|---|---|
+| Doesn't require execution | Executes in controlled environment |
+| Strings | Process behavior |
+| Hashes | Network traffic |
+| Imports | File changes |
+| Metadata | Registry changes |
+
+---
+
+# 14. ENDPOINT DETECTION
+
+EDR can provide visibility into:
+
+- Processes
+- Command lines
+- Network connections
+- Files
+- Registry
+- Users
+- Persistence
+- Security alerts
+
+---
+
+# 15. NETWORK DEFENSE
+
+Important controls:
+
+- Firewall
+- IDS/IPS
+- Network segmentation
+- DNS monitoring
+- Proxy
+- Network detection
+- TLS
+- Secure Wi-Fi
+- VPN where appropriate
+
+---
+
+# 16. NETWORK INVESTIGATION
+
+When suspicious traffic appears:
+
+```text
+Source
+ ↓
+Destination
+ ↓
+Port
+ ↓
+Protocol
+ ↓
+Timestamp
+ ↓
+Frequency
+ ↓
+Process/Host
+ ↓
+Context
+```
+
+Never conclude maliciousness from one packet alone.
+
+---
+
+# 17. AUTHENTICATION DEFENSE
+
+Use:
+
+- Strong authentication
+- MFA
+- Password hashing
+- Secure session management
+- Account monitoring
+- Rate limiting
+- Credential rotation when required
+
+---
+
+# 18. AUTHORIZATION DEFENSE
+
+Always enforce authorization server-side.
+
+```text
+Authentication
+      ↓
+Who is the user?
+      ↓
+Authorization
+      ↓
+What can they do?
+```
+
+---
+
+# 19. LEAST PRIVILEGE
+
+Users and services should have only the permissions required for their role.
+
+Example:
+
+```text
+Web application
+      ↓
+Database
+      ↓
+Only required permissions
+```
+
+Not:
+
+```text
+Web application
+      ↓
+Database administrator
+      ↓
+Full database control
+```
+
+---
+
+# 20. SECURE CODING REVISION
+
+Important defenses:
+
+| Vulnerability | Main Defense |
+|---|---|
+| SQL Injection | Parameterized queries |
+| XSS | Context-appropriate output encoding |
+| CSRF | CSRF tokens + SameSite/Origin controls |
+| IDOR | Server-side authorization |
+| Path Traversal | Canonicalization + allowlisting/safe IDs |
+| Command Injection | Avoid shell + fixed arguments |
+| SSRF | Destination validation/allowlisting + network controls |
+| Weak passwords | Strong password hashing |
+| Secrets exposure | Secret management |
+| Excess privileges | Least privilege |
+
+---
+
+# 21. PATCH MANAGEMENT
+
+Lifecycle:
+
+```text
+Inventory
+ ↓
+Identify
+ ↓
+Prioritize
+ ↓
+Test
+ ↓
+Deploy
+ ↓
+Verify
+ ↓
+Rescan
+```
+
+Prioritize based on:
+
+- Severity
+- Exploitability
+- Exposure
+- Asset importance
+- Business impact
+
+---
+
+# 22. VULNERABILITY SCANNING
+
+Remember:
+
+> **Scanner finding ≠ confirmed vulnerability.**
+
+Workflow:
+
+```text
+Discover
+ ↓
+Scan
+ ↓
+Validate
+ ↓
+Prioritize
+ ↓
+Remediate
+ ↓
+Rescan
+```
+
+---
+
+# 23. THREAT INTELLIGENCE
+
+Threat intelligence provides information that helps defenders understand:
+
+- Threat actors
+- Techniques
+- Indicators
+- Malware
+- Infrastructure
+- Vulnerabilities
+- Attack patterns
+
+Types:
+
+```text
+Strategic
+Operational
+Tactical
+Technical
+```
+
+---
+
+# 24. IOC VS TTP
+
+### IOC
+
+Indicator of Compromise.
+
+Examples:
+
+- Malicious hash
+- IP
+- Domain
+- Filename
+
+### TTP
+
+Tactics, Techniques and Procedures.
+
+Describes attacker behavior.
+
+Example:
+
+```text
+Credential dumping
+```
+
+Memory:
+
+> **IOC = What indicator?**
+
+> **TTP = How did they behave?**
+
+---
+
+# 25. SOC INVESTIGATION
+
+Basic workflow:
+
+```text
+Alert
+ ↓
+Validate
+ ↓
+Enrich
+ ↓
+Correlate
+ ↓
+Determine Scope
+ ↓
+Classify
+ ↓
+Respond
+ ↓
+Document
+```
+
+---
+
+# 26. LOG CORRELATION SCENARIO
+
+Events:
+
+```text
+10:00 — Failed login
+10:01 — Failed login
+10:02 — Failed login
+10:03 — Successful login
+10:05 — Privileged command
+10:06 — Unusual outbound connection
+```
+
+Individually:
+
+> Potentially normal.
+
+Together:
+
+> **Potential account compromise.**
+
+---
+
+# 27. BLUE TEAM + RED TEAM
+
+Red team:
+
+```text
+Simulates attacker
+```
+
+Blue team:
+
+```text
+Detects and defends
+```
+
+Purple team:
+
+```text
+Uses both perspectives
+to improve defenses
+```
+
+---
+
+# 28. PURPLE TEAM LOOP
+
+```text
+RED TEST
+   ↓
+BLUE DETECT
+   ↓
+IDENTIFY GAP
+   ↓
+IMPROVE DETECTION
+   ↓
+RED TEST AGAIN
+```
+
+This creates continuous improvement.
+
+---
+
+# 29. HARD SCENARIO MCQs
+
+### Q1
+
+A SIEM receives multiple failed logins followed by a successful login from an unusual source.
+
+What is the best response?
+
+A. Ignore all failed logins  
+B. Correlate and investigate the sequence  
+C. Delete the events  
+D. Disable authentication
+
+**Answer: B**
+
+---
+
+### Q2
+
+What is the primary purpose of containment?
+
+A. Remove every vulnerability  
+B. Limit the incident's spread and impact  
+C. Write the final report  
+D. Restore backups
+
+**Answer: B**
+
+---
+
+### Q3
+
+A developer relies on JavaScript to prevent unauthorized API requests.
+
+What is the problem?
+
+A. Client-side controls can be bypassed  
+B. JavaScript cannot use HTTPS  
+C. APIs do not need authorization  
+D. Browsers cannot authenticate
+
+**Answer: A**
+
+---
+
+### Q4
+
+Which is the best SQL injection defense?
+
+A. Hide the database  
+B. Parameterized queries  
+C. Change the port  
+D. Disable logging
+
+**Answer: B**
+
+---
+
+### Q5
+
+An analyst receives millions of low-value alerts.
+
+What should be addressed?
+
+A. Alert fatigue  
+B. Disk encryption  
+C. DNS resolution  
+D. Password hashing
+
+**Answer: A**
+
+---
+
+# 30. HARDER SCENARIOS
+
+### Q6
+
+A compromised endpoint is isolated, but the attacker account remains active elsewhere.
+
+What should responders investigate?
+
+A. Credential compromise and lateral movement  
+B. Monitor resolution  
+C. Printer configuration  
+D. Screen brightness
+
+**Answer: A**
+
+---
+
+### Q7
+
+A malware sample has suspicious strings but has never been executed.
+
+What type of analysis is this?
+
+A. Static analysis  
+B. Dynamic analysis  
+C. Incident recovery  
+D. Network segmentation
+
+**Answer: A**
+
+---
+
+### Q8
+
+A malicious process connects to an unusual external address.
+
+Which combination provides better investigation context?
+
+A. Process + destination + timestamp + user + endpoint  
+B. Destination only  
+C. Process name only  
+D. Username only
+
+**Answer: A**
+
+---
+
+### Q9
+
+A vulnerability scanner reports an outdated service, but the vendor backport means the vulnerability is not actually present.
+
+What should the analyst consider?
+
+A. False positive/validation  
+B. Confirmed exploitation  
+C. Persistence  
+D. Ransomware
+
+**Answer: A**
+
+---
+
+### Q10
+
+A system is restored but the original vulnerability remains.
+
+What is the concern?
+
+A. Recompromise  
+B. Better security  
+C. Reduced attack surface  
+D. Guaranteed recovery
+
+**Answer: A**
+
+---
+
+# 31. EXPERT SCENARIOS
+
+### Q11
+
+A company has excellent endpoint protection but no centralized logging.
+
+What weakness remains?
+
+A. Poor cross-system visibility and correlation  
+B. No need for SIEM  
+C. Authentication becomes impossible  
+D. Encryption automatically fails
+
+**Answer: A**
+
+---
+
+### Q12
+
+A SIEM alert shows a suspicious PowerShell process. The endpoint also shows an unusual child process and an outbound connection.
+
+What should the analyst do?
+
+A. Correlate the endpoint and network evidence  
+B. Investigate only the IP  
+C. Ignore the endpoint  
+D. Immediately delete the process without investigation
+
+**Answer: A**
+
+---
+
+### Q13
+
+A user can access another user's record by changing an object identifier.
+
+What control failed?
+
+A. Server-side authorization  
+B. DNS security  
+C. Password hashing  
+D. Network segmentation only
+
+**Answer: A**
+
+---
+
+### Q14
+
+A ransomware incident has been contained. What should happen before full recovery?
+
+A. Verify eradication, address root cause, validate trusted backups and security controls  
+B. Immediately reconnect everything  
+C. Delete forensic evidence  
+D. Disable monitoring
+
+**Answer: A**
+
+---
+
+### Q15
+
+A detection rule generates thousands of alerts because legitimate administrative software triggers it.
+
+What is the best long-term response?
+
+A. Tune the rule using appropriate context while preserving useful detection coverage  
+B. Delete all alerts  
+C. Disable SIEM  
+D. Ignore every future alert
+
+**Answer: A**
+
+---
+
+# 32. MASTER BLUE TEAM SCENARIO
+
+### Situation
+
+A SOC receives:
+
+```text
+1. Multiple failed logins
+2. Successful privileged login
+3. New process on endpoint
+4. Suspicious DNS query
+5. External network connection
+6. File modification
+```
+
+### Correct thinking
+
+Do not analyze each event independently.
+
+Correlate:
+
+```text
+Authentication
+      +
+Endpoint
+      +
+DNS
+      +
+Network
+      +
+File activity
+```
+
+Potential conclusion:
+
+> **Possible account compromise followed by endpoint execution and outbound communication.**
+
+Then:
+
+```text
+Validate
+ ↓
+Determine scope
+ ↓
+Contain
+ ↓
+Preserve evidence
+ ↓
+Investigate
+ ↓
+Eradicate
+ ↓
+Recover
+ ↓
+Monitor
+```
+
+---
+
+# 33. BLUE TEAM MASTER TABLE
+
+| Area | Key Concept |
+|---|---|
+| SIEM | Centralized security visibility |
+| SOC | Monitoring and investigation |
+| EDR | Endpoint visibility/response |
+| IDS/IPS | Network detection/prevention |
+| Firewall | Traffic control |
+| Forensics | Evidence analysis |
+| Malware analysis | Understand malicious behavior |
+| IR | Respond to incidents |
+| Secure coding | Prevent vulnerabilities |
+| IAM | Identity and access control |
+| MFA | Stronger authentication |
+| Least privilege | Minimum permissions |
+| Patch management | Reduce known vulnerabilities |
+| Threat intelligence | Understand threats |
+| Purple team | Improve attack detection/defense |
+
+---
+
+# 34. MASTER BLUE TEAM MEMORY
+
+> **P-M-D-A-R-C-E-R-L-I**
+
+```text
+P = Prevent
+M = Monitor
+D = Detect
+A = Analyze
+R = Respond
+C = Contain
+E = Eradicate
+R = Recover
+L = Learn
+I = Improve
+```
+
+---
+
+# 35. MOST IMPORTANT EXAM DIFFERENCES
+
+### SIEM vs EDR
+
+```text
+SIEM → Centralized correlation
+EDR  → Endpoint visibility/response
+```
+
+### IDS vs IPS
+
+```text
+IDS → Detect
+IPS → Detect + Prevent
+```
+
+### Red vs Blue
+
+```text
+Red → Attack simulation
+Blue → Defense
+```
+
+### Red vs Purple
+
+```text
+Red → Test
+Blue → Detect
+Purple → Improve together
+```
+
+### Containment vs Eradication
+
+```text
+Containment → Limit
+Eradication → Remove
+```
+
+### Eradication vs Recovery
+
+```text
+Eradication → Remove threat/root cause
+Recovery → Restore trusted operation
+```
+
+### IOC vs TTP
+
+```text
+IOC → Indicator
+TTP → Behavior
+```
+
+---
+
+# 36. DAY 64 PRACTICAL REVIEW
+
+Build an isolated blue-team lab containing:
+
+```text
+Windows VM
+Linux VM
+SIEM
+Optional EDR
+Test network
+```
+
+Then perform:
+
+### Step 1
+
+Generate legitimate login events.
+
+### Step 2
+
+Generate controlled failed-login events.
+
+### Step 3
+
+Observe SIEM ingestion.
+
+### Step 4
+
+Create a detection/correlation rule.
+
+### Step 5
+
+Investigate the resulting alert.
+
+### Step 6
+
+Collect:
+
+```text
+Timestamp
+User
+Source
+Destination
+Process
+Event
+```
+
+### Step 7
+
+Create an incident timeline.
+
+### Step 8
+
+Practice containment using a test system.
+
+### Step 9
+
+Document remediation.
+
+### Step 10
+
+Retest detection.
+
+---
+
+# 37. FINAL BLUE TEAM CHECKLIST
+
+Before declaring an incident handled:
+
+```text
+☐ Alert validated
+☐ Scope determined
+☐ Evidence preserved
+☐ Affected systems identified
+☐ Accounts investigated
+☐ Containment completed
+☐ Root cause identified
+☐ Threat eradicated
+☐ Credentials remediated where required
+☐ Vulnerability fixed
+☐ Systems recovered
+☐ Monitoring enabled
+☐ Lessons learned documented
+☐ Detection improved
+```
+
+---
+
+# 38. 1-MINUTE BLUE TEAM REVISION
+
+```text
+PREVENT
+   ↓
+MONITOR
+   ↓
+DETECT
+   ↓
+ANALYZE
+   ↓
+CONTAIN
+   ↓
+ERADICATE
+   ↓
+RECOVER
+   ↓
+LEARN
+   ↓
+IMPROVE
+```
+
+Remember:
+
+> **SIEM gives visibility.**
+
+> **EDR gives endpoint visibility.**
+
+> **IR handles incidents.**
+
+> **Forensics explains evidence.**
+
+> **Secure coding prevents vulnerabilities.**
+
+> **Purple teaming improves detection.**
+
+---
+
+# ⭐ ONE-LINE EXAM ANSWER
+
+> **Blue-team defensive security combines prevention, monitoring, detection, investigation, incident response, secure coding, vulnerability management, endpoint/network protection and continuous improvement to protect systems against cyber threats.**
+
+# 🔥 DAY 64 GOLDEN RULE
+
+> **Detect early, correlate evidence, respond carefully, preserve what matters, fix the root cause, recover safely, and continuously improve detection and defenses.**

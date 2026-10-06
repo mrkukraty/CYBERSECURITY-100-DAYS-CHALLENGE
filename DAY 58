@@ -1,0 +1,1479 @@
+# DAY 58 – INTRODUCTION TO INCIDENT RESPONSE
+## Learn the Steps to Respond to Security Breaches
+
+> **Incident response is the defensive counterpart to many of the offensive techniques studied earlier. The objective is to detect, contain, investigate, eradicate, recover from, and learn from security incidents.**
+
+---
+
+# 1. DAY 58 OBJECTIVES
+
+By the end of this lesson, you should understand:
+
+- What incident response is
+- Security incidents vs events
+- Incident-response lifecycle
+- Preparation
+- Detection and analysis
+- Triage
+- Containment
+- Evidence preservation
+- Eradication
+- Recovery
+- Lessons learned
+- Incident classification
+- Severity
+- Incident response teams
+- Communication
+- Digital forensics
+- Malware incidents
+- Ransomware incidents
+- Credential compromise
+- Network incidents
+- Reporting
+- Post-incident improvement
+
+---
+
+# 2. WHAT IS INCIDENT RESPONSE?
+
+**Incident response (IR)** is the organized process used to detect, investigate, contain, eradicate, and recover from cybersecurity incidents.
+
+Simple definition:
+
+> **Incident response = organized action taken after detecting a security incident.**
+
+---
+
+# 3. EVENT VS INCIDENT
+
+### Event
+
+Any observable occurrence.
+
+Examples:
+
+```text
+Successful login
+Failed login
+Application error
+Network connection
+```
+
+### Security Incident
+
+An event or series of events that violates or threatens security.
+
+Examples:
+
+```text
+Malware infection
+Credential compromise
+Unauthorized access
+Data breach
+Ransomware
+```
+
+Memory:
+
+> **Every incident is an event, but not every event is an incident.**
+
+---
+
+# 4. INCIDENT RESPONSE LIFECYCLE
+
+A commonly used lifecycle is:
+
+```text
+PREPARATION
+     ↓
+DETECTION & ANALYSIS
+     ↓
+CONTAINMENT
+     ↓
+ERADICATION
+     ↓
+RECOVERY
+     ↓
+LESSONS LEARNED
+```
+
+Memory:
+
+> **P-D-C-E-R-L**
+
+---
+
+# 5. PREPARATION
+
+Preparation happens **before** an incident.
+
+Activities:
+
+- Incident-response plan
+- Contact lists
+- Roles and responsibilities
+- Logging
+- Monitoring
+- Backups
+- EDR
+- Network segmentation
+- Playbooks
+- Forensic tools
+- Training
+- Exercises
+
+---
+
+# 6. WHY PREPARATION MATTERS
+
+Without preparation:
+
+```text
+Incident
+ ↓
+Confusion
+ ↓
+Delayed decisions
+ ↓
+More damage
+```
+
+With preparation:
+
+```text
+Incident
+ ↓
+Defined procedure
+ ↓
+Fast response
+ ↓
+Controlled impact
+```
+
+---
+
+# 7. INCIDENT RESPONSE TEAM
+
+An organization may involve:
+
+- SOC analysts
+- Incident responders
+- Digital forensics specialists
+- Malware analysts
+- Network engineers
+- System administrators
+- Security engineers
+- Management
+- Legal
+- HR
+- Communications
+- External specialists
+
+---
+
+# 8. DETECTION
+
+Possible sources:
+
+- SIEM
+- EDR
+- Antivirus
+- Firewall
+- IDS/IPS
+- Authentication logs
+- User reports
+- Cloud alerts
+- Threat intelligence
+- Network monitoring
+
+---
+
+# 9. INCIDENT TRIAGE
+
+Triage answers:
+
+> **How serious is this, and what should we do first?**
+
+Consider:
+
+- Number of affected systems
+- Criticality
+- Data involved
+- Privilege level
+- Active attacker presence
+- Business impact
+- Spread
+- Persistence
+- Regulatory impact
+
+---
+
+# 10. INCIDENT SEVERITY
+
+Example classification:
+
+| Severity | Example |
+|---|---|
+| Low | Isolated suspicious event |
+| Medium | Confirmed malware on workstation |
+| High | Compromised privileged account |
+| Critical | Domain-wide compromise/ransomware |
+
+Organizations may use their own classification system.
+
+---
+
+# 11. DETECTION → ANALYSIS
+
+When an alert appears:
+
+```text
+Alert
+ ↓
+Validate
+ ↓
+Collect Context
+ ↓
+Determine Scope
+ ↓
+Classify
+ ↓
+Escalate
+```
+
+Avoid immediately assuming the alert is correct.
+
+---
+
+# 12. FALSE POSITIVE
+
+A security system reports malicious activity, but investigation shows legitimate activity.
+
+Example:
+
+```text
+EDR Alert
+ ↓
+Investigation
+ ↓
+Approved administration tool
+```
+
+This is a potential false positive.
+
+---
+
+# 13. FALSE NEGATIVE
+
+Malicious activity occurs but the security system fails to detect it.
+
+This is dangerous because:
+
+> **The organization may believe it is protected when it is not detecting the attack.**
+
+---
+
+# 14. CONTAINMENT
+
+Goal:
+
+> **Stop or limit the spread and impact.**
+
+Possible actions:
+
+- Isolate endpoint
+- Disable compromised account
+- Block malicious destination
+- Segment affected network
+- Disable compromised service
+- Restrict access
+
+Containment should consider evidence preservation and business impact.
+
+---
+
+# 15. SHORT-TERM VS LONG-TERM CONTAINMENT
+
+### Short-term
+
+Immediate action:
+
+```text
+Isolate infected workstation
+```
+
+### Long-term
+
+Structural action:
+
+```text
+Network segmentation
+Credential reset
+Security policy changes
+```
+
+---
+
+# 16. CONTAINMENT EXAMPLE
+
+Suppose ransomware is spreading.
+
+Possible response:
+
+```text
+Infected PC
+    ↓
+Network Isolation
+    ↓
+Stop Spread
+    ↓
+Identify Other Systems
+    ↓
+Protect Backups
+```
+
+Do not automatically shut down every system without considering operational and forensic consequences.
+
+---
+
+# 17. EVIDENCE PRESERVATION
+
+Before destructive remediation, consider:
+
+- Memory capture
+- Disk acquisition
+- Relevant logs
+- Network captures
+- Process information
+- Authentication records
+
+Evidence requirements depend on the incident and organizational procedures.
+
+---
+
+# 18. ORDER OF VOLATILITY
+
+A simplified concept:
+
+```text
+RAM
+ ↓
+Running processes
+ ↓
+Network connections
+ ↓
+Temporary state
+ ↓
+Disk
+ ↓
+Archived data
+```
+
+More volatile information can disappear quickly.
+
+---
+
+# 19. ERADICATION
+
+Goal:
+
+> **Remove the root cause and attacker presence.**
+
+Actions may include:
+
+- Remove malware
+- Remove persistence
+- Patch vulnerability
+- Reset credentials
+- Remove unauthorized accounts
+- Fix insecure configuration
+- Rebuild compromised systems
+
+---
+
+# 20. ERADICATION IS MORE THAN DELETING MALWARE
+
+Suppose:
+
+```text
+Malware deleted
+```
+
+but:
+
+```text
+Compromised account remains
+Persistence remains
+Vulnerability remains
+```
+
+The attacker may return.
+
+Therefore:
+
+> **Fix the root cause, not just the visible symptom.**
+
+---
+
+# 21. RECOVERY
+
+Recovery returns systems to trusted operation.
+
+Activities:
+
+- Restore systems
+- Restore data
+- Validate security
+- Monitor
+- Reconnect systems gradually
+- Confirm business functionality
+
+---
+
+# 22. RECOVERY CHECKLIST
+
+Before reconnecting a compromised system:
+
+```text
+Malware removed?
+Persistence removed?
+Credentials reset?
+Vulnerability fixed?
+Backups trusted?
+Security controls working?
+Monitoring enabled?
+```
+
+---
+
+# 23. LESSONS LEARNED
+
+After the incident:
+
+Ask:
+
+- What happened?
+- Why did it happen?
+- How was it detected?
+- What worked?
+- What failed?
+- How long did response take?
+- What controls were missing?
+- What should change?
+
+---
+
+# 24. ROOT CAUSE
+
+Example:
+
+```text
+Incident:
+Ransomware
+
+Immediate Cause:
+Malicious executable
+
+Root Cause:
+Unpatched exposed service
+```
+
+Or:
+
+```text
+Incident:
+Account compromise
+
+Immediate Cause:
+Stolen password
+
+Root Cause:
+Phishing + missing MFA
+```
+
+---
+
+# 25. INCIDENT TIMELINE
+
+Create a timeline:
+
+```text
+08:00 — Suspicious login
+08:05 — Malware downloaded
+08:07 — Process executed
+08:10 — Persistence created
+08:15 — C2 connection
+08:20 — Alert generated
+08:25 — Endpoint isolated
+08:40 — Credentials reset
+09:00 — Investigation begins
+```
+
+Timelines help establish:
+
+- Sequence
+- Scope
+- Response time
+- Root cause
+
+---
+
+# 26. INCIDENT RESPONSE + FORENSICS
+
+They work together:
+
+```text
+Incident
+   ↓
+Detection
+   ↓
+Containment
+   ↓
+Forensics
+   ↓
+Evidence
+   ↓
+Root Cause
+   ↓
+Eradication
+   ↓
+Recovery
+```
+
+---
+
+# 27. INCIDENT RESPONSE + MALWARE ANALYSIS
+
+Suppose malware is discovered.
+
+Malware analysis asks:
+
+```text
+What does it do?
+```
+
+Incident response asks:
+
+```text
+Where did it go?
+Who/what was affected?
+How did it enter?
+Is it still active?
+How do we contain it?
+How do we remove it?
+```
+
+---
+
+# 28. INCIDENT RESPONSE + ACTIVE DIRECTORY
+
+If an AD account is compromised:
+
+```text
+Detect
+ ↓
+Validate
+ ↓
+Disable/contain account
+ ↓
+Investigate authentication
+ ↓
+Check privilege
+ ↓
+Search lateral movement
+ ↓
+Reset credentials
+ ↓
+Check persistence
+ ↓
+Monitor
+```
+
+For suspected domain-wide compromise, response may require broader credential and trust remediation.
+
+---
+
+# 29. RANSOMWARE RESPONSE
+
+High-level response:
+
+```text
+Detect
+ ↓
+Isolate
+ ↓
+Preserve Evidence
+ ↓
+Identify Scope
+ ↓
+Protect Backups
+ ↓
+Eradicate
+ ↓
+Recover
+ ↓
+Monitor
+```
+
+Important:
+
+> Do not destroy evidence before determining what information is needed for the investigation.
+
+---
+
+# 30. CREDENTIAL COMPROMISE
+
+If a credential is compromised:
+
+1. Validate compromise
+2. Identify affected account
+3. Contain account
+4. Revoke sessions/tokens where applicable
+5. Reset credential
+6. Investigate authentication history
+7. Check privilege
+8. Investigate lateral movement
+9. Enable/improve MFA
+10. Monitor
+
+---
+
+# 31. PHISHING INCIDENT
+
+Example:
+
+```text
+Phishing Email
+ ↓
+User Clicks
+ ↓
+Credential Submitted
+ ↓
+Suspicious Login
+```
+
+Response:
+
+```text
+Identify message
+ ↓
+Remove/quarantine copies
+ ↓
+Reset compromised credential
+ ↓
+Revoke sessions
+ ↓
+Check authentication logs
+ ↓
+Check mailbox activity
+ ↓
+Search for other recipients
+```
+
+---
+
+# 32. MALWARE INCIDENT
+
+Response:
+
+```text
+Alert
+ ↓
+Validate
+ ↓
+Isolate Host
+ ↓
+Preserve Evidence
+ ↓
+Analyze Malware
+ ↓
+Determine Scope
+ ↓
+Remove Persistence
+ ↓
+Patch Root Cause
+ ↓
+Recover
+ ↓
+Monitor
+```
+
+---
+
+# 33. NETWORK INCIDENT
+
+Possible indicators:
+
+- Unusual traffic
+- Port scanning
+- C2 communication
+- Data transfer
+- DNS anomalies
+
+Response:
+
+```text
+Detect
+ ↓
+Capture relevant network evidence
+ ↓
+Identify source/destination
+ ↓
+Contain
+ ↓
+Investigate affected hosts
+ ↓
+Block/eradicate
+ ↓
+Monitor
+```
+
+---
+
+# 34. COMMUNICATION
+
+Incident response requires controlled communication.
+
+Possible audiences:
+
+- SOC
+- IT
+- Management
+- Legal
+- HR
+- Customers
+- Regulators
+- Law enforcement
+
+Not everyone needs the same technical details.
+
+---
+
+# 35. INCIDENT RESPONSE DOCUMENTATION
+
+Record:
+
+```text
+Time
+Action
+Person/Team
+Evidence
+Decision
+Reason
+Result
+```
+
+Example:
+
+```text
+10:15
+Endpoint isolated
+
+Performed by:
+SOC Analyst
+
+Reason:
+Confirmed malware
+
+Result:
+Outbound communication stopped
+```
+
+---
+
+# 36. INCIDENT RESPONSE PLAYBOOKS
+
+A playbook provides predefined steps.
+
+Examples:
+
+- Malware
+- Ransomware
+- Phishing
+- Credential compromise
+- Data breach
+- Insider threat
+- DDoS
+- Cloud compromise
+
+---
+
+# 37. WHY PLAYBOOKS HELP
+
+Without playbook:
+
+```text
+Incident
+ ↓
+Guess what to do
+```
+
+With playbook:
+
+```text
+Incident Type
+ ↓
+Known procedure
+ ↓
+Consistent response
+```
+
+Playbooks should still allow analyst judgment.
+
+---
+
+# 38. INCIDENT RESPONSE METRICS
+
+Useful metrics:
+
+### MTTD
+
+**Mean Time to Detect**
+
+### MTTR
+
+**Mean Time to Respond/Recover**, depending on organizational definition.
+
+### Dwell Time
+
+How long an attacker may remain undetected.
+
+### Containment Time
+
+Time required to limit the incident.
+
+---
+
+# 39. INCIDENT RESPONSE REPORT
+
+A report can contain:
+
+```text
+1. Executive Summary
+2. Incident Description
+3. Detection
+4. Scope
+5. Timeline
+6. Evidence
+7. Impact
+8. Root Cause
+9. Containment
+10. Eradication
+11. Recovery
+12. Lessons Learned
+13. Recommendations
+```
+
+---
+
+# 40. INCIDENT RESPONSE MASTER FLOW
+
+```text
+PREPARE
+   ↓
+DETECT
+   ↓
+ANALYZE
+   ↓
+CONTAIN
+   ↓
+PRESERVE / INVESTIGATE
+   ↓
+ERADICATE
+   ↓
+RECOVER
+   ↓
+MONITOR
+   ↓
+LESSONS LEARNED
+```
+
+---
+
+# 41. HARD SCENARIO MCQs
+
+## Q1
+
+What is the first phase of incident response?
+
+A. Recovery  
+B. Preparation  
+C. Eradication  
+D. Reporting
+
+**Answer: B**
+
+---
+
+## Q2
+
+A confirmed malware infection is detected on a workstation.
+
+What is an appropriate immediate containment action?
+
+A. Isolate the workstation when appropriate  
+B. Ignore it  
+C. Publish the malware  
+D. Delete every company computer
+
+**Answer: A**
+
+---
+
+## Q3
+
+Why might investigators preserve volatile evidence before shutting down a system?
+
+A. RAM and runtime state may be lost  
+B. Disk files disappear immediately  
+C. Antivirus stops working  
+D. Passwords automatically become stronger
+
+**Answer: A**
+
+---
+
+## Q4
+
+Deleting malware without fixing the vulnerability is:
+
+A. Complete remediation  
+B. Potentially incomplete remediation  
+C. Encryption  
+D. Recovery
+
+**Answer: B**
+
+---
+
+## Q5
+
+What is the purpose of lessons learned?
+
+A. Assign blame only  
+B. Improve future prevention and response  
+C. Delete evidence  
+D. Hide the incident
+
+**Answer: B**
+
+---
+
+# 42. HARDER SCENARIOS
+
+## Q6
+
+A ransomware infection is spreading across a network.
+
+What is the priority?
+
+A. Continue normal operations  
+B. Contain the spread while preserving necessary evidence  
+C. Delete all logs  
+D. Immediately reconnect infected systems
+
+**Answer: B**
+
+---
+
+## Q7
+
+An employee reports a suspicious email but there is no evidence of compromise yet.
+
+What should the SOC do?
+
+A. Validate and investigate the event  
+B. Declare a confirmed breach immediately  
+C. Ignore it  
+D. Shut down the entire network
+
+**Answer: A**
+
+---
+
+## Q8
+
+An attacker account is discovered.
+
+What should responders consider besides disabling the account?
+
+A. Authentication history, sessions/tokens, privilege, lateral movement and persistence  
+B. Only the username  
+C. Monitor brightness  
+D. Printer settings
+
+**Answer: A**
+
+---
+
+## Q9
+
+A system is restored from backup without determining how the attacker entered.
+
+What is the major concern?
+
+A. The attacker may exploit the same root cause again  
+B. The backup automatically contains malware  
+C. Recovery is impossible  
+D. Logs become encrypted
+
+**Answer: A**
+
+---
+
+## Q10
+
+A security alert is confirmed to be generated by legitimate administrative activity.
+
+What is this?
+
+A. Potential false positive  
+B. Confirmed ransomware  
+C. Rootkit  
+D. Persistence
+
+**Answer: A**
+
+---
+
+# 43. VERY HARD SCENARIOS
+
+## Q11
+
+A compromised administrator account is discovered.
+
+Which action is most appropriate?
+
+A. Only change the password  
+B. Contain the account and investigate authentication, privilege, sessions, lateral movement and persistence  
+C. Ignore it because administrators are trusted  
+D. Delete the Domain Controller
+
+**Answer: B**
+
+---
+
+## Q12
+
+A workstation is suspected of running malware. The investigator wants to shut it down immediately.
+
+What should they consider first?
+
+A. Whether volatile evidence should be preserved and what the incident-response procedure requires  
+B. Whether the wallpaper is important  
+C. Whether the monitor is connected  
+D. Whether the user likes the computer
+
+**Answer: A**
+
+---
+
+## Q13
+
+An attacker was detected 20 days after initial compromise.
+
+What concept describes this period?
+
+A. Dwell time  
+B. Encryption time  
+C. Patch window  
+D. Recovery time
+
+**Answer: A**
+
+---
+
+## Q14
+
+An incident response team successfully contains an attacker but fails to identify the exploited vulnerability.
+
+What is the major concern?
+
+A. Reinfection or repeated compromise  
+B. Faster recovery  
+C. Better security  
+D. Reduced attack surface
+
+**Answer: A**
+
+---
+
+## Q15
+
+Why should incident-response actions be documented?
+
+A. To maintain an investigation record and support decisions, evidence handling and lessons learned  
+B. To make the incident longer  
+C. To hide mistakes  
+D. To avoid remediation
+
+**Answer: A**
+
+---
+
+# 44. EXPERT SCENARIOS
+
+## Q16
+
+A company discovers that a compromised account was used from two geographically unusual locations within minutes.
+
+What should investigators consider?
+
+A. Possible credential compromise or anomalous authentication requiring validation  
+B. Guaranteed insider attack  
+C. Guaranteed malware  
+D. No concern
+
+**Answer: A**
+
+---
+
+## Q17
+
+A ransomware host is isolated, but its network share credentials remain valid.
+
+What should responders consider?
+
+A. Credential compromise and potential continued access from other systems  
+B. The incident is automatically finished  
+C. Backups should be deleted  
+D. Logs should be removed
+
+**Answer: A**
+
+---
+
+## Q18
+
+During recovery, an organization reconnects every affected system simultaneously without monitoring.
+
+What is the main concern?
+
+A. Reinfection or unresolved attacker activity may spread again  
+B. Faster forensic analysis  
+C. Improved visibility  
+D. Stronger authentication
+
+**Answer: A**
+
+---
+
+## Q19
+
+An incident responder discovers that logs covering the suspected attack period are missing.
+
+What should they do?
+
+A. Document the gap and seek alternative evidence sources  
+B. Invent the missing events  
+C. Assume nothing happened  
+D. Delete remaining logs
+
+**Answer: A**
+
+---
+
+## Q20
+
+Which is the strongest incident-response conclusion?
+
+A. "We deleted the malware, so the incident is over."
+B. "The system was restored, so no further investigation is needed."
+C. "The affected system was contained, evidence was preserved, the root cause was addressed, credentials were remediated as required, systems were recovered, and monitoring was increased."
+D. "The user caused everything."
+
+**Answer: C**
+
+---
+
+# 45. PRACTICAL INCIDENT-RESPONSE LAB
+
+Create a completely isolated lab incident.
+
+### Scenario
+
+A test Windows VM contains a benign simulated suspicious file.
+
+### Phase 1 — Preparation
+
+Create:
+
+```text
+System snapshot
+Test account
+Logging
+Network diagram
+Incident worksheet
+```
+
+### Phase 2 — Detection
+
+Generate a controlled event such as:
+
+```text
+Test executable created
+```
+
+### Phase 3 — Analysis
+
+Determine:
+
+```text
+What?
+When?
+Where?
+Which account?
+Which process?
+```
+
+### Phase 4 — Containment
+
+Isolate the test machine.
+
+### Phase 5 — Evidence
+
+Collect appropriate:
+
+```text
+Logs
+File hash
+Timeline
+Process information
+Network information
+```
+
+### Phase 6 — Eradication
+
+Remove the simulated threat and fix the test configuration.
+
+### Phase 7 — Recovery
+
+Restore the VM from a clean snapshot.
+
+### Phase 8 — Lessons Learned
+
+Document:
+
+```text
+What worked?
+What failed?
+What should improve?
+```
+
+---
+
+# 46. INCIDENT WORKSHEET
+
+```text
+INCIDENT ID:
+DATE/TIME:
+
+DETECTION SOURCE:
+
+AFFECTED SYSTEM:
+
+AFFECTED ACCOUNT:
+
+INCIDENT TYPE:
+
+SEVERITY:
+
+INITIAL INDICATOR:
+
+TIMELINE:
+
+EVIDENCE:
+
+CONTAINMENT ACTION:
+
+ROOT CAUSE:
+
+ERADICATION:
+
+RECOVERY:
+
+LESSONS LEARNED:
+
+RECOMMENDATIONS:
+```
+
+---
+
+# 47. INCIDENT RESPONSE VS DIGITAL FORENSICS
+
+| Incident Response | Digital Forensics |
+|---|---|
+| Respond to incident | Examine evidence |
+| Contain | Preserve |
+| Eradicate | Analyze |
+| Recover | Reconstruct |
+| Operational focus | Evidence focus |
+| Reduce impact | Determine what happened |
+
+They work together.
+
+---
+
+# 48. INCIDENT RESPONSE VS RED TEAM
+
+| Red Team | Incident Response |
+|---|---|
+| Simulates attacker | Responds to actual/suspected incident |
+| Proactive | Reactive |
+| Tests defenses | Restores security |
+| Controlled objective | Real incident |
+| Generates evidence | Investigates evidence |
+| Finds weaknesses | Contains/remediates them |
+
+---
+
+# 49. INCIDENT RESPONSE MASTER MEMORY
+
+> **P-D-A-C-E-R-L**
+
+```text
+P = Preparation
+D = Detection
+A = Analysis
+C = Containment
+E = Eradication
+R = Recovery
+L = Lessons Learned
+```
+
+---
+
+# 50. SIMPLE MEMORY STORY
+
+Think:
+
+> **PREPARE → DETECT → UNDERSTAND → STOP → REMOVE → RESTORE → LEARN**
+
+```text
+Prepare
+ ↓
+Detect
+ ↓
+Analyze
+ ↓
+Contain
+ ↓
+Eradicate
+ ↓
+Recover
+ ↓
+Learn
+```
+
+---
+
+# 51. MOST IMPORTANT EXAM POINTS
+
+### 1.
+
+**Event ≠ Incident**
+
+### 2.
+
+**Containment ≠ Eradication**
+
+Containment stops/limits the incident.
+
+Eradication removes the cause/presence.
+
+### 3.
+
+**Eradication ≠ Recovery**
+
+Eradication removes the threat.
+
+Recovery restores trusted operation.
+
+### 4.
+
+**Deleting malware ≠ complete remediation**
+
+### 5.
+
+**Evidence should be preserved appropriately**
+
+### 6.
+
+**Root cause must be addressed**
+
+### 7.
+
+**Credentials may need to be revoked/reset**
+
+### 8.
+
+**Recovery should include monitoring**
+
+### 9.
+
+**Lessons learned improve future security**
+
+### 10.
+
+**Incident response is a coordinated process, not one command.**
+
+---
+
+# 52. FINAL EXAM CHEAT SHEET
+
+| Term | Meaning |
+|---|---|
+| Incident Response | Organized response to security incidents |
+| Event | Observable occurrence |
+| Incident | Security-impacting event |
+| Triage | Determine severity/scope/priority |
+| Containment | Limit spread/impact |
+| Eradication | Remove threat/root cause |
+| Recovery | Restore trusted operations |
+| Dwell Time | Time attacker remains undetected |
+| MTTD | Mean Time to Detect |
+| MTTR | Mean Time to Respond/Recover, depending on definition |
+| Playbook | Predefined response procedure |
+| IOC | Indicator of compromise |
+| Root Cause | Underlying reason the incident occurred |
+| Lessons Learned | Post-incident improvement |
+
+---
+
+# 53. 30-SECOND REVISION
+
+```text
+PREPARE
+   ↓
+DETECT
+   ↓
+ANALYZE
+   ↓
+CONTAIN
+   ↓
+ERADICATE
+   ↓
+RECOVER
+   ↓
+LEARN
+```
+
+Remember:
+
+> **Contain = Stop the spread**
+
+> **Eradicate = Remove the threat**
+
+> **Recover = Restore trusted operations**
+
+> **Lessons Learned = Improve**
+
+---
+
+# ⭐ ONE-LINE EXAM ANSWER
+
+> **Incident response is the structured process of preparing for, detecting, analyzing, containing, eradicating, recovering from, and learning from cybersecurity incidents while preserving appropriate evidence and minimizing business impact.**
+
+# 🔥 DAY 58 GOLDEN RULE
+
+> **Don't just remove the symptom. Contain the incident, preserve evidence, find the root cause, eradicate the threat, recover safely, and improve the defenses so the same incident is less likely to happen again.**

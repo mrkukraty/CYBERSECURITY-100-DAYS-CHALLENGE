@@ -1,0 +1,658 @@
+# DAY 60 — THREAT HUNTING BASICS
+
+## Topic
+**Learn proactive threat detection methods.**
+
+---
+
+# 1. What is Threat Hunting?
+
+**Threat hunting** is the proactive process of searching through systems, networks, endpoints, and security data to identify threats that may not have been detected by existing security controls.
+
+### Simple definition
+
+> **Threat hunting = Proactively searching for hidden or undetected threats.**
+
+---
+
+# 2. Threat Detection vs Threat Hunting
+
+### Traditional Detection
+
+```text
+Attack
+ ↓
+Security Tool
+ ↓
+Alert
+ ↓
+Analyst
+```
+
+### Threat Hunting
+
+```text
+Hypothesis
+ ↓
+Search Data
+ ↓
+Find Anomalies
+ ↓
+Investigate
+ ↓
+Confirm / Reject
+```
+
+### Memory trick
+
+> **Detection waits for a signal.**  
+> **Hunting actively searches for signals.**
+
+---
+
+# 3. Why Threat Hunting Is Needed
+
+Security controls are not perfect.
+
+Attackers may:
+
+- Evade signatures
+- Use legitimate tools
+- Exploit unknown vulnerabilities
+- Compromise valid accounts
+- Blend into normal activity
+
+Threat hunting helps identify suspicious activity that automated detection may miss.
+
+---
+
+# 4. Threat Hunting Lifecycle
+
+A common simplified process is:
+
+```text
+Hypothesis
+    ↓
+Collect Data
+    ↓
+Search
+    ↓
+Investigate
+    ↓
+Validate
+    ↓
+Respond
+    ↓
+Improve Detection
+```
+
+---
+
+# 5. Step 1 — Create a Hypothesis
+
+A **threat hypothesis** is a testable idea about potentially malicious activity.
+
+Example:
+
+> "A compromised account may be accessing systems it normally does not use."
+
+The hunter then searches available telemetry to determine whether evidence supports or rejects the hypothesis.
+
+---
+
+# 6. Step 2 — Identify Data Sources
+
+Threat hunting may use:
+
+- EDR telemetry
+- SIEM logs
+- DNS logs
+- Firewall logs
+- Authentication logs
+- Proxy logs
+- Cloud logs
+- Endpoint events
+- Network traffic
+
+---
+
+# 7. Step 3 — Search for Anomalies
+
+Examples:
+
+### Authentication
+
+- Unusual login times
+- New locations
+- Multiple failed attempts
+- Unexpected privilege changes
+
+### Endpoint
+
+- Suspicious processes
+- Unusual process relationships
+- Unknown executables
+
+### Network
+
+- Rare destinations
+- Unexpected connections
+- Unusual DNS patterns
+
+---
+
+# 8. Step 4 — Investigate
+
+Finding an anomaly does not automatically mean compromise.
+
+The hunter asks:
+
+- What happened?
+- Who performed it?
+- When?
+- From which device?
+- Is it normal for this user?
+- Is there supporting evidence?
+
+---
+
+# 9. Step 5 — Validate
+
+The analyst determines whether the hypothesis is:
+
+### Supported
+
+Evidence indicates malicious activity.
+
+### Rejected
+
+Evidence indicates legitimate activity.
+
+### Inconclusive
+
+There is not enough information.
+
+---
+
+# 10. Step 6 — Respond
+
+If malicious activity is confirmed, incident response may include:
+
+- Isolating an endpoint
+- Blocking malicious infrastructure
+- Disabling compromised accounts
+- Removing malicious software
+- Resetting credentials
+- Investigating affected systems
+
+---
+
+# 11. Step 7 — Improve Detection
+
+One of the most valuable outcomes of threat hunting is improving future detection.
+
+```text
+Hunt
+ ↓
+Find Weakness
+ ↓
+Create Detection Rule
+ ↓
+Future Alert
+```
+
+---
+
+# 12. Threat Hunting Hypothesis Example
+
+### Hypothesis
+
+> "An attacker may be using compromised credentials to access systems outside the user's normal working pattern."
+
+The hunter can examine:
+
+- Login times
+- Source addresses
+- Devices
+- Applications
+- Authentication failures
+- Geographic context
+- Privilege changes
+
+---
+
+# 13. IOC-Based Hunting
+
+**IOC = Indicator of Compromise**
+
+Examples:
+
+- Malicious IP address
+- Malicious domain
+- File hash
+- Suspicious filename
+
+IOC hunting asks:
+
+> "Have we seen this known indicator anywhere in our environment?"
+
+---
+
+# 14. Limitation of IOC Hunting
+
+Attackers can change:
+
+- IP addresses
+- Domains
+- File hashes
+- Infrastructure
+
+Therefore:
+
+> **IOC hunting alone is not enough.**
+
+Behavior-based hunting is also important.
+
+---
+
+# 15. Behavior-Based Hunting
+
+Instead of looking for a specific malicious file, analysts search for suspicious behavior.
+
+Examples:
+
+- Unusual process execution
+- Unexpected authentication patterns
+- Abnormal data movement
+- Rare parent-child process relationships
+- Unexpected administrative activity
+
+### Advantage
+
+Behavior may remain suspicious even when the attacker changes specific indicators.
+
+---
+
+# 16. TTP-Based Hunting
+
+**TTP = Tactics, Techniques, and Procedures**
+
+Instead of searching for one indicator, analysts investigate patterns associated with attacker behavior.
+
+```text
+Tactics
+  ↓
+Techniques
+  ↓
+Procedures
+```
+
+This can provide more durable detection than relying solely on file hashes or IP addresses.
+
+---
+
+# 17. Threat Intelligence
+
+Threat intelligence can provide:
+
+- Known malicious infrastructure
+- Attack patterns
+- Malware indicators
+- Adversary behavior
+- Vulnerability information
+
+Threat hunters can use intelligence to create hypotheses.
+
+---
+
+# 18. MITRE ATT&CK Perspective
+
+The MITRE ATT&CK framework organizes adversary behavior into tactics and techniques.
+
+Examples of high-level tactics include:
+
+- Initial Access
+- Execution
+- Persistence
+- Privilege Escalation
+- Defense Evasion
+- Credential Access
+- Discovery
+- Lateral Movement
+- Collection
+- Command and Control
+- Exfiltration
+- Impact
+
+Threat hunters can map observed behavior to relevant ATT&CK techniques.
+
+---
+
+# 19. Threat Hunting Example
+
+Suppose an organization notices:
+
+```text
+User Login
+    ↓
+Rare administrative activity
+    ↓
+Unusual process
+    ↓
+Outbound network connection
+```
+
+A hunter can investigate whether these events are related.
+
+The goal is not simply:
+
+> "Find something suspicious."
+
+The goal is:
+
+> **Build an evidence-based understanding of what happened.**
+
+---
+
+# 20. Baseline
+
+A **baseline** represents normal behavior.
+
+Example:
+
+```text
+Normal user:
+09:00–18:00
+Office device
+Known applications
+Normal network destinations
+```
+
+An event outside the baseline may deserve investigation.
+
+### Important
+
+> **Anomaly ≠ Attack**
+
+---
+
+# 21. Hunting Queries
+
+A hunting query might search for:
+
+- Rare processes
+- Failed authentication
+- Unusual destinations
+- New administrative accounts
+- Abnormal DNS activity
+- Unexpected file access
+
+The exact query depends on the data platform.
+
+---
+
+# 22. Threat Hunting Tools
+
+Common categories include:
+
+### SIEM
+
+For centralized log search and correlation.
+
+### EDR
+
+For endpoint telemetry and investigation.
+
+### Network monitoring
+
+For network behavior.
+
+### Packet analysis
+
+For deeper traffic investigation.
+
+### Threat intelligence platforms
+
+For external intelligence.
+
+---
+
+# 23. Threat Hunter Mindset
+
+A good threat hunter asks:
+
+> "If an attacker were already inside, what evidence would they leave?"
+
+Then searches for that evidence.
+
+---
+
+# 24. Threat Hunting vs Incident Response
+
+### Threat Hunting
+
+Proactively searches for hidden threats.
+
+### Incident Response
+
+Responds to confirmed or suspected security incidents.
+
+They work together:
+
+```text
+Threat Hunting
+      ↓
+Potential Threat
+      ↓
+Investigation
+      ↓
+Incident Response
+```
+
+---
+
+# 25. Threat Hunting vs Vulnerability Scanning
+
+### Vulnerability Scanning
+
+Looks for weaknesses.
+
+### Threat Hunting
+
+Looks for evidence of suspicious or malicious activity.
+
+| Vulnerability Scanning | Threat Hunting |
+|---|---|
+| Finds weaknesses | Finds suspicious activity |
+| Often automated | Human-guided + automated |
+| Focuses on vulnerabilities | Focuses on threats |
+| Usually preventive | Proactive detection |
+
+---
+
+# 26. Threat Hunting Metrics
+
+Possible metrics include:
+
+- Number of hunts
+- Confirmed threats
+- False positives
+- Detection improvements
+- Mean Time to Detect
+- Mean Time to Respond
+
+---
+
+# 27. Safe Threat-Hunting Lab
+
+Build a small lab:
+
+```text
+Windows/Linux VM
+       ↓
+Generate normal activity
+       ↓
+Collect logs
+       ↓
+Create suspicious test events
+       ↓
+Search
+       ↓
+Investigate
+       ↓
+Create detection rule
+```
+
+Use only synthetic/authorized activity.
+
+---
+
+# 28. MCQs
+
+### Q1. What is threat hunting?
+
+A. Waiting for antivirus alerts  
+B. Proactively searching for hidden threats  
+C. Installing software  
+D. Creating backups  
+
+**Answer: B**
+
+### Q2. What is an IOC?
+
+A. Indicator of Compromise  
+B. Internet Operating Control  
+C. Internal Object Code  
+D. Incident Operation Center  
+
+**Answer: A**
+
+### Q3. What is a threat hypothesis?
+
+A. A testable idea about potential malicious activity  
+B. A firewall rule  
+C. A password  
+D. A backup  
+
+**Answer: A**
+
+### Q4. Does an anomaly always mean an attack?
+
+A. Yes  
+B. No  
+
+**Answer: B**
+
+### Q5. What does TTP stand for?
+
+A. Tactics, Techniques, and Procedures  
+B. Threat Transfer Protocol  
+C. Technical Testing Process  
+D. Trusted Traffic Path  
+
+**Answer: A**
+
+---
+
+# 29. HARD SCENARIO
+
+An employee logs in from a new device at an unusual time. Shortly afterward, the account accesses several systems it has never accessed before.
+
+What should a threat hunter do?
+
+### Answer
+
+Create/investigate the hypothesis that the account may be compromised.
+
+Check:
+
+- Authentication logs
+- Device identity
+- Login timing
+- Previous behavior
+- Accessed systems
+- Privilege changes
+- Endpoint telemetry
+- Network activity
+
+Then determine whether the activity is legitimate or suspicious.
+
+---
+
+# 30. EXAM TRAPS
+
+> **Threat hunting = incident response**
+
+False.
+
+> **Threat hunting only searches for known malware hashes**
+
+False.
+
+> **Every anomaly is an attack**
+
+False.
+
+> **IOC hunting is sufficient**
+
+False.
+
+> **Threat hunting is completely automated**
+
+False.
+
+Human reasoning and context are important.
+
+---
+
+# 31. MEMORY TRICK
+
+Remember:
+
+> **H-S-I-V-R**
+
+**H** — Hypothesis  
+**S** — Search  
+**I** — Investigate  
+**V** — Validate  
+**R** — Respond
+
+```text
+Hypothesis
+   ↓
+Search
+   ↓
+Investigate
+   ↓
+Validate
+   ↓
+Respond
+```
+
+---
+
+# 32. 30-SECOND REVISION
+
+```text
+THREAT HUNTING
+      ↓
+Proactive detection
+      ↓
+Create hypothesis
+      ↓
+Collect telemetry
+      ↓
+Search
+      ↓
+Investigate anomalies
+      ↓
+Validate evidence
+      ↓
+Respond
+      ↓
+Improve detections
+```
+
+# FINAL TAKEAWAY
+
+> **Threat hunting is a proactive cybersecurity practice in which analysts search available telemetry for signs of threats that automated security controls may have missed. Effective hunting combines hypotheses, behavioral analysis, IOCs, TTPs, threat intelligence, and contextual investigation.**

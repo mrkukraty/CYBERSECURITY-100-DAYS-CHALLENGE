@@ -1,0 +1,2121 @@
+# DAY 52 – ACTIVE DIRECTORY EXPLOITATION
+
+## Attack Active Directory Environments
+
+> **Lab-only rule:** Active Directory exploitation techniques must be practiced only in an isolated AD lab or against systems for which you have explicit authorization. Never test these techniques against a real organization without written permission and defined scope.
+
+---
+
+# 1. DAY 52 OBJECTIVES
+
+By the end of this lesson, you should understand:
+
+- What Active Directory is
+- Domain, forest, tree and OU concepts
+- Domain Controllers
+- Users, groups and computers
+- Kerberos and NTLM
+- LDAP
+- Authentication vs authorization
+- AD attack surface
+- Enumeration
+- Credential attacks
+- Kerberoasting
+- AS-REP roasting
+- Password spraying
+- Pass-the-Hash concept
+- Pass-the-Ticket concept
+- NTLM relay concept
+- ACL abuse
+- Delegation concepts
+- Group Policy security
+- Privilege escalation in AD
+- Lateral movement
+- Domain Admin risk
+- AD attack paths
+- BloodHound
+- Impacket
+- Mimikatz concepts
+- Detection and defense
+- Incident-response considerations
+
+---
+
+# 2. WHAT IS ACTIVE DIRECTORY?
+
+**Active Directory Domain Services (AD DS)** is Microsoft's directory service used to centrally manage identities, computers, resources and access in Windows domain environments.
+
+Simple definition:
+
+> **Active Directory = centralized identity, authentication and authorization management for Windows enterprise environments.**
+
+Example:
+
+```text
+                    ACTIVE DIRECTORY
+                           |
+          +----------------+----------------+
+          |                |                |
+        Users           Computers         Groups
+          |                |                |
+          +----------------+----------------+
+                           |
+                    Domain Controller
+```
+
+---
+
+# 3. WHY AD IS IMPORTANT
+
+An enterprise may have:
+
+```text
+500 Users
+300 Computers
+50 Servers
+20 Departments
+```
+
+Managing every account individually would be difficult.
+
+AD provides centralized management for:
+
+- User accounts
+- Computer accounts
+- Groups
+- Authentication
+- Policies
+- Permissions
+- Organizational Units
+- Domain resources
+
+---
+
+# 4. BASIC AD COMPONENTS
+
+## Domain
+
+A logical administrative/security boundary.
+
+Example:
+
+```text
+corp.example
+```
+
+---
+
+## Domain Controller
+
+A server running AD DS services.
+
+It commonly provides:
+
+- Authentication
+- Directory services
+- Kerberos
+- LDAP
+- Group Policy processing
+- Domain database
+
+Important database:
+
+```text
+NTDS.dit
+```
+
+It contains Active Directory directory information and is therefore highly sensitive.
+
+---
+
+# 5. ACTIVE DIRECTORY HIERARCHY
+
+Understand these terms:
+
+```text
+Forest
+  ↓
+Tree
+  ↓
+Domain
+  ↓
+Organizational Units
+  ↓
+Users / Computers / Groups
+```
+
+---
+
+# 6. FOREST
+
+A **forest** is the highest-level AD logical structure.
+
+It can contain:
+
+- Multiple domains
+- Trees
+- Trust relationships
+
+Memory:
+
+> **Forest = largest AD logical boundary**
+
+---
+
+# 7. TREE
+
+A tree is a collection of related domains sharing a contiguous DNS namespace.
+
+Concept:
+
+```text
+example.com
+    |
+    +--- child.example.com
+    |
+    +--- another.example.com
+```
+
+---
+
+# 8. ORGANIZATIONAL UNIT
+
+An **OU** is a container used to organize AD objects.
+
+Example:
+
+```text
+CORP
+ |
+ +-- IT
+ |
+ +-- HR
+ |
+ +-- Finance
+ |
+ +-- Servers
+```
+
+OUs are especially important for:
+
+- Group Policy
+- Delegation
+- Administrative organization
+
+---
+
+# 9. USERS
+
+AD users are identity objects.
+
+Examples:
+
+```text
+alice
+bob
+administrator
+service-account
+```
+
+A user's permissions may come from:
+
+```text
+Direct permissions
+      +
+Group membership
+      +
+ACLs
+      +
+Policies
+```
+
+---
+
+# 10. GROUPS
+
+Groups simplify permission management.
+
+Examples:
+
+```text
+Domain Users
+Domain Admins
+Enterprise Admins
+Administrators
+Help Desk
+Finance
+IT
+```
+
+Instead of assigning permissions individually:
+
+```text
+User
+ ↓
+Group
+ ↓
+Permission
+```
+
+---
+
+# 11. DOMAIN ADMINS
+
+**Domain Admins** is a highly privileged group.
+
+Membership can provide extensive control over the domain.
+
+Therefore:
+
+> **Compromising a Domain Admin account can be catastrophic for the entire AD environment.**
+
+---
+
+# 12. COMPUTER ACCOUNTS
+
+Computers also have AD accounts.
+
+Example:
+
+```text
+WORKSTATION01$
+SERVER01$
+DC01$
+```
+
+The `$` commonly identifies a machine account in AD naming conventions.
+
+---
+
+# 13. SERVICE ACCOUNTS
+
+Applications and services may use dedicated accounts.
+
+Example:
+
+```text
+svc_backup
+svc_database
+svc_web
+```
+
+Poorly secured service accounts can create significant security risks.
+
+---
+
+# 14. AUTHENTICATION VS AUTHORIZATION
+
+### Authentication
+
+> **Who are you?**
+
+### Authorization
+
+> **What are you allowed to do?**
+
+Example:
+
+```text
+Login
+ ↓
+Authentication
+ ↓
+User identified
+ ↓
+Authorization
+ ↓
+Determine permissions
+```
+
+---
+
+# 15. KERBEROS
+
+Kerberos is the primary authentication protocol used in modern Windows AD environments.
+
+Basic concept:
+
+```text
+User
+ ↓
+Authentication
+ ↓
+KDC
+ ↓
+Ticket
+ ↓
+Access Resource
+```
+
+---
+
+# 16. KDC
+
+The **Key Distribution Center (KDC)** is a central Kerberos component.
+
+It contains:
+
+### Authentication Service (AS)
+
+Handles initial authentication.
+
+### Ticket Granting Service (TGS)
+
+Issues service tickets.
+
+Concept:
+
+```text
+User
+ ↓
+AS
+ ↓
+TGT
+ ↓
+TGS
+ ↓
+Service Ticket
+ ↓
+Resource
+```
+
+---
+
+# 17. TGT
+
+**Ticket Granting Ticket (TGT)** allows a user to request service tickets without repeatedly entering their password.
+
+Memory:
+
+> **TGT = Ticket to get Tickets**
+
+---
+
+# 18. TGS
+
+A **Ticket Granting Service (TGS) response/service ticket** is associated with accessing a particular service.
+
+Examples of services:
+
+```text
+HTTP
+CIFS
+LDAP
+MSSQL
+```
+
+---
+
+# 19. NTLM
+
+NTLM is an older Windows authentication protocol that still exists in some environments.
+
+Security concerns can arise from:
+
+- Credential relay
+- Hash-based authentication
+- Legacy compatibility
+- Weak configurations
+
+Modern environments generally prefer Kerberos where possible.
+
+---
+
+# 20. LDAP
+
+**LDAP = Lightweight Directory Access Protocol**
+
+AD uses LDAP for directory queries and operations.
+
+Concept:
+
+```text
+Application
+    ↓
+LDAP
+    ↓
+Active Directory
+    ↓
+Users / Groups / Computers
+```
+
+LDAP is therefore extremely useful for legitimate AD administration and security enumeration.
+
+---
+
+# 21. AD ATTACK SURFACE
+
+An attacker may investigate:
+
+```text
+Users
+Groups
+Computers
+SPNs
+ACLs
+Trusts
+GPOs
+Services
+Credentials
+Delegation
+Shares
+Authentication protocols
+```
+
+The goal of enumeration is to understand the environment.
+
+---
+
+# 22. AD ATTACK CHAIN
+
+A simplified attack path:
+
+```text
+Initial Access
+      ↓
+AD Enumeration
+      ↓
+Credential Discovery
+      ↓
+Privilege Escalation
+      ↓
+Lateral Movement
+      ↓
+Domain Privilege
+      ↓
+Persistence
+      ↓
+Impact
+```
+
+Not every attack follows this exact sequence.
+
+---
+
+# 23. AD ENUMERATION
+
+Enumeration means discovering information about the AD environment.
+
+Questions:
+
+- What is the domain?
+- Which users exist?
+- Which groups exist?
+- Which computers exist?
+- Which accounts are privileged?
+- Which services exist?
+- Which trust relationships exist?
+- Which permissions exist?
+
+---
+
+# 24. WINDOWS ENUMERATION COMMANDS
+
+In an authorized lab, useful built-in commands include:
+
+```powershell
+whoami
+whoami /all
+hostname
+ipconfig /all
+whoami /groups
+net user
+net user <username>
+net localgroup
+net group
+net group "Domain Admins" /domain
+```
+
+These can help understand identity and group membership.
+
+---
+
+# 25. POWERSHELL AD ENUMERATION
+
+In environments where the AD PowerShell module is installed, administrators can query directory objects.
+
+Examples:
+
+```powershell
+Get-ADUser -Filter *
+Get-ADGroup -Filter *
+Get-ADComputer -Filter *
+Get-ADDomain
+Get-ADForest
+```
+
+These commands are legitimate administration functions but can also be useful during authorized security assessments.
+
+---
+
+# 26. AD ENUMERATION TOOLS
+
+Common tools include:
+
+### BloodHound
+
+Visualizes relationships and attack paths in AD.
+
+### SharpHound
+
+Collects AD relationship data for BloodHound.
+
+### PowerView
+
+PowerShell-based AD enumeration/security-auditing tool.
+
+### Impacket
+
+Python collection of networking/Windows protocol tools useful in authorized security testing.
+
+### ldapsearch
+
+LDAP directory querying tool.
+
+---
+
+# 27. BLOODHOUND
+
+BloodHound is extremely important for understanding AD attack paths.
+
+It can visualize relationships such as:
+
+```text
+User
+ ↓
+Group
+ ↓
+Computer
+ ↓
+Local Admin
+ ↓
+Service
+ ↓
+High Privilege
+```
+
+Instead of asking:
+
+> "Who has permission?"
+
+BloodHound helps ask:
+
+> **"What path could lead from this identity to a high-value target?"**
+
+---
+
+# 28. ATTACK PATH
+
+Example conceptual path:
+
+```text
+Low-Privilege User
+       ↓
+Group Membership
+       ↓
+Computer Access
+       ↓
+Local Administrator
+       ↓
+Credential/Session Exposure
+       ↓
+Privileged Account
+       ↓
+Domain-Level Privilege
+```
+
+The exact path depends on the environment.
+
+---
+
+# 29. KERBEROASTING
+
+**Kerberoasting** is a credential-attack technique targeting Kerberos service accounts associated with Service Principal Names (SPNs).
+
+Concept:
+
+```text
+Service Account
+      ↓
+SPN
+      ↓
+Kerberos Service Ticket
+      ↓
+Ticket material
+      ↓
+Offline password guessing
+```
+
+The objective is generally to recover a service account password when it is weak enough to be guessed.
+
+---
+
+# 30. WHY KERBEROASTING MATTERS
+
+Service accounts may have:
+
+- Long-lived passwords
+- Excessive privileges
+- Weak password policies
+- Broad access
+
+Therefore:
+
+> **A weakly protected privileged service account can become an AD attack path.**
+
+---
+
+# 31. DEFENDING AGAINST KERBEROASTING
+
+Organizations should:
+
+- Use strong service-account passwords
+- Use managed service accounts where appropriate
+- Minimize privileges
+- Monitor unusual Kerberos service-ticket requests
+- Remove unnecessary SPNs
+- Monitor privileged service accounts
+- Use appropriate modern authentication controls
+
+---
+
+# 32. AS-REP ROASTING
+
+AS-REP roasting targets accounts configured so that Kerberos preauthentication is not required.
+
+Concept:
+
+```text
+Account
+ ↓
+Preauthentication disabled
+ ↓
+AS response
+ ↓
+Offline password guessing
+```
+
+Important:
+
+> The vulnerability is primarily the insecure account configuration combined with a weak password.
+
+---
+
+# 33. KERBEROASTING VS AS-REP ROASTING
+
+| Kerberoasting | AS-REP Roasting |
+|---|---|
+| Service accounts | User accounts/configuration |
+| SPN relevant | Preauthentication disabled |
+| Service ticket | AS response |
+| Offline guessing | Offline guessing |
+
+Memory:
+
+> **Kerberoasting → SPN**
+
+> **AS-REP → No preauthentication**
+
+---
+
+# 34. PASSWORD SPRAYING
+
+Password spraying attempts a small number of common passwords across many accounts rather than many passwords against one account.
+
+Concept:
+
+```text
+Password A
+ ↓
+User1
+User2
+User3
+User4
+```
+
+This attempts to reduce account-lockout risk compared with repeatedly guessing many passwords against one account.
+
+---
+
+# 35. DEFENSE AGAINST PASSWORD SPRAYING
+
+- MFA
+- Strong passwords
+- Smart lockout policies
+- Monitoring authentication failures
+- Conditional access
+- Risk-based authentication
+- Disable unused accounts
+- Monitor geographically unusual authentication
+- Alert on password-spray patterns
+
+---
+
+# 36. PASS-THE-HASH
+
+Pass-the-Hash abuses an NTLM password hash to authenticate without needing the plaintext password.
+
+Concept:
+
+```text
+Password
+   ↓
+NTLM Hash
+   ↓
+Credential Material
+   ↓
+Authentication Attempt
+```
+
+The attacker does not necessarily need to recover the original password.
+
+---
+
+# 37. WHY PASS-THE-HASH IS DANGEROUS
+
+If a privileged credential hash is obtained, it may enable unauthorized authentication to systems where that credential is accepted.
+
+Risk increases with:
+
+- Reused administrator passwords
+- Excessive local administrator privileges
+- Weak credential isolation
+- Legacy NTLM usage
+
+---
+
+# 38. DEFENDING AGAINST PASS-THE-HASH
+
+- Credential Guard where appropriate
+- Reduce NTLM usage
+- Separate administrative accounts
+- Use unique local administrator passwords
+- LAPS/Windows LAPS
+- Least privilege
+- Restrict privileged logons
+- Monitor suspicious authentication patterns
+- Protect credential material
+
+---
+
+# 39. PASS-THE-TICKET
+
+Pass-the-Ticket involves abusing stolen Kerberos tickets.
+
+Concept:
+
+```text
+Valid Kerberos Ticket
+       ↓
+Obtained by attacker
+       ↓
+Reused improperly
+       ↓
+Unauthorized access
+```
+
+Difference:
+
+> **Pass-the-Hash → hash**
+
+> **Pass-the-Ticket → Kerberos ticket**
+
+---
+
+# 40. NTLM RELAY
+
+NTLM relay is a class of attacks in which authentication material is relayed to another service instead of directly cracking the password.
+
+Concept:
+
+```text
+Victim
+  ↓
+NTLM Authentication
+  ↓
+Attacker/Relay
+  ↓
+Target Service
+```
+
+The attacker attempts to make the target service accept the relayed authentication.
+
+---
+
+# 41. NTLM RELAY DEFENSE
+
+Important controls include:
+
+- SMB signing
+- LDAP signing
+- LDAP channel binding where appropriate
+- Reduce/disable NTLM where feasible
+- Network segmentation
+- Extended Protection for Authentication where applicable
+- Monitor unusual authentication flows
+
+---
+
+# 42. ACTIVE DIRECTORY ACLs
+
+AD objects have permissions.
+
+Examples include permissions to:
+
+- Read
+- Write
+- Modify
+- Reset passwords
+- Add group members
+- Modify attributes
+- Control objects
+
+A dangerous ACL can create a privilege-escalation path.
+
+---
+
+# 43. ACL ABUSE
+
+Concept:
+
+```text
+Low-Privilege User
+       ↓
+Unexpected Write Permission
+       ↓
+Sensitive AD Object
+       ↓
+Privilege Change
+       ↓
+Higher Privilege
+```
+
+Important:
+
+> **Permission to modify an object can be more important than simple group membership.**
+
+---
+
+# 44. DELEGATION
+
+Kerberos delegation allows services to act on behalf of users in certain circumstances.
+
+Types/concepts include:
+
+- Unconstrained delegation
+- Constrained delegation
+- Resource-based constrained delegation
+
+Poorly configured delegation can create significant attack paths.
+
+---
+
+# 45. UNCONSTRAINED DELEGATION
+
+A system configured for unconstrained delegation may be able to obtain/use delegated credentials in ways that create substantial security risk if that system is compromised.
+
+High-value systems should be carefully reviewed for unnecessary delegation.
+
+---
+
+# 46. CONSTRAINED DELEGATION
+
+Constrained delegation limits which services a service account can delegate to.
+
+This is generally safer than unrestricted delegation, but configuration must still be reviewed carefully.
+
+---
+
+# 47. RESOURCE-BASED CONSTRAINED DELEGATION
+
+RBCD controls delegation based on the resource/service configuration.
+
+Misconfigured permissions can potentially create privilege-escalation paths.
+
+For exams:
+
+> **Delegation misconfiguration can create unexpected authentication paths.**
+
+---
+
+# 48. GROUP POLICY
+
+Group Policy centrally manages Windows configuration.
+
+Examples:
+
+- Password policies
+- Security settings
+- Software deployment
+- Firewall configuration
+- User settings
+- Computer settings
+
+Because GPOs affect many systems, excessive modification rights are dangerous.
+
+---
+
+# 49. GPO SECURITY
+
+Ask:
+
+```text
+Who can modify the GPO?
+Who can link it?
+Which OUs receive it?
+What settings does it control?
+```
+
+A low-privileged account with dangerous GPO permissions may represent a significant escalation path.
+
+---
+
+# 50. DOMAIN TRUSTS
+
+AD environments may have trust relationships.
+
+Concept:
+
+```text
+Domain A
+   ↕
+Trust
+   ↕
+Domain B
+```
+
+Trusts can be legitimate, but excessive or poorly configured trust relationships can expand an attack surface.
+
+---
+
+# 51. LATERAL MOVEMENT
+
+Lateral movement means moving from one compromised system/account to another.
+
+Concept:
+
+```text
+Computer A
+    ↓
+Credential / Access
+    ↓
+Computer B
+    ↓
+Server C
+    ↓
+High-Value System
+```
+
+Common enterprise mechanisms can include:
+
+- SMB
+- RDP
+- WinRM
+- Remote services
+- Administrative shares
+- Kerberos/NTLM authentication
+
+---
+
+# 52. LATERAL MOVEMENT VS PRIVILEGE ESCALATION
+
+### Privilege Escalation
+
+```text
+Low privilege
+     ↓
+Higher privilege
+```
+
+### Lateral Movement
+
+```text
+System A
+     ↓
+System B
+```
+
+They can occur together.
+
+---
+
+# 53. DOMAIN PRIVILEGE ESCALATION
+
+A simplified path:
+
+```text
+Initial User
+     ↓
+Enumeration
+     ↓
+Weak Permission
+     ↓
+Credential / ACL / Delegation Issue
+     ↓
+Higher-Privilege Identity
+     ↓
+Domain-Level Control
+```
+
+The actual path depends entirely on the environment.
+
+---
+
+# 54. DOMAIN ADMIN VS ENTERPRISE ADMIN
+
+### Domain Admins
+
+Highly privileged within a domain.
+
+### Enterprise Admins
+
+Highly privileged across the forest/root-domain context.
+
+Memory:
+
+> **Enterprise Admins generally represent an even broader forest-level privilege boundary.**
+
+---
+
+# 55. GOLDEN TICKET CONCEPT
+
+A **Golden Ticket** is a forged Kerberos TGT created using the secret associated with the domain's KRBTGT account.
+
+Conceptually:
+
+```text
+KRBTGT Secret Compromised
+        ↓
+Forge TGT
+        ↓
+Potential Domain Authentication
+```
+
+This is an extremely serious AD compromise.
+
+---
+
+# 56. SILVER TICKET CONCEPT
+
+A **Silver Ticket** involves forging a Kerberos service ticket for a specific service using the relevant service account secret.
+
+Simplified:
+
+```text
+Service Account Secret
+        ↓
+Forge Service Ticket
+        ↓
+Target Specific Service
+```
+
+Memory:
+
+> **Golden = TGT/domain-level impact**
+
+> **Silver = Service ticket/service-specific impact**
+
+---
+
+# 57. GOLDEN VS SILVER TICKET
+
+| Golden Ticket | Silver Ticket |
+|---|---|
+| TGT | Service ticket |
+| KRBTGT secret | Service account secret |
+| Broader potential scope | Service-specific |
+| Extremely serious domain compromise | Serious service-level compromise |
+
+---
+
+# 58. MIMIKATZ
+
+Mimikatz is a well-known Windows security research/post-exploitation tool associated with credential and authentication-material extraction/manipulation.
+
+It can be used in legitimate security testing, but it is also heavily abused by attackers.
+
+Important exam concept:
+
+> **Protect credential material so attackers cannot obtain reusable authentication secrets.**
+
+---
+
+# 59. IMPACKET
+
+Impacket is a collection of Python classes/tools for interacting with Windows network protocols.
+
+Security professionals use it for:
+
+- Protocol testing
+- AD security assessment
+- Authentication testing
+- Network-service interaction
+
+Because some capabilities can directly facilitate unauthorized access, use only against authorized lab systems.
+
+---
+
+# 60. BLOODHOUND ATTACK-PATH THINKING
+
+BloodHound encourages graph-based thinking.
+
+Example:
+
+```text
+USER
+ ↓
+MemberOf
+ ↓
+GROUP
+ ↓
+AdminTo
+ ↓
+COMPUTER
+ ↓
+HasSession
+ ↓
+PRIVILEGED USER
+```
+
+An attack path is not automatically an exploit.
+
+It represents:
+
+> **A relationship that may provide a path to higher privilege.**
+
+---
+
+# 61. AD ATTACK PATH ANALYSIS
+
+When you find a possible path, ask:
+
+1. Is the relationship real?
+2. Is the permission actually effective?
+3. Is the account active?
+4. Is the target reachable?
+5. Is the credential valid?
+6. Are security controls blocking the path?
+7. Can the finding be safely validated?
+
+---
+
+# 62. ACTIVE DIRECTORY DEFENSE
+
+A strong AD security strategy includes:
+
+### Identity
+
+- MFA
+- Strong passwords
+- Separate admin accounts
+- Disable unused accounts
+
+### Privileges
+
+- Least privilege
+- Tiered administration
+- Just-in-time access where appropriate
+
+### Authentication
+
+- Prefer Kerberos where appropriate
+- Reduce legacy NTLM
+- Protect credential material
+
+### Systems
+
+- Patch Domain Controllers
+- Secure administrative workstations
+- Restrict remote administration
+
+### Monitoring
+
+- Authentication logs
+- Kerberos events
+- Group membership changes
+- GPO modifications
+- New accounts
+- Privilege changes
+
+---
+
+# 63. PRIVILEGED ACCESS WORKSTATIONS
+
+Administrators should ideally perform high-privilege administrative activities from hardened systems.
+
+Concept:
+
+```text
+Normal User PC
+     X
+     ↓
+Domain Admin Activity
+
+Hardened Admin Workstation
+     ↓
+Privileged Administration
+```
+
+This reduces credential exposure.
+
+---
+
+# 64. WINDOWS LAPS
+
+Windows LAPS helps manage unique local administrator passwords.
+
+Important security benefit:
+
+> **Avoids widespread reuse of the same local administrator credential.**
+
+This can reduce lateral movement and pass-the-hash risk.
+
+---
+
+# 65. AD LOGGING
+
+Important events to monitor include:
+
+- Successful logons
+- Failed logons
+- Privileged group changes
+- New accounts
+- Account changes
+- Service changes
+- GPO changes
+- Kerberos anomalies
+- NTLM authentication
+- Unusual remote administration
+
+---
+
+# 66. AD INCIDENT RESPONSE
+
+If AD compromise is suspected:
+
+```text
+Detect
+  ↓
+Validate
+  ↓
+Identify Compromised Accounts
+  ↓
+Contain
+  ↓
+Reset/Revoke Credentials
+  ↓
+Investigate Persistence
+  ↓
+Analyze Domain Controllers
+  ↓
+Remove Attack Paths
+  ↓
+Recover
+  ↓
+Monitor
+```
+
+A suspected domain-wide compromise requires careful incident-response planning.
+
+---
+
+# 67. AD ATTACK VS DEFENSE
+
+| Attack Concept | Defensive Control |
+|---|---|
+| Password spraying | MFA + monitoring |
+| Kerberoasting | Strong service passwords |
+| AS-REP roasting | Enable Kerberos preauthentication |
+| Pass-the-Hash | Credential isolation + LAPS |
+| Pass-the-Ticket | Protect Kerberos credentials |
+| NTLM relay | Signing/channel protections |
+| ACL abuse | Least privilege + ACL review |
+| GPO abuse | Restrict GPO modification |
+| Delegation abuse | Review delegation |
+| Lateral movement | Segmentation + privileged access controls |
+| Golden Ticket | Protect KRBTGT/domain controllers |
+| Credential theft | Credential Guard/EDR/least privilege |
+
+---
+
+# 68. SAFE AD LAB
+
+A useful training environment:
+
+```text
+              ISOLATED LAB
+                   |
+        +----------+----------+
+        |                     |
+   Domain Controller       Windows Client
+        |                     |
+        +----------+----------+
+                   |
+              Kali/Linux VM
+```
+
+Use:
+
+- Host-only/Internal network
+- Test domain
+- Test accounts
+- Intentionally vulnerable configuration
+- Snapshots
+- Synthetic credentials
+
+Example:
+
+```text
+Domain:
+lab.local
+
+DC:
+DC01
+
+Client:
+WIN10-CLIENT
+
+Test accounts:
+student
+administrator
+svc-test
+```
+
+Never connect an intentionally vulnerable AD lab directly to an organizational network.
+
+---
+
+# 69. SAFE LAB EXERCISE 1 – ENUMERATION
+
+On a Windows domain-joined lab machine:
+
+```powershell
+whoami
+whoami /all
+whoami /groups
+hostname
+ipconfig /all
+net user
+net group "Domain Admins" /domain
+```
+
+Document:
+
+```text
+Domain:
+Current User:
+Groups:
+Domain Admins:
+Computer:
+IP:
+```
+
+---
+
+# 70. SAFE LAB EXERCISE 2 – AD STRUCTURE
+
+Use authorized administrative queries:
+
+```powershell
+Get-ADDomain
+Get-ADForest
+Get-ADUser -Filter *
+Get-ADGroup -Filter *
+Get-ADComputer -Filter *
+```
+
+Build a simple map:
+
+```text
+Forest
+ ↓
+Domain
+ ↓
+OUs
+ ↓
+Users
+ ↓
+Groups
+ ↓
+Computers
+```
+
+---
+
+# 71. SAFE LAB EXERCISE 3 – BLOODHOUND
+
+In an isolated lab:
+
+```text
+1. Configure test AD
+2. Collect authorized directory relationship data
+3. Import into BloodHound
+4. Identify group relationships
+5. Examine attack-path graphs
+6. Validate the relationships manually
+7. Document defensive recommendations
+```
+
+The important learning objective is:
+
+> **Understand how AD relationships create privilege paths.**
+
+---
+
+# 72. SAFE LAB EXERCISE 4 – KERBEROS
+
+In a lab, investigate:
+
+```text
+Users
+ ↓
+SPNs
+ ↓
+Service accounts
+ ↓
+Password policy
+ ↓
+Privileges
+```
+
+Ask:
+
+- Which accounts have SPNs?
+- Are service accounts privileged?
+- Are passwords strong?
+- Can managed service accounts be used?
+- Are unnecessary SPNs present?
+
+---
+
+# 73. SAFE LAB EXERCISE 5 – ACL REVIEW
+
+Select an intentionally vulnerable lab object.
+
+Determine:
+
+```text
+Who has access?
+What permissions exist?
+Can the account modify the object?
+What would happen if it were abused?
+```
+
+Then remediate the excessive permission.
+
+---
+
+# 74. DAY 52 ATTACK CHAIN
+
+Memorize:
+
+> **E-N-C-P-L-D**
+
+```text
+E = Enumerate
+N = Notice Weakness
+C = Credential/Access Path
+P = Privilege Escalation
+L = Lateral Movement
+D = Domain-Level Impact
+```
+
+Then:
+
+```text
+Report
+ ↓
+Remediate
+ ↓
+Retest
+```
+
+---
+
+# 75. HARD SCENARIO MCQs
+
+## Q1
+
+An organization uses Active Directory to centrally manage users and computers.
+
+What is AD primarily?
+
+A. Antivirus software  
+B. Directory and identity-management service  
+C. Packet analyzer  
+D. Encryption algorithm
+
+**Answer: B**
+
+---
+
+## Q2
+
+Which system normally provides centralized AD authentication services?
+
+A. Domain Controller  
+B. Workstation  
+C. Printer  
+D. Router
+
+**Answer: A**
+
+---
+
+## Q3
+
+What is the primary role of Kerberos in AD?
+
+A. File compression  
+B. Network routing  
+C. Authentication  
+D. Disk encryption
+
+**Answer: C**
+
+---
+
+## Q4
+
+What does TGT mean?
+
+A. Trusted Group Token  
+B. Ticket Granting Ticket  
+C. Transfer Gateway Token  
+D. Temporary Group Ticket
+
+**Answer: B**
+
+---
+
+## Q5
+
+Which protocol is commonly associated with querying Active Directory?
+
+A. FTP  
+B. LDAP  
+C. SMTP  
+D. ICMP
+
+**Answer: B**
+
+---
+
+# 76. SCENARIO QUESTIONS
+
+## Q6
+
+A low-privileged user can modify an ACL on a highly privileged AD object.
+
+What should the security team investigate?
+
+A. Potential privilege-escalation path  
+B. Monitor brightness  
+C. Printer configuration  
+D. DNS TTL only
+
+**Answer: A**
+
+---
+
+## Q7
+
+A service account has an SPN and a weak password.
+
+What technique is particularly relevant?
+
+A. Kerberoasting  
+B. ARP spoofing  
+C. XSS  
+D. Directory traversal
+
+**Answer: A**
+
+---
+
+## Q8
+
+An AD account has Kerberos preauthentication disabled.
+
+What technique may become relevant?
+
+A. AS-REP roasting  
+B. SQL injection  
+C. CSRF  
+D. DNS tunneling
+
+**Answer: A**
+
+---
+
+## Q9
+
+An attacker obtains an NTLM password hash and attempts to authenticate without knowing the plaintext password.
+
+What concept is involved?
+
+A. Pass-the-Hash  
+B. Pass-the-Ticket  
+C. Kerberoasting  
+D. Phishing
+
+**Answer: A**
+
+---
+
+## Q10
+
+An attacker obtains a Kerberos ticket and attempts to reuse it.
+
+What concept is most relevant?
+
+A. Pass-the-Ticket  
+B. Pass-the-Hash  
+C. Password spraying  
+D. SQL injection
+
+**Answer: A**
+
+---
+
+# 77. HARDER MCQs
+
+## Q11
+
+An attacker attempts one common password against hundreds of accounts rather than trying hundreds of passwords against one account.
+
+What technique is this?
+
+A. Password spraying  
+B. Brute force against one account  
+C. Kerberoasting  
+D. Pass-the-Ticket
+
+**Answer: A**
+
+---
+
+## Q12
+
+A BloodHound graph shows:
+
+```text
+User A
+ ↓
+Group B
+ ↓
+Admin rights
+ ↓
+Computer C
+```
+
+What does this primarily represent?
+
+A. A possible privilege/attack path  
+B. Guaranteed successful exploitation  
+C. A malware signature  
+D. A DNS record
+
+**Answer: A**
+
+---
+
+## Q13
+
+A company discovers that the same local administrator password is used on hundreds of workstations.
+
+What is the major concern?
+
+A. Increased lateral-movement/pass-the-hash risk  
+B. Better security  
+C. Improved MFA  
+D. Reduced attack surface
+
+**Answer: A**
+
+---
+
+## Q14
+
+Which solution specifically helps manage unique local administrator passwords?
+
+A. Windows LAPS  
+B. FTP  
+C. Telnet  
+D. SMTP
+
+**Answer: A**
+
+---
+
+## Q15
+
+A user has membership in a group but the group has no relevant permissions to the target.
+
+What should an analyst conclude?
+
+A. Group membership alone does not prove an effective attack path  
+B. The user is automatically Domain Admin  
+C. The target is compromised  
+D. Kerberos is broken
+
+**Answer: A**
+
+---
+
+# 78. VERY HARD SCENARIOS
+
+## Q16
+
+A security analyst discovers:
+
+```text
+Low-privileged account
+        ↓
+Write permission on AD object
+        ↓
+Object influences privileged group
+```
+
+What is the most important next step?
+
+A. Validate whether the permission is actually effective and whether it creates a privilege-escalation path  
+B. Immediately compromise the domain  
+C. Delete the object  
+D. Disable every user
+
+**Answer: A**
+
+---
+
+## Q17
+
+A service account has an SPN but uses a 40-character randomly generated password managed by an appropriate service-account mechanism.
+
+What should the analyst conclude?
+
+A. The SPN automatically means Kerberoasting will succeed  
+B. The account should still be reviewed, but strong credential management significantly reduces password-guessing risk  
+C. The account is definitely compromised  
+D. Kerberos must be disabled
+
+**Answer: B**
+
+---
+
+## Q18
+
+An organization sees many failed logins for hundreds of users, with each user receiving only a small number of attempts.
+
+What should investigators consider?
+
+A. Password spraying  
+B. Disk fragmentation  
+C. XSS  
+D. SQL injection
+
+**Answer: A**
+
+---
+
+## Q19
+
+A workstation is compromised and its local administrator password is reused across many machines.
+
+What is a likely risk?
+
+A. Attackers may use recovered credential material to move laterally  
+B. Only the original machine is affected  
+C. DNS stops working  
+D. Kerberos becomes unavailable
+
+**Answer: A**
+
+---
+
+## Q20
+
+Which statement best describes BloodHound?
+
+A. Antivirus software  
+B. Graph-based AD relationship and attack-path analysis tool  
+C. Password manager  
+D. Disk-recovery software
+
+**Answer: B**
+
+---
+
+# 79. EXPERT SCENARIO
+
+An organization discovers:
+
+```text
+User A
+  ↓
+Member of Group B
+  ↓
+Group B has rights over Computer C
+  ↓
+User D has privileged session on Computer C
+  ↓
+User D has Domain Admin privileges
+```
+
+What does this represent?
+
+A. A potential AD attack path  
+B. Proof that User A is malicious  
+C. Proof of malware  
+D. A DNS failure
+
+**Answer: A**
+
+### Why?
+
+The graph shows relationships that may permit privilege escalation or lateral movement.
+
+However:
+
+> **A graph relationship must be validated before being treated as an exploitable vulnerability.**
+
+---
+
+# 80. EXAM TRAPS
+
+### Trap 1
+
+**AD ≠ only a user database**
+
+It also handles authentication, authorization, policies and computer identities.
+
+### Trap 2
+
+**Kerberos ≠ encryption only**
+
+It is primarily an authentication protocol.
+
+### Trap 3
+
+**Domain Admin ≠ only another group**
+
+It represents extremely high privilege.
+
+### Trap 4
+
+**SPN ≠ automatically vulnerable**
+
+It becomes particularly relevant to Kerberoasting when service-account credentials are weak.
+
+### Trap 5
+
+**BloodHound path ≠ guaranteed exploitation**
+
+It represents relationships requiring validation.
+
+### Trap 6
+
+**Group membership ≠ automatically effective privilege**
+
+Effective permissions must be examined.
+
+### Trap 7
+
+**NTLM hash ≠ plaintext password**
+
+A hash can nevertheless be sensitive authentication material.
+
+### Trap 8
+
+**Pass-the-Hash ≠ Pass-the-Ticket**
+
+Hash vs Kerberos ticket.
+
+### Trap 9
+
+**Lateral movement ≠ privilege escalation**
+
+Moving between systems is different from increasing privileges.
+
+### Trap 10
+
+**Domain compromise ≠ one single technique**
+
+It can result from multiple weaknesses combined into an attack path.
+
+---
+
+# 81. MASTER AD COMPARISON
+
+| Technique | Key Concept |
+|---|---|
+| Enumeration | Discover AD structure |
+| Kerberoasting | SPN/service-ticket credential attack |
+| AS-REP roasting | Accounts without Kerberos preauthentication |
+| Password spraying | Few passwords across many accounts |
+| Pass-the-Hash | Reuse NTLM hash |
+| Pass-the-Ticket | Reuse Kerberos ticket |
+| NTLM relay | Relay authentication |
+| ACL abuse | Abuse excessive object permissions |
+| Delegation abuse | Abuse delegation configuration |
+| GPO abuse | Abuse excessive GPO control |
+| Lateral movement | Move between systems |
+| Golden Ticket | Forged Kerberos TGT |
+| Silver Ticket | Forged service ticket |
+| BloodHound | AD relationship/attack-path analysis |
+
+---
+
+# 82. ATTACK → DEFENSE MEMORY
+
+```text
+KERBEROASTING
+      ↓
+Strong service credentials
+
+AS-REP ROASTING
+      ↓
+Enable preauthentication
+
+PASSWORD SPRAYING
+      ↓
+MFA + monitoring
+
+PASS-THE-HASH
+      ↓
+Credential protection + LAPS
+
+PASS-THE-TICKET
+      ↓
+Protect Kerberos credentials
+
+NTLM RELAY
+      ↓
+Signing + channel protections
+
+ACL ABUSE
+      ↓
+Least privilege + ACL review
+
+GPO ABUSE
+      ↓
+Restrict GPO modification
+
+LATERAL MOVEMENT
+      ↓
+Segmentation + privileged access
+
+DOMAIN COMPROMISE
+      ↓
+Protect Domain Controllers + privileged identities
+```
+
+---
+
+# 83. 30-SECOND REVISION
+
+```text
+ACTIVE DIRECTORY
+       ↓
+USERS
+GROUPS
+COMPUTERS
+OUs
+       ↓
+KERBEROS / LDAP / NTLM
+       ↓
+ENUMERATION
+       ↓
+CREDENTIALS
+       ↓
+ACLs / SPNs / DELEGATION / GPO
+       ↓
+PRIVILEGE ESCALATION
+       ↓
+LATERAL MOVEMENT
+       ↓
+DOMAIN-LEVEL IMPACT
+       ↓
+DETECT
+CONTAIN
+REMEDIATE
+RETEST
+```
+
+---
+
+# 84. MOST IMPORTANT MEMORY TRICKS
+
+### Kerberos
+
+> **TGT = Ticket to Get Tickets**
+
+### Kerberoasting
+
+> **SPN → Service Ticket → Offline Guessing**
+
+### AS-REP Roasting
+
+> **No Preauth → AS Response → Offline Guessing**
+
+### Pass-the-Hash
+
+> **HASH**
+
+### Pass-the-Ticket
+
+> **TICKET**
+
+### BloodHound
+
+> **GRAPH = ATTACK PATH**
+
+### Lateral Movement
+
+> **SYSTEM → SYSTEM**
+
+### Privilege Escalation
+
+> **LOW → HIGH**
+
+---
+
+# 85. ONE-LINE EXAM ANSWERS
+
+### Active Directory
+
+> Active Directory is Microsoft's directory service that centrally manages identities, computers, groups, authentication, authorization and policies in Windows domain environments.
+
+### Kerberoasting
+
+> Kerberoasting is a technique that targets Kerberos service accounts associated with SPNs and can allow offline password guessing against obtained service-ticket material.
+
+### AS-REP Roasting
+
+> AS-REP roasting targets accounts configured without Kerberos preauthentication and can expose material suitable for offline password guessing.
+
+### Pass-the-Hash
+
+> Pass-the-Hash is an authentication attack in which a stolen NTLM hash is reused without requiring recovery of the plaintext password.
+
+### Pass-the-Ticket
+
+> Pass-the-Ticket involves unauthorized reuse of stolen Kerberos authentication tickets.
+
+### BloodHound
+
+> BloodHound is a graph-based tool used to visualize Active Directory relationships and identify potential attack paths.
+
+### Lateral Movement
+
+> Lateral movement is the process of moving from one compromised system or identity to another within an environment.
+
+---
+
+# 🔥 DAY 52 GOLDEN RULE
+
+> **AD exploitation is rarely about one isolated vulnerability. The real risk often comes from the combination of identity, permissions, credentials, trusts, delegation, services and misconfigurations that create an attack path from a low-privileged account to high-value resources.**
+
+## MASTER FORMULA
+
+> **ENUMERATE → MAP RELATIONSHIPS → IDENTIFY WEAKNESS → VALIDATE → ESCALATE → MOVE → CONTROL → REPORT → REMEDIATE → RETEST**

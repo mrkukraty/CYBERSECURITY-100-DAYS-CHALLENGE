@@ -1,0 +1,1678 @@
+# DAY 43 – INTRODUCTION TO MALWARE ANALYSIS
+
+## Understand Malware Types and Analysis Techniques
+
+> **Lab-only rule:** Analyze malware only in an isolated, authorized environment such as a dedicated VM. Do not execute unknown malware on your personal or production system.
+
+---
+
+# 1. DAY 43 OBJECTIVES
+
+By the end of this lesson, you should understand:
+
+- What malware is
+- Common malware types
+- Malware infection methods
+- Malware analysis
+- Static analysis
+- Dynamic analysis
+- Behavioral analysis
+- Indicators of Compromise (IOCs)
+- Malware analysis workflow
+- Sandboxing
+- Basic malware-analysis tools
+- Safe malware-analysis practices
+- How defenders detect and respond to malware
+
+---
+
+# 2. WHAT IS MALWARE?
+
+**Malware** means **malicious software**.
+
+It is software designed to:
+
+- Damage systems
+- Steal information
+- Disrupt operations
+- Gain unauthorized access
+- Spy on users
+- Encrypt files
+- Download additional malware
+- Maintain unauthorized access
+
+Simple definition:
+
+> **Malware is software intentionally designed to perform malicious or unauthorized actions.**
+
+---
+
+# 3. COMMON MALWARE TYPES
+
+The major categories include:
+
+```text
+Virus
+Worm
+Trojan
+Ransomware
+Spyware
+Rootkit
+Botnet
+Keylogger
+Downloader
+Backdoor
+Adware
+```
+
+---
+
+# 4. VIRUS
+
+A **virus** is malware that typically attaches itself to a legitimate file or program and requires some form of user/system interaction to spread or execute.
+
+Concept:
+
+```text
+Infected File
+     ↓
+Execution
+     ↓
+Malicious Code
+     ↓
+Other Files
+```
+
+Key point:
+
+> A virus commonly depends on a host file or program.
+
+---
+
+# 5. WORM
+
+A **worm** is malware capable of spreading between systems without requiring the same type of user interaction as a traditional virus.
+
+Concept:
+
+```text
+Computer A
+    ↓
+Network
+    ↓
+Computer B
+    ↓
+Computer C
+```
+
+Key characteristic:
+
+> **Self-propagation**
+
+---
+
+# 6. VIRUS VS WORM
+
+| Virus | Worm |
+|---|---|
+| Usually requires a host file | Standalone malware |
+| Often requires user/system execution | Can self-propagate |
+| Spreads through infected files | Commonly spreads through networks/vulnerabilities |
+
+Memory:
+
+> **Virus = attaches**  
+> **Worm = spreads**
+
+---
+
+# 7. TROJAN
+
+A **Trojan** is malicious software disguised as legitimate or useful software.
+
+Example concept:
+
+```text
+User thinks:
+Useful Application
+
+Actually:
+Useful-looking Application
+        ↓
+Malicious Activity
+```
+
+Important:
+
+> A Trojan relies heavily on deception.
+
+---
+
+# 8. RANSOMWARE
+
+**Ransomware** is malware designed to deny access to data or systems, commonly by encrypting files, and then demand payment or otherwise coerce the victim.
+
+Concept:
+
+```text
+System
+  ↓
+Malware
+  ↓
+Files Become Inaccessible
+  ↓
+Extortion/Demand
+```
+
+Defensive controls include:
+
+- Offline/immutable backups
+- Endpoint protection
+- Network segmentation
+- Least privilege
+- Patch management
+- Email security
+- User awareness
+
+---
+
+# 9. SPYWARE
+
+**Spyware** is malware designed to secretly collect information.
+
+Potential targets include:
+
+- Browsing activity
+- Credentials
+- Personal information
+- System information
+- Communications
+
+Concept:
+
+```text
+User
+ ↓
+Spyware
+ ↓
+Information Collection
+ ↓
+Unauthorized Destination
+```
+
+---
+
+# 10. KEYLOGGER
+
+A **keylogger** records keyboard input.
+
+Potentially captured information may include:
+
+- Usernames
+- Passwords
+- Messages
+- Search queries
+
+Defensive detection can involve:
+
+- EDR
+- Process monitoring
+- Application control
+- Behavioral analysis
+- Credential protection
+
+---
+
+# 11. ROOTKIT
+
+A **rootkit** is designed to hide malicious activity or provide privileged access.
+
+It may attempt to hide:
+
+- Processes
+- Files
+- Network connections
+- Drivers/components
+
+Rootkits can operate at different levels.
+
+Conceptually:
+
+```text
+Application Level
+      ↓
+OS Level
+      ↓
+Kernel Level
+      ↓
+Firmware Level
+```
+
+The deeper the compromise, the more difficult investigation can become.
+
+---
+
+# 12. BOTNET
+
+A **botnet** is a collection of compromised systems controlled by an attacker.
+
+Concept:
+
+```text
+             Command/Control
+                  ↓
+       ┌──────────┼──────────┐
+       ↓          ↓          ↓
+     Bot A      Bot B      Bot C
+```
+
+Compromised devices may be used for:
+
+- DDoS
+- Spam
+- Credential attacks
+- Malware distribution
+- Other malicious activity
+
+---
+
+# 13. BACKDOOR
+
+A **backdoor** provides an unauthorized method of accessing or controlling a system.
+
+Concept:
+
+```text
+Normal Access
+     ↓
+Authentication
+     ↓
+Application
+
+Backdoor
+     ↓
+Unauthorized Access Path
+```
+
+A backdoor may also be used as a persistence mechanism.
+
+---
+
+# 14. DOWNLOADER
+
+A **downloader** is malware whose primary purpose is to retrieve additional malicious components.
+
+Concept:
+
+```text
+Initial Malware
+      ↓
+Downloader
+      ↓
+Additional Payload
+      ↓
+Further Activity
+```
+
+This is why analyzing only the first file may not reveal the complete attack.
+
+---
+
+# 15. MALWARE ANALYSIS
+
+**Malware analysis** is the process of examining malicious software to understand:
+
+- What it does
+- How it executes
+- What files it changes
+- What processes it creates
+- What network connections it makes
+- What information it accesses
+- How it persists
+- How to detect and remove it
+
+---
+
+# 16. MAIN TYPES OF MALWARE ANALYSIS
+
+Remember:
+
+```text
+STATIC
+   ↓
+DYNAMIC
+   ↓
+BEHAVIORAL
+   ↓
+DEEP/REVERSE ENGINEERING
+```
+
+The two fundamental categories are:
+
+### Static Analysis
+
+Analyze without executing the malware.
+
+### Dynamic Analysis
+
+Observe malware while it executes in a controlled environment.
+
+---
+
+# 17. STATIC ANALYSIS
+
+Static analysis examines a file without running it.
+
+Things to inspect:
+
+- File type
+- File size
+- Hashes
+- Metadata
+- Strings
+- Imports
+- Exports
+- Sections
+- Digital signatures
+- Embedded resources
+
+Concept:
+
+```text
+Malware File
+     ↓
+Examine
+     ↓
+No Execution
+```
+
+---
+
+# 18. FILE HASHES
+
+A hash produces a fixed-size value representing file contents.
+
+Common algorithms:
+
+```text
+MD5
+SHA-1
+SHA-256
+```
+
+For security investigations, **SHA-256** is commonly preferred over older hashes such as MD5 and SHA-1.
+
+Example concept:
+
+```text
+Malware.exe
+     ↓
+SHA-256
+     ↓
+Unique-looking hash value
+```
+
+Uses:
+
+- File identification
+- IOC sharing
+- Threat intelligence
+- Comparing samples
+- Detecting known files
+
+---
+
+# 19. HASH ≠ ENCRYPTION
+
+Very important exam point.
+
+### Hashing
+
+```text
+Input
+  ↓
+Hash
+```
+
+Designed to be one-way.
+
+### Encryption
+
+```text
+Plaintext
+   ↓
+Encryption
+   ↓
+Ciphertext
+   ↓
+Decryption
+   ↓
+Plaintext
+```
+
+Encryption is designed to be reversible with the appropriate key.
+
+---
+
+# 20. FILE TYPE ANALYSIS
+
+First determine what the file actually is.
+
+Do not trust only the filename extension.
+
+Example:
+
+```text
+invoice.pdf.exe
+```
+
+may be an executable despite appearing to be a document.
+
+Investigate:
+
+- File signature/magic bytes
+- Actual format
+- Extension
+- MIME type
+- PE/ELF structure where applicable
+
+---
+
+# 21. STRINGS ANALYSIS
+
+Strings can reveal useful clues.
+
+Possible strings include:
+
+```text
+URLs
+IP addresses
+File paths
+Registry paths
+Error messages
+Command names
+Domain names
+User-agent strings
+Configuration values
+```
+
+However:
+
+> The absence of readable strings does not mean the file is harmless.
+
+Strings may be encrypted, compressed, encoded, or generated dynamically.
+
+---
+
+# 22. IMPORTS
+
+Executable files may reference operating-system or library functions.
+
+Imports can provide clues about behavior.
+
+For example, imports related to:
+
+```text
+File operations
+Process creation
+Networking
+Registry access
+Cryptography
+Memory management
+```
+
+can help analysts form hypotheses about what the program may do.
+
+---
+
+# 23. PE FILES
+
+Windows executable files commonly use the **PE (Portable Executable)** format.
+
+Common PE components include:
+
+- DOS header
+- PE header
+- Sections
+- Import information
+- Export information
+- Resources
+
+Common sections include:
+
+```text
+.text
+.rdata
+.data
+.rsrc
+.reloc
+```
+
+Exact sections vary between files.
+
+---
+
+# 24. ELF FILES
+
+Linux executable and object files commonly use the **ELF (Executable and Linkable Format)**.
+
+Analysts may examine:
+
+- ELF header
+- Sections
+- Segments
+- Symbols
+- Dynamic libraries
+- Strings
+
+Concept:
+
+```text
+Linux executable
+      ↓
+ELF structure
+      ↓
+Static examination
+```
+
+---
+
+# 25. DIGITAL SIGNATURES
+
+A digital signature can help verify:
+
+- Who signed a file
+- Whether the signature is valid
+- Whether the file changed after signing
+
+Important:
+
+> A valid signature does not automatically prove that a file is safe.
+
+Attackers may abuse compromised or legitimately signed software.
+
+---
+
+# 26. DYNAMIC ANALYSIS
+
+Dynamic analysis observes malware while it executes in a controlled environment.
+
+Concept:
+
+```text
+Malware
+   ↓
+Isolated VM/Sandbox
+   ↓
+Execute
+   ↓
+Observe
+```
+
+Observe:
+
+- Processes
+- Files
+- Registry changes
+- Network activity
+- Services
+- Persistence
+- System modifications
+
+---
+
+# 27. WHY USE A VM?
+
+A virtual machine provides isolation between:
+
+```text
+Host Computer
+      ↓
+Virtual Machine
+      ↓
+Analysis Environment
+```
+
+For malware analysis, additional isolation controls may be required.
+
+> A normal VM is not a guarantee of safety.
+
+---
+
+# 28. SAFE MALWARE LAB
+
+A dedicated malware-analysis environment should ideally have:
+
+```text
+Isolated VM
+     +
+Snapshots
+     +
+Controlled Network
+     +
+No Sensitive Data
+     +
+Monitoring Tools
+     +
+Disposable Environment
+```
+
+Never analyze unknown malware on your main computer.
+
+---
+
+# 29. SANDBOX
+
+A **sandbox** is an isolated environment used to execute and observe potentially malicious software.
+
+It records behavior such as:
+
+- Process creation
+- File changes
+- Registry changes
+- Network activity
+- Persistence attempts
+
+Concept:
+
+```text
+Sample
+  ↓
+Sandbox
+  ↓
+Execution
+  ↓
+Behavioral Report
+```
+
+---
+
+# 30. STATIC VS DYNAMIC ANALYSIS
+
+| Static | Dynamic |
+|---|---|
+| Does not execute sample | Executes sample in controlled environment |
+| Hashes | Processes |
+| Strings | Network traffic |
+| Imports | File changes |
+| PE/ELF structure | Registry/system changes |
+| Metadata | Persistence |
+| Safer initial approach | Higher-risk but more behavioral information |
+
+Memory:
+
+> **Static = Look**  
+> **Dynamic = Run & Observe**
+
+---
+
+# 31. BEHAVIORAL ANALYSIS
+
+Behavioral analysis focuses on what malware actually does.
+
+Questions:
+
+- What process does it create?
+- What files does it modify?
+- What registry keys does it change?
+- What network destinations does it contact?
+- Does it create persistence?
+- Does it inject into another process?
+- Does it collect information?
+
+---
+
+# 32. NETWORK ANALYSIS
+
+Malware may communicate with external infrastructure.
+
+Analysts can examine:
+
+```text
+DNS queries
+IP addresses
+Domains
+HTTP/HTTPS traffic
+TLS information
+Ports
+Protocols
+Connection timing
+```
+
+Important:
+
+> Encrypted traffic may hide its contents, but metadata can still provide useful evidence.
+
+---
+
+# 33. DNS ANALYSIS
+
+A suspicious sample may generate DNS queries.
+
+Example concept:
+
+```text
+Malware
+   ↓
+DNS Query
+   ↓
+Suspicious Domain
+   ↓
+Remote Server
+```
+
+Investigate:
+
+- Domain reputation
+- Domain age
+- Query frequency
+- Unusual subdomains
+- DNS patterns
+- Associated IP addresses
+
+---
+
+# 34. PROCESS ANALYSIS
+
+Observe:
+
+```text
+Parent Process
+      ↓
+Child Process
+      ↓
+Command/Arguments
+      ↓
+Network Activity
+```
+
+Unexpected parent-child relationships can be valuable indicators.
+
+Example:
+
+```text
+Document Application
+       ↓
+Unexpected Script Interpreter
+       ↓
+Network Connection
+```
+
+This should trigger investigation.
+
+---
+
+# 35. FILE SYSTEM ANALYSIS
+
+Look for:
+
+- New files
+- Modified files
+- Deleted files
+- Temporary files
+- Executables
+- Scripts
+- Configuration files
+
+Questions:
+
+```text
+What changed?
+When?
+Which process changed it?
+Where was it created?
+```
+
+---
+
+# 36. REGISTRY ANALYSIS
+
+For Windows malware, examine relevant registry modifications.
+
+Potential evidence includes:
+
+- Startup-related changes
+- Configuration changes
+- New values
+- Modified keys
+
+Again:
+
+> A registry change is not automatically malicious.
+
+Context is important.
+
+---
+
+# 37. PERSISTENCE ANALYSIS
+
+Connect Day 41 to Day 43.
+
+Malware may attempt persistence through:
+
+```text
+Startup
+Registry
+Services
+Scheduled Tasks
+Accounts
+Cron
+systemd
+SSH keys
+```
+
+Therefore malware analysis should ask:
+
+> **Does the sample attempt to survive reboot or logout?**
+
+---
+
+# 38. IOC – INDICATORS OF COMPROMISE
+
+An **IOC** is evidence that may indicate malicious activity or compromise.
+
+Examples:
+
+```text
+File hash
+IP address
+Domain
+URL
+File path
+Registry key
+Mutex
+Email address
+Certificate
+```
+
+---
+
+# 39. IOC VS IOA
+
+### IOC
+
+Evidence of compromise.
+
+Examples:
+
+```text
+Known malicious hash
+Known malicious domain
+Known malicious IP
+```
+
+### IOA
+
+Indicator of attack/behavior.
+
+Examples:
+
+```text
+Suspicious process chain
+Unexpected credential access
+Abnormal persistence attempt
+```
+
+Memory:
+
+> **IOC = What was seen**  
+> **IOA = What behavior occurred**
+
+---
+
+# 40. MALWARE ANALYSIS WORKFLOW
+
+A common workflow:
+
+```text
+1. Acquire Sample
+       ↓
+2. Preserve Evidence
+       ↓
+3. Calculate Hash
+       ↓
+4. Static Analysis
+       ↓
+5. Prepare Isolated Environment
+       ↓
+6. Dynamic Analysis
+       ↓
+7. Network Analysis
+       ↓
+8. Extract IOCs
+       ↓
+9. Determine Capabilities
+       ↓
+10. Create Report
+```
+
+---
+
+# 41. FIRST RESPONSE TO A SUSPICIOUS FILE
+
+Do not immediately double-click it.
+
+Instead:
+
+```text
+Suspicious File
+      ↓
+Do NOT Execute
+      ↓
+Preserve
+      ↓
+Hash
+      ↓
+Identify File Type
+      ↓
+Analyze Safely
+```
+
+---
+
+# 42. MALWARE ANALYSIS TOOLS
+
+Common tools include:
+
+### Static
+
+- `strings`
+- PEStudio
+- Detect It Easy (DIE)
+- Ghidra
+- CFF Explorer
+
+### Dynamic
+
+- Process Monitor
+- Process Explorer
+- Wireshark
+- Autoruns
+- Sandbox environments
+
+### Debugging/Reverse Engineering
+
+- x64dbg
+- Ghidra
+- IDA
+
+Use these only in an authorized malware-analysis environment.
+
+---
+
+# 43. PROCESS MONITOR
+
+**Process Monitor (Procmon)** can capture system activity such as:
+
+- File-system activity
+- Registry activity
+- Process activity
+- Network-related activity
+
+It can help answer:
+
+> **What did this program change?**
+
+---
+
+# 44. PROCESS EXPLORER
+
+Process Explorer provides detailed process information.
+
+Useful observations:
+
+- Parent process
+- Child processes
+- Process path
+- Command line
+- Digital signature
+- Loaded components
+
+---
+
+# 45. AUTORUNS
+
+Autoruns helps identify many locations where applications can automatically start.
+
+Useful for:
+
+- Persistence investigation
+- Startup analysis
+- Incident response
+
+Concept:
+
+```text
+System Startup
+      ↓
+Autoruns
+      ↓
+Startup Locations
+      ↓
+Investigate Unknown Entries
+```
+
+---
+
+# 46. WIRESHARK
+
+Wireshark captures and analyzes network traffic.
+
+Useful for malware analysis:
+
+```text
+DNS
+HTTP
+TCP
+TLS metadata
+IP addresses
+Ports
+Protocols
+```
+
+It can help identify suspicious network behavior.
+
+---
+
+# 47. GHIDRA
+
+Ghidra is a reverse-engineering framework.
+
+It can help analysts understand compiled programs through:
+
+- Disassembly
+- Decompilation
+- Functions
+- References
+- Program structure
+
+It is particularly useful when source code is unavailable.
+
+---
+
+# 48. STRINGS + HASH + NETWORK
+
+A simple analysis approach:
+
+```text
+HASH
+ ↓
+Identify sample
+ ↓
+STRINGS
+ ↓
+Find clues
+ ↓
+DYNAMIC ANALYSIS
+ ↓
+Observe behavior
+ ↓
+NETWORK ANALYSIS
+ ↓
+Extract IOCs
+```
+
+---
+
+# 49. MALWARE ANALYSIS REPORT
+
+A professional report should contain:
+
+### 1. Sample Information
+
+- Filename
+- File type
+- Size
+- SHA-256
+
+### 2. Static Findings
+
+- Strings
+- Imports
+- Metadata
+- Structure
+
+### 3. Dynamic Findings
+
+- Processes
+- Files
+- Registry
+- Services
+- Persistence
+
+### 4. Network Findings
+
+- Domains
+- IPs
+- DNS
+- Protocols
+
+### 5. IOCs
+
+- Hashes
+- Domains
+- IPs
+- Paths
+- Other indicators
+
+### 6. Assessment
+
+- Capabilities
+- Risk
+- Recommended actions
+
+---
+
+# 50. MALWARE ANALYSIS VS REVERSE ENGINEERING
+
+### Malware Analysis
+
+Broad process of understanding malicious software.
+
+### Reverse Engineering
+
+Detailed examination of how compiled software works.
+
+Relationship:
+
+```text
+Malware Analysis
+      ↓
+Static/Dynamic Analysis
+      ↓
+Reverse Engineering
+```
+
+Reverse engineering may be required when basic analysis is insufficient.
+
+---
+
+# 51. OBFUSCATION
+
+**Obfuscation** makes code or data harder to understand.
+
+Purpose can include:
+
+- Hiding strings
+- Making analysis difficult
+- Hiding configuration
+- Making detection harder
+
+Concept:
+
+```text
+Readable Code
+     ↓
+Obfuscation
+     ↓
+Harder-to-understand Code
+```
+
+---
+
+# 52. PACKING
+
+A **packer** transforms or compresses an executable and may unpack it at runtime.
+
+Concept:
+
+```text
+Packed File
+    ↓
+Execution
+    ↓
+Unpacking
+    ↓
+Original Code
+```
+
+Packing can make static analysis more difficult.
+
+---
+
+# 53. ENCRYPTED/ENCODED CONFIGURATION
+
+Malware may hide configuration information.
+
+Possible hidden information:
+
+- Domains
+- IP addresses
+- Commands
+- Keys
+- Configuration parameters
+
+Analysts may need dynamic analysis or reverse engineering to recover it.
+
+---
+
+# 54. FALSE POSITIVES
+
+A security tool may classify a legitimate file as suspicious.
+
+Example:
+
+```text
+Tool Alert
+    ↓
+Potential Malware
+    ↓
+Manual Investigation
+    ↓
+Legitimate Software
+```
+
+Therefore:
+
+> **An alert is an indication, not automatically proof.**
+
+---
+
+# 55. FALSE NEGATIVES
+
+A security tool may fail to detect actual malware.
+
+This is why layered security is important:
+
+```text
+Antivirus
++
+EDR
++
+Network Monitoring
++
+Threat Intelligence
++
+Behavioral Analysis
++
+Human Investigation
+```
+
+---
+
+# 56. MALWARE ANALYSIS SAFETY
+
+Important rules:
+
+1. Never execute unknown malware on your primary computer.
+2. Use isolated lab machines.
+3. Avoid sensitive files in the lab.
+4. Use snapshots.
+5. Control network access.
+6. Do not connect the analysis VM to trusted internal networks.
+7. Treat malware samples as dangerous.
+8. Keep the analysis environment disposable.
+9. Preserve evidence before modifying it.
+10. Clean or destroy the lab environment after analysis.
+
+---
+
+# 57. SAFE LAB ARCHITECTURE
+
+```text
+                INTERNET
+                   X
+                   |
+             Controlled Network
+                   |
+        ┌──────────┴──────────┐
+        │                     │
+   Analysis VM           Monitoring VM
+        │                     │
+     Sample              Wireshark/Tools
+```
+
+The exact architecture depends on the analysis objective.
+
+---
+
+# 58. COMMON EXAM QUESTIONS
+
+## Q1
+
+What is malware?
+
+**Answer:** Malicious software designed to perform unauthorized or harmful actions.
+
+---
+
+## Q2
+
+Which malware can self-propagate across networks?
+
+**Answer:** Worm.
+
+---
+
+## Q3
+
+Which malware disguises itself as legitimate software?
+
+**Answer:** Trojan.
+
+---
+
+## Q4
+
+Which malware commonly encrypts files to deny access?
+
+**Answer:** Ransomware.
+
+---
+
+## Q5
+
+What is static analysis?
+
+**Answer:** Examining malware without executing it.
+
+---
+
+## Q6
+
+What is dynamic analysis?
+
+**Answer:** Observing malware while it executes in a controlled environment.
+
+---
+
+## Q7
+
+What is an IOC?
+
+**Answer:** An indicator that may provide evidence of compromise or malicious activity.
+
+---
+
+## Q8
+
+Why are hashes useful?
+
+**Answer:** They help identify and compare files and can be used as indicators in investigations.
+
+---
+
+## Q9
+
+What tool can capture and analyze network packets?
+
+**Answer:** Wireshark.
+
+---
+
+## Q10
+
+What is a sandbox?
+
+**Answer:** An isolated environment used to safely execute and observe potentially malicious software.
+
+---
+
+# 59. HARD SCENARIO MCQs
+
+### Q11
+
+An analyst receives an unknown executable. What should be done first?
+
+A. Double-click it  
+B. Execute it on the production computer  
+C. Preserve it and perform safe initial/static analysis  
+D. Email it to everyone
+
+**Answer: C**
+
+---
+
+### Q12
+
+An executable contains suspicious URLs in its strings but has never been executed.
+
+What type of analysis produced this information?
+
+A. Dynamic analysis  
+B. Static analysis  
+C. Network analysis  
+D. Privilege escalation
+
+**Answer: B**
+
+---
+
+### Q13
+
+A sample creates a new process, modifies a startup location and connects to a remote server during execution.
+
+What type of analysis is most directly observing these actions?
+
+A. Static analysis  
+B. Dynamic/behavioral analysis  
+C. Cryptographic analysis  
+D. DNS enumeration
+
+**Answer: B**
+
+---
+
+### Q14
+
+A malware sample has no readable IP addresses in its strings but makes network connections when executed.
+
+What is the best conclusion?
+
+A. It cannot communicate  
+B. It is harmless  
+C. Static analysis alone was insufficient; dynamic/network analysis provides additional evidence  
+D. The file is definitely ransomware
+
+**Answer: C**
+
+---
+
+### Q15
+
+An analyst finds a suspicious scheduled task created shortly after malware execution.
+
+What might this indicate?
+
+A. Persistence  
+B. Encryption  
+C. DNS resolution only  
+D. Packet fragmentation
+
+**Answer: A**
+
+---
+
+# 60. HARDER SCENARIO
+
+A suspicious executable is discovered on a workstation.
+
+The analyst finds:
+
+```text
+SHA-256 → Unknown
+Strings → Suspicious domain
+Process → Creates child process
+Registry → Startup modification
+Network → DNS query + outbound connection
+```
+
+What should the analyst conclude?
+
+> The sample exhibits multiple suspicious behaviors consistent with potentially malicious activity. The findings should be correlated, documented, and investigated further in an isolated environment.
+
+Do **not** conclude the exact malware family solely from these indicators.
+
+---
+
+# 61. STATIC + DYNAMIC COMBINATION
+
+The strongest practical approach often combines both:
+
+```text
+STATIC
+  ↓
+Create Hypothesis
+  ↓
+DYNAMIC
+  ↓
+Observe Behavior
+  ↓
+NETWORK
+  ↓
+Confirm Communication
+  ↓
+IOC Extraction
+```
+
+Example:
+
+```text
+Static:
+Suspicious domain found
+
+        ↓
+
+Dynamic:
+Program performs DNS query
+
+        ↓
+
+Network:
+Connection observed
+
+        ↓
+
+Conclusion:
+Evidence is correlated
+```
+
+---
+
+# 62. DAY 43 MEMORY TRICK
+
+Remember:
+
+> **S-D-B-I-R**
+
+### S — Static
+Look without running
+
+### D — Dynamic
+Run in controlled environment
+
+### B — Behavioral
+Understand actions
+
+### I — IOC
+Collect evidence
+
+### R — Report
+Document findings
+
+---
+
+# 63. MALWARE TYPES MEMORY
+
+Remember:
+
+> **V-W-T-R-S-R-B-K**
+
+**V** = Virus  
+**W** = Worm  
+**T** = Trojan  
+**R** = Ransomware  
+**S** = Spyware  
+**R** = Rootkit  
+**B** = Botnet  
+**K** = Keylogger
+
+---
+
+# 64. MOST IMPORTANT DIFFERENCES
+
+```text
+Virus     → Infects/attaches
+Worm      → Self-spreads
+Trojan    → Disguises
+Ransomware→ Denies/encrypts
+Spyware   → Secretly monitors
+Rootkit   → Hides/maintains privileged control
+Botnet    → Network of compromised systems
+Keylogger → Records keystrokes
+```
+
+---
+
+# 65. 30-SECOND REVISION
+
+```text
+MALWARE
+   ↓
+Malicious Software
+```
+
+### Analysis
+
+```text
+STATIC
+   ↓
+Don't execute
+   ↓
+Hash
+Strings
+Metadata
+Imports
+Structure
+```
+
+```text
+DYNAMIC
+   ↓
+Controlled execution
+   ↓
+Processes
+Files
+Registry
+Network
+Persistence
+```
+
+### Evidence
+
+```text
+IOC
+ ↓
+Hash
+Domain
+IP
+URL
+File path
+Registry key
+```
+
+### Workflow
+
+```text
+PRESERVE
+ ↓
+HASH
+ ↓
+STATIC
+ ↓
+ISOLATE
+ ↓
+DYNAMIC
+ ↓
+NETWORK
+ ↓
+IOC
+ ↓
+REPORT
+```
+
+---
+
+# 66. ⭐ KEY EXAM POINT
+
+> **Static analysis examines malware without executing it, while dynamic analysis executes the sample in a controlled environment and observes its behavior. Effective malware analysis combines static, dynamic, behavioral, and network analysis to identify capabilities, persistence mechanisms, and Indicators of Compromise (IOCs).**

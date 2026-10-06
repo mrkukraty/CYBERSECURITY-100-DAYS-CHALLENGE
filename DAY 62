@@ -1,0 +1,841 @@
+# DAY 62 – SIEM
+## Understand and Configure a Basic SIEM Setup
+
+> **Lab-only:** Build the SIEM in an isolated or authorized environment using your own test logs and systems.
+
+---
+
+## 1. DAY 62 OBJECTIVES
+
+By the end of this lesson, you should understand:
+
+- What SIEM means
+- Why SIEM is used
+- Logs vs events
+- SIEM architecture
+- Log collection
+- Log normalization
+- Correlation
+- Detection rules
+- Alerts
+- Dashboards
+- Incident investigation
+- Basic SIEM deployment
+- False positives
+- Log retention
+- Time synchronization
+- Basic SIEM lab using Wazuh or another authorized SIEM platform
+
+---
+
+# 2. WHAT IS SIEM?
+
+**SIEM = Security Information and Event Management**
+
+A SIEM collects security-related logs and events from multiple sources, analyzes them, correlates related activity, and generates alerts for investigation.
+
+Simple definition:
+
+> **SIEM = Centralized security logging + analysis + correlation + alerting.**
+
+---
+
+# 3. WHY DO WE NEED SIEM?
+
+Imagine an organization has:
+
+```text
+100 PCs
+20 Servers
+10 Firewalls
+5 Routers
+3 Domain Controllers
+Cloud Services
+Applications
+```
+
+Each system produces logs.
+
+Without centralized monitoring:
+
+```text
+PC logs       Server logs       Firewall logs
+   ↓              ↓                 ↓
+        Separate locations
+               ↓
+        Difficult investigation
+```
+
+With SIEM:
+
+```text
+PC ───────┐
+Server ───┤
+Firewall ─┤
+AD ───────┤
+Cloud ────┤
+Apps ─────┘
+      ↓
+    SIEM
+      ↓
+Correlation
+      ↓
+Alerts
+      ↓
+SOC Investigation
+```
+
+---
+
+# 4. LOG VS EVENT
+
+### Log
+
+A recorded piece of information.
+
+Example:
+
+```text
+User john logged in at 10:15.
+```
+
+### Event
+
+An observable occurrence.
+
+Example:
+
+```text
+Five failed logins occurred.
+```
+
+A SIEM processes both types of security telemetry.
+
+---
+
+# 5. COMMON SIEM DATA SOURCES
+
+| Source | Example Information |
+|---|---|
+| Windows | Login/process/system events |
+| Linux | Authentication/system logs |
+| Firewall | Allowed/blocked connections |
+| IDS/IPS | Network detections |
+| EDR | Endpoint activity |
+| DNS | Domain queries |
+| Proxy | Web activity |
+| VPN | Remote access |
+| Active Directory | Authentication/account activity |
+| Cloud | API/login/audit events |
+| Applications | Application events |
+| Email | Mail/security events |
+
+---
+
+# 6. BASIC SIEM ARCHITECTURE
+
+```text
+             LOG SOURCES
+                  ↓
+        ┌─────────────────┐
+        │ Log Collection  │
+        └─────────────────┘
+                  ↓
+        ┌─────────────────┐
+        │ Parsing/        │
+        │ Normalization   │
+        └─────────────────┘
+                  ↓
+        ┌─────────────────┐
+        │ Correlation &   │
+        │ Detection       │
+        └─────────────────┘
+                  ↓
+        ┌─────────────────┐
+        │ Alerts /        │
+        │ Dashboard       │
+        └─────────────────┘
+                  ↓
+              SOC / IR
+```
+
+---
+
+# 7. SIEM WORKFLOW
+
+Remember:
+
+> **C-N-C-A-I-R**
+
+```text
+Collect
+   ↓
+Normalize
+   ↓
+Correlate
+   ↓
+Alert
+   ↓
+Investigate
+   ↓
+Respond
+```
+
+---
+
+# 8. LOG COLLECTION
+
+The SIEM receives logs from different systems.
+
+Example:
+
+```text
+Windows Event Logs
+Linux auth logs
+Firewall logs
+DNS logs
+EDR telemetry
+```
+
+Collection methods can include:
+
+- Agents
+- Syslog
+- APIs
+- Network collectors
+- Cloud integrations
+- File-based ingestion
+
+---
+
+# 9. LOG NORMALIZATION
+
+Different systems use different formats.
+
+Example:
+
+```text
+Windows:
+4625
+
+Firewall:
+DENY
+
+Linux:
+authentication failure
+```
+
+SIEM normalization can transform these into common fields such as:
+
+```text
+timestamp
+username
+source_ip
+destination_ip
+event_type
+action
+status
+```
+
+---
+
+# 10. WHY NORMALIZATION MATTERS
+
+Without normalization:
+
+```text
+Windows format
+Linux format
+Firewall format
+      ↓
+Hard to compare
+```
+
+With normalization:
+
+```text
+Different sources
+      ↓
+Common fields
+      ↓
+Easy correlation
+```
+
+---
+
+# 11. CORRELATION
+
+Correlation connects related events.
+
+Example:
+
+```text
+10:00 — 10 failed logins
+10:02 — Successful login
+10:04 — Privileged action
+10:05 — Large outbound connection
+```
+
+Individually:
+
+```text
+Failed login → Maybe normal
+Successful login → Normal
+Privileged action → Maybe normal
+Outbound traffic → Maybe normal
+```
+
+Together:
+
+> **Potential compromise**
+
+---
+
+# 12. SIMPLE CORRELATION RULE
+
+Example:
+
+```text
+IF
+    failed_logins > 10
+AND
+    successful_login occurs
+AND
+    source_ip is unusual
+THEN
+    generate high-priority alert
+```
+
+This is a simplified example.
+
+---
+
+# 13. SIEM ALERT
+
+An alert should provide useful context:
+
+```text
+Alert:
+Possible Account Compromise
+
+User:
+admin
+
+Source:
+10.10.10.50
+
+Failed Attempts:
+15
+
+Successful Login:
+1
+
+Time:
+10:05
+
+Severity:
+High
+```
+
+---
+
+# 14. DETECTION RULES
+
+A detection rule defines conditions that may indicate suspicious activity.
+
+Examples:
+
+### Brute-force detection
+
+```text
+Many failed logins
++
+Same account/source
++
+Short time window
+```
+
+### Impossible-travel-style detection
+
+```text
+Login from Location A
++
+Login from distant Location B
++
+Impossible time difference
+```
+
+This requires validation because VPNs, proxies, mobile networks, and legitimate travel can create false positives.
+
+---
+
+# 15. FALSE POSITIVE
+
+SIEM reports suspicious activity but it is legitimate.
+
+Example:
+
+```text
+Many login attempts
+      ↓
+Investigation
+      ↓
+Approved vulnerability scanner
+```
+
+Result:
+
+> False positive.
+
+---
+
+# 16. FALSE NEGATIVE
+
+Malicious activity occurs but the SIEM does not detect it.
+
+This is dangerous because:
+
+> **The organization may not know the attack is occurring.**
+
+---
+
+# 17. DASHBOARD
+
+A SIEM dashboard can display:
+
+- Security alerts
+- Failed logins
+- Successful logins
+- Malware detections
+- Network events
+- Top source IPs
+- Top destination IPs
+- Authentication anomalies
+- Severity
+- Incident trends
+
+---
+
+# 18. TIME SYNCHRONIZATION
+
+Correct timestamps are extremely important.
+
+Suppose:
+
+```text
+PC:
+10:05
+
+Server:
+10:02
+
+Firewall:
+10:08
+```
+
+Building a timeline becomes difficult.
+
+Use synchronized time sources such as organizational NTP.
+
+Memory:
+
+> **No accurate time → unreliable timeline.**
+
+---
+
+# 19. LOG RETENTION
+
+Organizations need policies for:
+
+- What to collect
+- How long to retain
+- Where to store
+- Who can access
+- How to protect logs
+- When to delete
+
+Longer retention may improve investigation but increases:
+
+- Storage cost
+- Privacy considerations
+- Management requirements
+
+---
+
+# 20. LOG INTEGRITY
+
+Logs are valuable evidence.
+
+Protect them against:
+
+- Unauthorized modification
+- Deletion
+- Unauthorized access
+
+Controls may include:
+
+- Access control
+- Centralized storage
+- Immutable/WORM storage where appropriate
+- Integrity monitoring
+- Audit trails
+
+---
+
+# 21. BASIC SIEM LAB
+
+A good educational choice is:
+
+**Wazuh** or another SIEM/security-monitoring platform deployed in an isolated lab.
+
+Architecture:
+
+```text
+Windows VM ───┐
+Linux VM ─────┤
+               ↓
+          SIEM Server
+               ↓
+           Dashboard
+               ↓
+            Alerts
+```
+
+---
+
+# 22. BASIC LAB STEPS
+
+### Step 1 — Create lab
+
+Use:
+
+```text
+SIEM VM
+Windows VM
+Linux VM
+```
+
+Use an isolated/authorized virtual network.
+
+### Step 2 — Configure logging
+
+Enable appropriate test logs.
+
+### Step 3 — Connect log sources
+
+Configure the SIEM's supported agents/integrations.
+
+### Step 4 — Generate test events
+
+For example:
+
+- Several failed logins
+- Successful test login
+- Test file creation
+- Test service event
+
+### Step 5 — Observe
+
+Look at:
+
+```text
+Events
+Alerts
+Source
+Timestamp
+Username
+Severity
+```
+
+---
+
+# 23. INVESTIGATION WORKFLOW
+
+When an alert appears:
+
+```text
+ALERT
+ ↓
+VALIDATE
+ ↓
+COLLECT CONTEXT
+ ↓
+CORRELATE
+ ↓
+DETERMINE SCOPE
+ ↓
+CLASSIFY
+ ↓
+RESPOND
+ ↓
+DOCUMENT
+```
+
+---
+
+# 24. EXAMPLE INVESTIGATION
+
+Alert:
+
+> Multiple failed logins.
+
+Ask:
+
+1. Which account?
+2. Which source?
+3. How many attempts?
+4. What time?
+5. Was there a successful login afterward?
+6. Is the source expected?
+7. Was privileged activity performed?
+8. Are other systems affected?
+
+---
+
+# 25. SIEM + INCIDENT RESPONSE
+
+SIEM:
+
+> Detects and provides visibility.
+
+Incident response:
+
+> Investigates and responds.
+
+```text
+SIEM
+ ↓
+Detection
+ ↓
+SOC
+ ↓
+Incident Response
+ ↓
+Containment
+ ↓
+Eradication
+ ↓
+Recovery
+```
+
+---
+
+# 26. SIEM + EDR
+
+### SIEM
+
+Centralizes and correlates telemetry.
+
+### EDR
+
+Provides deeper endpoint visibility and response capabilities.
+
+Together:
+
+```text
+EDR → Endpoint evidence
+SIEM → Cross-source correlation
+```
+
+---
+
+# 27. COMMON SIEM PROBLEMS
+
+### Alert fatigue
+
+Too many alerts.
+
+### Poor logging
+
+Important data missing.
+
+### Bad time synchronization
+
+Timeline becomes unreliable.
+
+### Poor correlation
+
+Related events are not connected.
+
+### Excessive collection
+
+Too much irrelevant data.
+
+### Missing context
+
+Alert lacks useful information.
+
+---
+
+# 28. HOW TO REDUCE ALERT FATIGUE
+
+- Tune rules
+- Remove unnecessary alerts
+- Prioritize severity
+- Add context
+- Correlate multiple events
+- Suppress known benign activity carefully
+- Review detection performance
+
+---
+
+# 29. SIEM EXAM TABLE
+
+| Concept | Meaning |
+|---|---|
+| SIEM | Central security log/event analysis |
+| Log | Recorded information |
+| Event | Observable occurrence |
+| Correlation | Connect related events |
+| Alert | Detection requiring attention |
+| False positive | Benign activity detected as suspicious |
+| False negative | Malicious activity not detected |
+| Normalization | Convert different formats into common fields |
+| Dashboard | Visual security overview |
+| Retention | How long logs are stored |
+
+---
+
+# 30. HARD SCENARIO MCQs
+
+### Q1
+
+What is the main purpose of a SIEM?
+
+A. Replace all firewalls  
+B. Centralize, analyze and correlate security events  
+C. Encrypt every file  
+D. Physically secure servers
+
+**Answer: B**
+
+### Q2
+
+Why is normalization important?
+
+A. It makes unrelated logs comparable through common fields  
+B. It deletes logs  
+C. It disables authentication  
+D. It prevents all attacks
+
+**Answer: A**
+
+### Q3
+
+A SIEM receives 30 failed logins followed by a successful privileged login from the same unusual source.
+
+What should happen?
+
+A. Correlate and investigate  
+B. Ignore the failed attempts  
+C. Delete the logs  
+D. Reboot the SIEM
+
+**Answer: A**
+
+### Q4
+
+Why is synchronized time important?
+
+A. It helps build accurate event timelines  
+B. It increases CPU speed  
+C. It prevents phishing  
+D. It encrypts logs
+
+**Answer: A**
+
+### Q5
+
+A vulnerability scanner generates many login failures during an authorized scan.
+
+The SIEM generates a brute-force alert.
+
+What should the analyst do?
+
+A. Immediately declare compromise  
+B. Validate the source and activity against known authorized scanning  
+C. Delete the alert  
+D. Disable SIEM
+
+**Answer: B**
+
+---
+
+# 31. HARDER SCENARIOS
+
+### Q6
+
+An attacker successfully authenticates after numerous failed logins.
+
+Which additional information is most valuable?
+
+A. Source IP, account, timestamp and subsequent activity  
+B. Monitor brightness  
+C. Keyboard layout  
+D. Wallpaper
+
+**Answer: A**
+
+### Q7
+
+The SIEM has millions of low-value alerts.
+
+What is the primary concern?
+
+A. Alert fatigue  
+B. Encryption failure  
+C. DNS poisoning  
+D. Data compression
+
+**Answer: A**
+
+### Q8
+
+A firewall says a connection was allowed while the endpoint reports suspicious process activity.
+
+What should the analyst do?
+
+A. Correlate both sources  
+B. Trust only the firewall  
+C. Trust only the endpoint  
+D. Delete both logs
+
+**Answer: A**
+
+### Q9
+
+A critical server has no authentication logs.
+
+What is the problem?
+
+A. Reduced visibility and investigation capability  
+B. Stronger security  
+C. Faster SIEM  
+D. Better encryption
+
+**Answer: A**
+
+### Q10
+
+An analyst sees a suspicious login but discovers the account owner was using an approved VPN.
+
+What should happen?
+
+A. Validate additional context before declaring compromise  
+B. Automatically classify it as malicious  
+C. Delete the event  
+D. Disable every VPN
+
+**Answer: A**
+
+---
+
+# 32. DAY 62 MEMORY TRICK
+
+> **C-N-C-A-I-R**
+
+**Collect → Normalize → Correlate → Alert → Investigate → Respond**
+
+One-line exam answer:
+
+> **A SIEM centrally collects, normalizes, correlates and analyzes security events from multiple sources to provide detection, alerting and investigation capabilities.**

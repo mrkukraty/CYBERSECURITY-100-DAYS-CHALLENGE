@@ -1,0 +1,1822 @@
+# DAY 49 – REVIEW AND PRACTICE
+## Consolidating Malware Analysis & Digital Forensics
+
+> **Lab rule:** Analyze only malware samples, disk images, memory dumps, and systems that you are authorized to examine. Use isolated labs and synthetic/test evidence.
+
+---
+
+# 1. DAY 49 OBJECTIVES
+
+By the end of this review, you should be able to:
+
+- Explain malware fundamentals
+- Identify major malware types
+- Explain malware-analysis methodologies
+- Distinguish static and dynamic analysis
+- Understand indicators of compromise
+- Analyze suspicious files safely
+- Understand processes and network behavior
+- Explain digital-forensics workflows
+- Use Autopsy conceptually for disk analysis
+- Use Volatility conceptually for memory analysis
+- Understand evidence preservation
+- Explain hashing and chain of custody
+- Build an incident timeline
+- Correlate malware and forensic evidence
+- Distinguish evidence from assumptions
+- Answer scenario-based exam questions
+
+---
+
+# 2. MASTER CONCEPT
+
+The major connection between malware analysis and forensics is:
+
+```text
+                 SECURITY INCIDENT
+                        ↓
+                 Suspicious Activity
+                        ↓
+              ┌─────────┴─────────┐
+              ↓                   ↓
+        MALWARE ANALYSIS      DIGITAL FORENSICS
+              ↓                   ↓
+        What does it do?      What happened?
+              ↓                   ↓
+        Behavior/Code          Evidence/Timeline
+              ↓                   ↓
+              └─────────┬─────────┘
+                        ↓
+                   CORRELATION
+                        ↓
+                   CONCLUSION
+                        ↓
+                 REMEDIATION
+                        ↓
+                     REPORT
+```
+
+### Easy memory:
+
+> **Malware analysis = What does the malware do?**
+
+> **Forensics = What happened on the system?**
+
+---
+
+# 3. MALWARE VS DIGITAL FORENSICS
+
+| Malware Analysis | Digital Forensics |
+|---|---|
+| Studies malicious software | Studies digital evidence |
+| Focuses on behavior/code | Focuses on events/artifacts |
+| Static/dynamic analysis | Disk/memory/network analysis |
+| Reverse engineering | Evidence reconstruction |
+| Sandbox analysis | Timeline analysis |
+| Strings/imports | Files/logs/browser artifacts |
+| Process/network behavior | Process/network evidence |
+| Malware indicators | Forensic evidence |
+
+They overlap heavily.
+
+---
+
+# 4. WHAT IS MALWARE?
+
+**Malware** = malicious software designed to perform unauthorized or harmful actions.
+
+Common categories:
+
+- Virus
+- Worm
+- Trojan
+- Ransomware
+- Spyware
+- Keylogger
+- Rootkit
+- Bot
+- Downloader
+- Backdoor
+- RAT
+- Fileless malware
+
+---
+
+# 5. MALWARE TYPE REVISION
+
+## Virus
+
+Requires some mechanism involving a host file or content to propagate.
+
+## Worm
+
+Designed to self-propagate across systems/networks.
+
+## Trojan
+
+Malicious software disguised as legitimate software or content.
+
+## Ransomware
+
+Attempts to deny access to data/systems, commonly through encryption or other disruptive mechanisms.
+
+## Spyware
+
+Secretly collects information.
+
+## Keylogger
+
+Records keyboard input.
+
+## Rootkit
+
+Attempts to hide malicious activity or maintain privileged presence.
+
+## RAT
+
+Remote Access Trojan enabling unauthorized remote control.
+
+## Bot
+
+Compromised system controlled as part of a larger infrastructure.
+
+---
+
+# 6. MALWARE ANALYSIS
+
+Malware analysis means examining a suspicious file or program to understand:
+
+- What it is
+- What it does
+- How it executes
+- What files it accesses
+- What processes it creates
+- What network connections it makes
+- What persistence it uses
+- What indicators it leaves
+
+---
+
+# 7. STATIC VS DYNAMIC ANALYSIS
+
+## Static Analysis
+
+Analyze the malware **without executing it**.
+
+Examples:
+
+```text
+Hash
+Strings
+Metadata
+PE headers
+Imports
+Exports
+Sections
+Digital signature
+Embedded resources
+```
+
+### Memory trick:
+
+> **STATIC = STUDY**
+
+---
+
+## Dynamic Analysis
+
+Observe malware **while it executes in a controlled environment**.
+
+Examples:
+
+```text
+Processes
+Files
+Registry changes
+Network traffic
+Persistence
+Mutexes
+API behavior
+```
+
+### Memory trick:
+
+> **DYNAMIC = DO + OBSERVE**
+
+---
+
+# 8. STATIC ANALYSIS WORKFLOW
+
+```text
+Sample
+  ↓
+Hash
+  ↓
+File Type
+  ↓
+Metadata
+  ↓
+Strings
+  ↓
+Headers
+  ↓
+Imports/Exports
+  ↓
+Indicators
+  ↓
+Hypothesis
+```
+
+---
+
+# 9. DYNAMIC ANALYSIS WORKFLOW
+
+```text
+Prepare Isolated Lab
+        ↓
+Baseline System
+        ↓
+Execute Sample
+        ↓
+Monitor
+ ┌──────┼──────┐
+ ↓      ↓      ↓
+Files  Process Network
+ ↓      ↓      ↓
+Registry Persistence
+        ↓
+Collect Evidence
+        ↓
+Analyze
+        ↓
+Report
+```
+
+---
+
+# 10. STATIC ANALYSIS TOOLS
+
+Common tools include:
+
+- `sha256sum`
+- `file`
+- `strings`
+- PEStudio
+- Detect It Easy (DIE)
+- ExifTool
+- Ghidra
+- `objdump`
+- `readelf`
+- YARA
+
+### Remember:
+
+> **Static = Don't execute.**
+
+---
+
+# 11. DYNAMIC ANALYSIS TOOLS
+
+Examples:
+
+- Process Monitor
+- Process Explorer
+- Wireshark
+- TCPView
+- Autoruns
+- Regshot
+- Procmon
+- Sandbox environments
+
+These help identify behavioral changes.
+
+---
+
+# 12. HASHES
+
+A malware sample can be identified using hashes.
+
+Common:
+
+```text
+MD5
+SHA-1
+SHA-256
+```
+
+For modern integrity verification:
+
+> **SHA-256 is generally preferred over MD5.**
+
+Example:
+
+```text
+malware.exe
+      ↓
+SHA-256
+      ↓
+abcdef123...
+```
+
+Important:
+
+> A hash identifies a particular data representation; it does not explain what the file does.
+
+---
+
+# 13. STRINGS
+
+`strings` can reveal human-readable content embedded in a binary.
+
+Potential clues:
+
+```text
+URLs
+IP addresses
+File paths
+Registry paths
+Commands
+Error messages
+Domain names
+User-agent strings
+```
+
+Example:
+
+```bash
+strings suspicious.exe
+```
+
+### Important
+
+A suspicious string does not automatically prove malicious behavior.
+
+---
+
+# 14. FILE TYPE
+
+Before analysis, determine what the file actually is.
+
+Examples:
+
+```text
+PE executable
+DLL
+PDF
+Office document
+Script
+Archive
+Image
+```
+
+Do not trust only the filename extension.
+
+For example:
+
+```text
+invoice.pdf.exe
+```
+
+may visually deceive users.
+
+---
+
+# 15. PE FILE BASICS
+
+Windows executable files commonly use the **PE (Portable Executable)** format.
+
+Important concepts:
+
+- DOS header
+- PE signature
+- Sections
+- Imports
+- Exports
+- Resources
+- Entry point
+- Metadata
+
+Common sections include:
+
+```text
+.text
+.rdata
+.data
+.rsrc
+.reloc
+```
+
+---
+
+# 16. IMPORTS
+
+Imports can provide clues about functionality.
+
+For example, imports associated with:
+
+- File operations
+- Registry access
+- Networking
+- Process creation
+- Memory manipulation
+
+may suggest areas worth investigating.
+
+But:
+
+> **Imports are clues, not proof of malicious behavior.**
+
+---
+
+# 17. PACKING AND OBFUSCATION
+
+Malware may attempt to make analysis harder.
+
+### Packing
+
+Executable content is compressed or transformed and unpacked at runtime.
+
+### Obfuscation
+
+Code/data is deliberately made harder to understand.
+
+Indicators can include:
+
+- High entropy
+- Few readable strings
+- Unusual sections
+- Packing signatures
+
+Important:
+
+> Packed does not automatically mean malicious.
+
+Legitimate software can also be packed.
+
+---
+
+# 18. GHIHRA / GHIDRA
+
+**Ghidra** is a reverse-engineering framework.
+
+It can assist with:
+
+- Disassembly
+- Decompilation
+- Function analysis
+- Strings
+- Cross-references
+- Program structure
+
+Basic workflow:
+
+```text
+Sample
+ ↓
+Import
+ ↓
+Analyze
+ ↓
+Functions
+ ↓
+Strings
+ ↓
+Cross-references
+ ↓
+Understand behavior
+```
+
+---
+
+# 19. YARA
+
+YARA is commonly used to identify files based on patterns and rules.
+
+Concept:
+
+```text
+File
+ ↓
+YARA Rule
+ ↓
+Pattern Match
+ ↓
+Potential Classification
+```
+
+Example conceptual rule:
+
+```text
+rule Example_Suspicious_File
+{
+    strings:
+        $a = "example_marker"
+
+    condition:
+        $a
+}
+```
+
+A YARA match should be investigated in context.
+
+---
+
+# 20. MALWARE BEHAVIOR
+
+When analyzing malware, ask:
+
+### Process
+
+- What process starts?
+- Who starts it?
+- What is its parent?
+
+### Files
+
+- What files are created?
+- Modified?
+- Deleted?
+
+### Registry
+
+- What keys are changed?
+
+### Persistence
+
+- Does it survive reboot/logoff?
+
+### Network
+
+- Which destinations?
+- Which ports?
+- What protocols?
+
+### Security
+
+- Does it disable security tools?
+- Does it modify firewall settings?
+
+---
+
+# 21. NETWORK BEHAVIOR
+
+Malware may communicate with:
+
+- Command-and-control infrastructure
+- Download servers
+- DNS infrastructure
+- Cloud services
+- Other compromised systems
+
+Investigate:
+
+```text
+Source
+Destination
+Port
+Protocol
+DNS
+Timing
+Frequency
+Process association
+```
+
+---
+
+# 22. C2
+
+**Command and Control (C2)** is infrastructure or communication used to control compromised systems.
+
+Concept:
+
+```text
+Compromised Host
+       ↓
+   C2 Channel
+       ↓
+Attacker Infrastructure
+```
+
+Potential indicators:
+
+- Repeated outbound connections
+- Periodic connections
+- Suspicious domains
+- Unusual ports
+- DNS anomalies
+- Long-lived connections
+
+One connection alone does not prove C2.
+
+---
+
+# 23. BEACONING
+
+Beaconing means periodic communication.
+
+Example:
+
+```text
+10:00 → Connection
+10:05 → Connection
+10:10 → Connection
+10:15 → Connection
+```
+
+Regular timing may be suspicious.
+
+But legitimate software can also communicate periodically.
+
+Therefore:
+
+> **Correlate timing + destination + process + context.**
+
+---
+
+# 24. PERSISTENCE REVISION
+
+Malware may attempt to survive:
+
+- Reboot
+- Logout
+- Process termination
+
+Examples:
+
+### Windows
+
+- Registry autoruns
+- Scheduled Tasks
+- Services
+- Startup mechanisms
+- Accounts
+
+### Linux
+
+- Cron
+- systemd
+- SSH authorized keys
+- Startup files
+- Services
+
+Persistence itself is an important forensic indicator.
+
+---
+
+# 25. DIGITAL FORENSICS WORKFLOW
+
+Memorize:
+
+> **I-P-C-E-A-R**
+
+```text
+Identify
+Preserve
+Collect
+Examine
+Analyze
+Report
+```
+
+---
+
+# 26. EVIDENCE PRESERVATION
+
+Important principles:
+
+- Preserve original evidence
+- Use forensic copies where appropriate
+- Record hashes
+- Document handling
+- Maintain chain of custody
+- Minimize unnecessary modification
+
+---
+
+# 27. CHAIN OF CUSTODY
+
+Records:
+
+```text
+Who
+What
+When
+Where
+How
+```
+
+Example:
+
+```text
+Evidence collected
+       ↓
+Examiner A
+       ↓
+Secure storage
+       ↓
+Examiner B
+       ↓
+Analysis
+```
+
+Every transfer should be documented according to the investigation's procedures.
+
+---
+
+# 28. AUTOPSY REVISION
+
+### Autopsy is mainly useful for:
+
+- Disk images
+- Filesystem analysis
+- Deleted files
+- Browser artifacts
+- Timeline analysis
+- Hash analysis
+- Keyword searching
+- User activity artifacts
+
+Memory trick:
+
+> **AUTOPSY = DISK**
+
+---
+
+# 29. VOLATILITY REVISION
+
+### Volatility is mainly useful for:
+
+- Memory images
+- Process analysis
+- Process trees
+- Network artifacts
+- Command lines
+- Loaded modules
+- Runtime evidence
+
+Memory trick:
+
+> **VOLATILITY = RAM**
+
+---
+
+# 30. AUTOPSY + VOLATILITY
+
+Use both when possible.
+
+```text
+Disk
+ ↓
+Autopsy
+ ↓
+Persistent Evidence
+
+RAM
+ ↓
+Volatility
+ ↓
+Runtime Evidence
+
+        ↓
+    CORRELATE
+        ↓
+    INCIDENT STORY
+```
+
+---
+
+# 31. FORENSIC TIMELINE
+
+Example:
+
+```text
+08:55 — User logs in
+09:00 — Browser downloads document
+09:01 — Executable appears
+09:02 — Process starts
+09:03 — Registry modified
+09:04 — Network connection
+09:10 — Suspicious scheduled task
+```
+
+This gives investigators a possible sequence of events.
+
+---
+
+# 32. TIMELINE DOES NOT EQUAL ATTRIBUTION
+
+A timeline may show:
+
+> "File was executed at 09:02."
+
+It does **not automatically prove**:
+
+> "Person X intentionally executed it."
+
+Additional evidence is required.
+
+---
+
+# 33. IOCs
+
+Indicators of Compromise can include:
+
+### File
+
+- Hash
+- Filename
+- Path
+
+### Network
+
+- IP
+- Domain
+- URL
+- Port
+
+### Host
+
+- Process
+- Registry key
+- Scheduled task
+- Service
+
+### Email
+
+- Sender
+- Attachment
+- URL
+
+---
+
+# 34. IOC VS EVIDENCE
+
+An IOC is an indicator that may support investigation.
+
+Example:
+
+```text
+Suspicious hash
+```
+
+This may be evidence.
+
+But:
+
+```text
+Suspicious hash
++
+Execution
++
+Network connection
++
+Persistence
++
+Matching timeline
+```
+
+provides much stronger context.
+
+---
+
+# 35. MALWARE INVESTIGATION EXAMPLE
+
+Suppose:
+
+```text
+User receives email
+       ↓
+Downloads attachment
+       ↓
+Executable created
+       ↓
+Executable launches
+       ↓
+Registry modified
+       ↓
+Outbound connection
+       ↓
+Scheduled task created
+```
+
+Investigation should correlate:
+
+```text
+Email evidence
++
+Disk evidence
++
+Process evidence
++
+Registry evidence
++
+Network evidence
++
+Timeline
+```
+
+---
+
+# 36. FORENSIC QUESTION FRAMEWORK
+
+When investigating an incident ask:
+
+### WHAT?
+
+What happened?
+
+### WHEN?
+
+When did it happen?
+
+### WHERE?
+
+Which system/file/process?
+
+### WHO?
+
+Which account was involved?
+
+### HOW?
+
+What mechanism was used?
+
+### WHY?
+
+What objective appears likely?
+
+Be careful with **WHY** because intent is often difficult to establish from technical evidence alone.
+
+---
+
+# 37. MALWARE ANALYSIS QUESTION FRAMEWORK
+
+Ask:
+
+```text
+WHAT IS IT?
+     ↓
+HOW DOES IT EXECUTE?
+     ↓
+WHAT DOES IT CHANGE?
+     ↓
+WHAT DOES IT CONNECT TO?
+     ↓
+HOW DOES IT PERSIST?
+     ↓
+WHAT INDICATORS DOES IT LEAVE?
+```
+
+---
+
+# 38. STATIC VS DYNAMIC – EXAM TABLE
+
+| Static | Dynamic |
+|---|---|
+| Do not execute | Execute in controlled environment |
+| Hash | Process behavior |
+| Strings | Network traffic |
+| Imports | File changes |
+| PE headers | Registry changes |
+| Metadata | Persistence |
+| Disassembly | Runtime behavior |
+| Ghidra | Procmon/Wireshark |
+
+---
+
+# 39. DISK VS MEMORY – EXAM TABLE
+
+| Disk Forensics | Memory Forensics |
+|---|---|
+| Persistent evidence | Volatile evidence |
+| Files | Running processes |
+| Filesystem | Runtime state |
+| Browser artifacts | Active connections |
+| Registry artifacts | Loaded modules |
+| Deleted files | Command-line/process artifacts |
+| Autopsy | Volatility |
+
+---
+
+# 40. TOOLS MASTER TABLE
+
+| Tool | Main Purpose |
+|---|---|
+| Autopsy | Disk forensics |
+| Volatility | Memory forensics |
+| Wireshark | Network analysis |
+| Ghidra | Reverse engineering |
+| YARA | Pattern-based identification |
+| Procmon | Windows activity monitoring |
+| Process Explorer | Process investigation |
+| Autoruns | Startup/persistence investigation |
+| Strings | Extract readable strings |
+| ExifTool | Metadata |
+| PEStudio | PE analysis |
+| Detect It Easy | File/compiler/packer identification |
+
+---
+
+# 41. MALWARE + FORENSICS MASTER WORKFLOW
+
+```text
+SUSPICIOUS EVENT
+      ↓
+PRESERVE EVIDENCE
+      ↓
+HASH / DOCUMENT
+      ↓
+STATIC MALWARE ANALYSIS
+      ↓
+DYNAMIC ANALYSIS
+      ↓
+DISK FORENSICS
+      ↓
+MEMORY FORENSICS
+      ↓
+NETWORK ANALYSIS
+      ↓
+TIMELINE CORRELATION
+      ↓
+IOC EXTRACTION
+      ↓
+ROOT-CAUSE ANALYSIS
+      ↓
+CONTAINMENT / REMEDIATION
+      ↓
+REPORT
+      ↓
+RETEST / MONITOR
+```
+
+---
+
+# 42. IMPORTANT EXAM TRAPS
+
+### Trap 1
+
+**Unknown file ≠ malware**
+
+### Trap 2
+
+**Suspicious filename ≠ malware**
+
+### Trap 3
+
+**Unusual process ≠ automatically malicious**
+
+### Trap 4
+
+**YARA match ≠ automatic confirmation**
+
+### Trap 5
+
+**Hash ≠ behavior**
+
+### Trap 6
+
+**One network connection ≠ C2**
+
+### Trap 7
+
+**Persistence mechanism ≠ automatically malicious**
+
+### Trap 8
+
+**Deleted file ≠ permanently unrecoverable**
+
+### Trap 9
+
+**Timeline ≠ attribution**
+
+### Trap 10
+
+**IOC ≠ complete incident explanation**
+
+---
+
+# 43. SCENARIO-BASED PRACTICE
+
+## Q1
+
+An analyst receives a suspicious executable but must not execute it yet.
+
+Which approach is most appropriate initially?
+
+A. Run it on the production system  
+B. Perform static analysis  
+C. Send it to every employee  
+D. Disable antivirus
+
+**Answer: B**
+
+---
+
+## Q2
+
+A suspicious program creates a new registry autorun entry during controlled execution.
+
+What does this most likely indicate?
+
+A. Possible persistence  
+B. Guaranteed ransomware  
+C. Network scanning  
+D. Disk failure
+
+**Answer: A**
+
+---
+
+## Q3
+
+A memory image contains a suspicious process that is absent from the current filesystem.
+
+What should investigators consider?
+
+A. Runtime/in-memory evidence or a deleted/removed executable  
+B. That memory is useless  
+C. That the process never existed  
+D. That Volatility created the process
+
+**Answer: A**
+
+---
+
+## Q4
+
+A file's SHA-256 hash matches a known malicious sample.
+
+What can reasonably be concluded?
+
+A. The file matches that known hash  
+B. The current user created the malware  
+C. The user intentionally attacked the organization  
+D. Persistence definitely exists
+
+**Answer: A**
+
+---
+
+## Q5
+
+A process communicates with an unfamiliar IP every five minutes.
+
+What should the analyst conclude?
+
+A. Definitely C2  
+B. Potential beaconing requiring further investigation  
+C. Definitely legitimate  
+D. Definitely DNS poisoning
+
+**Answer: B**
+
+---
+
+# 44. HARD SCENARIO MCQs
+
+## Q6
+
+An executable contains strings referencing a suspicious domain but never contacts it during controlled analysis.
+
+What is the best interpretation?
+
+A. The domain is definitely C2  
+B. The string is an indicator/clue requiring further investigation  
+C. The file is definitely harmless  
+D. The domain proves execution
+
+**Answer: B**
+
+---
+
+## Q7
+
+A suspicious process has the name `svchost.exe`, but it executes from an unusual user-writable directory.
+
+What should the analyst do?
+
+A. Trust it because the name is legitimate  
+B. Investigate its path, parent, command line, signature, hash and behavior  
+C. Delete all copies of svchost.exe  
+D. Assume Windows is corrupted
+
+**Answer: B**
+
+---
+
+## Q8
+
+Autopsy shows a browser download at 14:05. Volatility shows the downloaded executable running at 14:07.
+
+What is this?
+
+A. Useful cross-source timeline correlation  
+B. Proof of the user's intent  
+C. Proof that the browser was compromised  
+D. Proof of C2
+
+**Answer: A**
+
+---
+
+## Q9
+
+A memory image contains an established outbound connection associated with a suspicious process.
+
+What should be examined next?
+
+A. Only the process name  
+B. Destination, port, timing, process details and related artifacts  
+C. Nothing  
+D. Only the user's browser history
+
+**Answer: B**
+
+---
+
+## Q10
+
+A malware sample is packed and contains very few readable strings.
+
+What should an analyst consider?
+
+A. Packing/obfuscation  
+B. Guaranteed legitimate software  
+C. Guaranteed ransomware  
+D. Corrupted evidence
+
+**Answer: A**
+
+---
+
+# 45. VERY HARD MCQs
+
+## Q11
+
+An analyst finds:
+
+```text
+Unknown executable
++
+New scheduled task
++
+Outbound connection
+```
+
+What is the best approach?
+
+A. Treat all three as unrelated  
+B. Correlate them by process, account, timestamps, paths and network evidence  
+C. Delete the executable immediately  
+D. Conclude the employee is responsible
+
+**Answer: B**
+
+---
+
+## Q12
+
+A suspicious process disappears after the machine is rebooted. Disk analysis finds no executable.
+
+Which evidence would have been particularly valuable?
+
+A. Memory acquisition before shutdown  
+B. Wallpaper image  
+C. Monitor brightness  
+D. Printer configuration
+
+**Answer: A**
+
+---
+
+## Q13
+
+A file is detected by multiple antivirus engines but has no observed malicious behavior in the lab.
+
+What is the best conclusion?
+
+A. It is definitely harmless  
+B. It is definitely malicious and the user is guilty  
+C. The detections are evidence supporting further investigation  
+D. Antivirus results should always be ignored
+
+**Answer: C**
+
+---
+
+## Q14
+
+A forensic analyst finds a suspicious file timestamp matching an incident timeline.
+
+What does this establish?
+
+A. Useful temporal correlation  
+B. Exact attribution  
+C. User intent  
+D. Malware classification by itself
+
+**Answer: A**
+
+---
+
+## Q15
+
+A process named `update.exe` runs from a temporary directory and creates a persistence mechanism.
+
+What is the best next step?
+
+A. Trust it because it says "update"  
+B. Investigate its hash, signature, parent, command line, file activity, persistence and network behavior  
+C. Automatically declare ransomware  
+D. Ignore it
+
+**Answer: B**
+
+---
+
+# 46. EXPERT-LEVEL SCENARIOS
+
+## Q16
+
+A workstation shows:
+
+```text
+09:00 — User login
+09:04 — Office document downloaded
+09:05 — Suspicious child process
+09:06 — PowerShell execution
+09:07 — Registry modification
+09:08 — Outbound network connection
+09:09 — Scheduled task created
+```
+
+Which investigation method is strongest?
+
+A. Examine only the executable  
+B. Correlate disk, memory, process, registry, network and timeline evidence  
+C. Examine only network traffic  
+D. Examine only browser history
+
+**Answer: B**
+
+---
+
+## Q17
+
+An analyst sees PowerShell executing on a workstation.
+
+What is the correct conclusion?
+
+A. PowerShell execution alone proves malware  
+B. PowerShell is legitimate software and can also be abused; investigate command line, parent process, user, timing and context  
+C. PowerShell should always be removed  
+D. PowerShell is itself a virus
+
+**Answer: B**
+
+---
+
+## Q18
+
+A memory image shows a process communicating with an external server, while disk evidence shows a recently created executable associated with the same process.
+
+What does the correlation provide?
+
+A. Stronger evidence linking the process, file and network activity  
+B. Proof of the attacker's identity  
+C. Proof of user intent  
+D. No useful information
+
+**Answer: A**
+
+---
+
+## Q19
+
+A forensic investigator analyzes an original disk directly and changes access timestamps.
+
+What is the major concern?
+
+A. Evidence integrity/preservation may have been compromised  
+B. The malware automatically disappeared  
+C. The hash algorithm stopped working  
+D. Volatility cannot analyze RAM
+
+**Answer: A**
+
+---
+
+## Q20
+
+Which statement is the most forensically defensible?
+
+A. "The employee is definitely the attacker."
+B. "The suspicious file proves criminal intent."
+C. "Multiple artifacts indicate that a suspicious executable was downloaded, executed, established an outbound connection and created persistence; attribution requires additional evidence."
+D. "The filename proves malware."
+
+**Answer: C**
+
+---
+
+# 47. PRACTICAL LAB EXERCISE
+
+## Lab A – Static Malware Analysis
+
+Use a **known training sample** or a benign test executable.
+
+Workflow:
+
+```text
+1. Obtain authorized sample
+2. Calculate SHA-256
+3. Identify file type
+4. Extract strings
+5. Inspect metadata
+6. Inspect PE information if applicable
+7. Check imports
+8. Record observations
+```
+
+Create:
+
+| Item | Observation |
+|---|---|
+| SHA-256 | |
+| File type | |
+| Size | |
+| Strings | |
+| Imports | |
+| Signature | |
+| Suspicious indicators | |
+
+---
+
+# 48. LAB B – Dynamic Analysis
+
+Use an isolated analysis VM.
+
+Before execution:
+
+```text
+Create snapshot
+      ↓
+Record baseline
+      ↓
+Start monitoring
+```
+
+Observe:
+
+```text
+Process
+Files
+Registry
+Network
+Persistence
+```
+
+After execution:
+
+```text
+Collect evidence
+      ↓
+Compare with baseline
+      ↓
+Document changes
+```
+
+Do not use real credentials or production systems.
+
+---
+
+# 49. LAB C – AUTOPSY
+
+Use an authorized training disk image.
+
+Workflow:
+
+```text
+Create Case
+    ↓
+Add Image
+    ↓
+Process Evidence
+    ↓
+Inspect Files
+    ↓
+Inspect Deleted Files
+    ↓
+Inspect Browser Artifacts
+    ↓
+Build Timeline
+    ↓
+Search Keywords
+    ↓
+Document Findings
+```
+
+---
+
+# 50. LAB D – VOLATILITY
+
+Use an authorized training memory image.
+
+Workflow:
+
+```text
+Memory Image
+      ↓
+Identify Environment
+      ↓
+Process Analysis
+      ↓
+Process Tree
+      ↓
+Network Analysis
+      ↓
+Command Lines
+      ↓
+Modules
+      ↓
+Correlate
+```
+
+---
+
+# 51. LAB E – FULL INVESTIGATION
+
+Scenario:
+
+> A test Windows workstation is suspected of running a malicious program.
+
+Investigate:
+
+### Disk
+
+Use Autopsy to find:
+
+- Download artifacts
+- Suspicious files
+- Timestamps
+- Browser activity
+- Persistence artifacts
+
+### Memory
+
+Use Volatility to investigate:
+
+- Processes
+- Process relationships
+- Network connections
+- Command lines
+- Modules
+
+### Network
+
+Use Wireshark if a lab PCAP is available.
+
+Look for:
+
+- DNS
+- HTTP/HTTPS
+- Repeated connections
+- Suspicious destinations
+
+### Final
+
+Create:
+
+```text
+Timeline
++
+IOC List
++
+Evidence
++
+Analysis
++
+Conclusion
+```
+
+---
+
+# 52. FORENSIC REPORT TEMPLATE
+
+```text
+CASE ID:
+DATE:
+ANALYST:
+
+1. INCIDENT SUMMARY
+
+2. SCOPE
+
+3. EVIDENCE
+
+4. HASHES
+
+5. TOOLS USED
+
+6. STATIC ANALYSIS
+
+7. DYNAMIC ANALYSIS
+
+8. DISK FORENSICS
+
+9. MEMORY FORENSICS
+
+10. NETWORK ANALYSIS
+
+11. TIMELINE
+
+12. INDICATORS OF COMPROMISE
+
+13. FINDINGS
+
+14. IMPACT
+
+15. LIMITATIONS
+
+16. CONCLUSION
+
+17. RECOMMENDATIONS
+```
+
+---
+
+# 53. MASTER COMPARISON
+
+| Topic | Main Question |
+|---|---|
+| Malware analysis | What does it do? |
+| Static analysis | What can we learn without executing it? |
+| Dynamic analysis | What happens when it runs? |
+| Disk forensics | What evidence exists on storage? |
+| Memory forensics | What was happening in RAM? |
+| Network forensics | What communication occurred? |
+| Timeline | In what sequence did events occur? |
+| IOC analysis | What indicators can we identify? |
+| Correlation | How are artifacts related? |
+| Reporting | What can we confidently conclude? |
+
+---
+
+# 54. MASTER MEMORY TRICKS
+
+## Malware analysis
+
+> **S-D-B-I-R**
+
+```text
+S = Static
+D = Dynamic
+B = Behavior
+I = Indicators
+R = Report
+```
+
+## Forensics
+
+> **I-P-C-E-A-R**
+
+```text
+Identify
+Preserve
+Collect
+Examine
+Analyze
+Report
+```
+
+## Disk
+
+> **A = Autopsy = Disk**
+
+## Memory
+
+> **V = Volatility = RAM**
+
+## Malware investigation
+
+> **F-P-N-P-I**
+
+```text
+File
+Process
+Network
+Persistence
+Indicators
+```
+
+---
+
+# 55. ONE-MINUTE REVISION
+
+```text
+MALWARE
+  ↓
+STATIC + DYNAMIC
+  ↓
+BEHAVIOR
+  ↓
+IOC
+  ↓
+FORENSICS
+  ↓
+DISK + RAM + NETWORK
+  ↓
+TIMELINE
+  ↓
+CORRELATION
+  ↓
+CONCLUSION
+  ↓
+REMEDIATION
+  ↓
+REPORT
+```
+
+### Remember:
+
+> **Static = Study**
+
+> **Dynamic = Do & Observe**
+
+> **Autopsy = Disk**
+
+> **Volatility = RAM**
+
+> **Wireshark = Network**
+
+> **Ghidra = Reverse Engineering**
+
+> **YARA = Pattern Matching**
+
+---
+
+# 56. FINAL EXAM CHEAT SHEET
+
+| Term | One-line meaning |
+|---|---|
+| Malware | Malicious software |
+| Static analysis | Analysis without execution |
+| Dynamic analysis | Analysis during controlled execution |
+| IOC | Indicator associated with potential compromise |
+| C2 | Command-and-control communication/infrastructure |
+| Beaconing | Repeated/periodic communication |
+| Persistence | Maintaining execution/access |
+| Digital forensics | Investigation of digital evidence |
+| Hash | Fixed-length representation used for comparison/integrity |
+| Chain of custody | Record of evidence handling |
+| Forensic image | Acquired copy used for examination |
+| Autopsy | Disk/digital-forensics platform |
+| Volatility | Memory-forensics framework |
+| Timeline | Chronological reconstruction of events |
+| YARA | Pattern/rule-based file identification |
+| Ghidra | Reverse-engineering framework |
+| Wireshark | Network packet-analysis tool |
+
+---
+
+# ⭐ MOST IMPORTANT EXAM DIFFERENCES
+
+### Static vs Dynamic
+
+**Static → Don't execute**
+
+**Dynamic → Execute in controlled environment**
+
+### Autopsy vs Volatility
+
+**Autopsy → Disk**
+
+**Volatility → RAM**
+
+### Malware analysis vs Forensics
+
+**Malware analysis → Understand the malware**
+
+**Forensics → Reconstruct the incident**
+
+### IOC vs Proof
+
+**IOC → Indicator**
+
+**Multiple correlated artifacts → Stronger evidence**
+
+### Timeline vs Attribution
+
+**Timeline → Shows sequence**
+
+**Attribution → Requires additional evidence**
+
+---
+
+# ⭐ ONE-LINE EXAM ANSWER
+
+> **Malware and forensic analysis combine static and dynamic malware examination with disk, memory, and network forensics to identify malicious behavior, reconstruct incident timelines, extract indicators of compromise, preserve evidence, and produce defensible conclusions for incident response and remediation.**
+
+# 🔥 DAY 49 GOLDEN RULE
+
+> **Never rely on one artifact. Preserve the evidence, analyze safely, correlate disk + memory + network + timeline information, distinguish facts from assumptions, and document every conclusion.**

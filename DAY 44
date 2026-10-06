@@ -1,0 +1,1529 @@
+# DAY 44 — STATIC AND DYNAMIC ANALYSIS
+
+## Topic
+**Analyze malware samples with tools like Strings and Ghidra.**
+
+> **Safety:** Perform malware analysis only on samples you are authorized to analyze, preferably inside an isolated lab VM. Never execute unknown malware on a personal, office, or production system.
+
+---
+
+# 1. What is Malware Analysis?
+
+**Malware analysis** is the process of examining a suspicious or malicious file to understand:
+
+- What the file is
+- What it does
+- How it works
+- What files/processes it interacts with
+- What network activity it may generate
+- What indicators of compromise (IOCs) it contains
+- How defenders can detect and respond to it
+
+Two major approaches are:
+
+1. **Static Analysis**
+2. **Dynamic Analysis**
+
+A third technique often combines both:
+
+3. **Hybrid Analysis**
+
+---
+
+# 2. Static Analysis
+
+## Definition
+
+**Static analysis** examines a malware sample **without executing it**.
+
+The analyst studies the file's structure, metadata, strings, code, imports, resources, and other characteristics.
+
+### Simple definition
+
+> **Static Analysis = Examine the file without running it.**
+
+---
+
+# 3. Why Use Static Analysis?
+
+Static analysis can help determine:
+
+- File type
+- Architecture
+- Compiler information
+- Embedded strings
+- Imported functions
+- Suspicious APIs
+- Embedded URLs/domains/IPs
+- File paths
+- Registry references
+- Encryption/encoding
+- Obfuscation
+- Program logic
+
+It is often the safest starting point.
+
+---
+
+# 4. Static Analysis Workflow
+
+A common workflow is:
+
+```text
+Obtain Sample
+     ↓
+Calculate Hash
+     ↓
+Identify File Type
+     ↓
+Inspect Metadata
+     ↓
+Extract Strings
+     ↓
+Examine Imports
+     ↓
+Analyze PE/ELF Structure
+     ↓
+Check for Obfuscation/Packing
+     ↓
+Disassemble / Decompile
+     ↓
+Analyze Code
+     ↓
+Extract IOCs
+```
+
+---
+
+# 5. File Hashing
+
+Before analyzing a sample, calculate its hash.
+
+Common hashes:
+
+- MD5
+- SHA-1
+- SHA-256
+
+### Example
+
+```text
+SHA-256:
+a1b2c3d4....
+```
+
+The hash acts like a fingerprint for the file.
+
+### Why hash the sample?
+
+It helps:
+
+- Identify the exact sample
+- Track samples in an investigation
+- Compare files
+- Search threat-intelligence databases
+- Prevent confusion between modified copies
+
+### Important
+
+A hash does **not** tell you whether a file is malicious by itself.
+
+It identifies the file.
+
+---
+
+# 6. The `strings` Tool
+
+`strings` is one of the simplest static-analysis tools.
+
+It extracts human-readable character sequences from a binary file.
+
+### Example
+
+```bash
+strings sample.exe
+```
+
+You may find strings such as:
+
+```text
+http://example.test
+User-Agent
+cmd.exe
+PowerShell
+AppData
+Temp
+Software\Microsoft\Windows
+password
+config
+```
+
+These strings can provide clues about the malware's behavior.
+
+---
+
+# 7. What Can Strings Reveal?
+
+Strings may reveal:
+
+### Network indicators
+
+```text
+example.test
+192.0.2.10
+/api/update
+```
+
+### File paths
+
+```text
+C:\Users\Public\
+C:\Windows\Temp\
+```
+
+### Registry paths
+
+```text
+Software\Microsoft\Windows\
+```
+
+### Commands
+
+```text
+cmd.exe
+powershell.exe
+```
+
+### Error messages
+
+```text
+Connection failed
+Invalid configuration
+```
+
+### Configuration data
+
+```text
+server=
+port=
+username=
+```
+
+---
+
+# 8. Limitations of Strings
+
+Strings analysis is useful but not sufficient.
+
+Malware may:
+
+- Encrypt strings
+- Encode strings
+- Generate strings at runtime
+- Compress strings
+- Store strings in unusual formats
+- Use obfuscation
+
+Therefore:
+
+> **No suspicious strings ≠ harmless file**
+
+---
+
+# 9. Ghidra
+
+Ghidra is a software reverse-engineering framework commonly used to analyze compiled programs.
+
+It can help analysts understand executable code.
+
+### Major capabilities
+
+- Disassembly
+- Decompilation
+- Function analysis
+- Cross-references
+- Symbol analysis
+- Code navigation
+- Strings analysis
+- Control-flow examination
+
+---
+
+# 10. Disassembly
+
+**Disassembly** converts machine code into assembly instructions.
+
+Example concept:
+
+```text
+Machine Code
+     ↓
+Disassembler
+     ↓
+Assembly Instructions
+```
+
+Assembly is closer to the CPU's actual execution instructions.
+
+Example:
+
+```asm
+MOV
+CALL
+PUSH
+POP
+CMP
+JMP
+```
+
+The exact instructions depend on the processor architecture.
+
+---
+
+# 11. Decompilation
+
+A **decompiler** attempts to convert compiled machine code into higher-level pseudocode.
+
+Conceptually:
+
+```text
+Executable
+    ↓
+Machine Code
+    ↓
+Decompiler
+    ↓
+Pseudocode
+```
+
+The result is **not necessarily the original source code**.
+
+Example:
+
+```c
+if (condition) {
+    perform_action();
+}
+```
+
+The analyst uses this to understand program logic.
+
+---
+
+# 12. Disassembly vs Decompilation
+
+| Feature | Disassembly | Decompilation |
+|---|---|---|
+| Output | Assembly | Pseudocode |
+| Level | Lower-level | Higher-level |
+| Accuracy | Close to machine instructions | Approximation |
+| Readability | More difficult | Usually easier |
+| Main use | CPU-level behavior | Program logic |
+
+### Memory trick
+
+> **Disassembly = Assembly**  
+> **Decompilation = Code-like pseudocode**
+
+---
+
+# 13. Important Ghidra Concepts
+
+## Function
+
+A section of code performing a particular operation.
+
+Example:
+
+```text
+main()
+connect_to_server()
+decrypt_data()
+write_file()
+```
+
+---
+
+## Cross-Reference (XREF)
+
+A cross-reference tells you where a function, string, or address is referenced.
+
+For example:
+
+```text
+"Connection failed"
+       ↓
+Referenced by
+       ↓
+connect_to_server()
+```
+
+This helps determine **why a particular string or function exists**.
+
+---
+
+# 14. Imports
+
+Executable files often import functions from operating-system libraries.
+
+Examples of suspicious categories include APIs associated with:
+
+- Process creation
+- File manipulation
+- Network communication
+- Registry access
+- Memory management
+- Service interaction
+
+### Important
+
+An imported API alone does **not prove malware**.
+
+Legitimate applications also use many powerful operating-system APIs.
+
+Analysts look at the **combination and context**.
+
+---
+
+# 15. API Analysis
+
+Suppose a program imports functions associated with:
+
+```text
+File operations
++
+Network communication
++
+Process creation
++
+Registry access
+```
+
+This combination may deserve further investigation.
+
+The analyst asks:
+
+> "Where are these functions called, and what data is passed to them?"
+
+This is more useful than simply looking at the API name.
+
+---
+
+# 16. PE Files
+
+Windows executables commonly use the **PE (Portable Executable)** format.
+
+Examples:
+
+```text
+.exe
+.dll
+.sys
+```
+
+Important PE components include:
+
+- DOS header
+- PE header
+- Sections
+- Import table
+- Export table
+- Resources
+- Entry point
+
+---
+
+# 17. PE Sections
+
+Common sections include:
+
+```text
+.text
+.rdata
+.data
+.rsrc
+.reloc
+```
+
+### `.text`
+
+Usually contains executable code.
+
+### `.data`
+
+Contains initialized writable data.
+
+### `.rdata`
+
+Often contains read-only data.
+
+### `.rsrc`
+
+Contains resources such as:
+
+- Icons
+- Dialogs
+- Embedded resources
+- Version information
+
+### `.reloc`
+
+Contains relocation information.
+
+---
+
+# 18. Entry Point
+
+The **entry point** is the location where execution begins when the executable is loaded.
+
+In static analysis, examining the entry point can help the analyst understand:
+
+- Initial program logic
+- Initialization routines
+- Unpacking behavior
+- Important function calls
+
+---
+
+# 19. Dynamic Analysis
+
+## Definition
+
+**Dynamic analysis** examines a sample by observing its behavior **while it executes in a controlled environment**.
+
+### Simple definition
+
+> **Dynamic Analysis = Run safely and observe what happens.**
+
+---
+
+# 20. Static vs Dynamic Analysis
+
+| Static Analysis | Dynamic Analysis |
+|---|---|
+| Does not execute sample | Executes sample |
+| Examines code/structure | Observes behavior |
+| Strings | Processes |
+| Imports | Files |
+| PE structure | Registry |
+| Disassembly | Network traffic |
+| Decompilation | Memory |
+| Safer starting point | Requires controlled environment |
+
+### Memory trick
+
+> **STATIC = Study**  
+> **DYNAMIC = Do and observe**
+
+---
+
+# 21. Dynamic Analysis Environment
+
+Dynamic malware analysis should be performed in an isolated lab.
+
+Typical setup:
+
+```text
+Host Computer
+     │
+     └── Analysis VM
+            │
+            ├── Malware Sample
+            ├── Monitoring Tools
+            ├── Snapshot
+            └── Controlled Network
+```
+
+Recommended precautions:
+
+- Use a dedicated VM
+- Take a clean snapshot
+- Do not store personal information in the VM
+- Keep the environment isolated
+- Use controlled networking
+- Do not connect the sample to production systems
+- Preserve evidence before and after analysis
+
+### Important
+
+> A VM reduces risk but does not make malware automatically safe.
+
+---
+
+# 22. What to Monitor During Dynamic Analysis?
+
+Observe:
+
+### Process activity
+
+- New processes
+- Child processes
+- Process termination
+- Unusual execution chains
+
+### File activity
+
+- Created files
+- Modified files
+- Deleted files
+- Temporary files
+
+### Registry activity
+
+- Registry reads
+- Registry writes
+- Configuration changes
+
+### Network activity
+
+- DNS queries
+- Connections
+- Destination domains/IPs
+- Protocols
+- Ports
+
+### Memory activity
+
+- Loaded modules
+- Suspicious memory regions
+- Injected or dynamically generated code
+
+---
+
+# 23. Process Monitoring
+
+A malware sample may create additional processes.
+
+Example concept:
+
+```text
+sample.exe
+    ↓
+child process
+    ↓
+another process
+```
+
+The analyst records:
+
+- Parent process
+- Child process
+- Command-line arguments
+- Start time
+- Loaded modules
+
+This can reveal suspicious process chains.
+
+---
+
+# 24. File System Monitoring
+
+Record:
+
+```text
+Created
+Modified
+Deleted
+Renamed
+```
+
+For example:
+
+```text
+sample.exe
+   ↓
+creates
+   ↓
+temporary configuration file
+```
+
+This may provide an important IOC.
+
+---
+
+# 25. Registry Monitoring
+
+On Windows, malware may interact with the Registry.
+
+An analyst can observe:
+
+- Keys accessed
+- Keys created
+- Values changed
+- Configuration information
+
+Registry activity should always be interpreted in context because legitimate software also modifies the Registry.
+
+---
+
+# 26. Network Analysis
+
+During dynamic analysis, network behavior may reveal:
+
+- DNS queries
+- Destination IPs
+- Domains
+- URLs
+- Ports
+- Protocols
+- Request patterns
+
+A common analysis flow is:
+
+```text
+Process
+   ↓
+Network Connection
+   ↓
+DNS Query
+   ↓
+Destination
+   ↓
+Protocol
+   ↓
+Traffic Analysis
+```
+
+Tools such as Wireshark can help inspect captured traffic in a controlled lab.
+
+---
+
+# 27. Sandbox Analysis
+
+A **sandbox** is an isolated environment designed to execute and observe suspicious files.
+
+It can automatically record:
+
+- Processes
+- Files
+- Registry activity
+- Network connections
+- Screenshots
+- Behavioral indicators
+
+### Purpose
+
+> Execute the sample in a controlled environment and collect evidence.
+
+---
+
+# 28. Hybrid Analysis
+
+Hybrid analysis combines:
+
+```text
+Static Analysis
+       +
+Dynamic Analysis
+       ↓
+Better Understanding
+```
+
+For example:
+
+Static analysis finds:
+
+```text
+server.example
+```
+
+Dynamic analysis shows:
+
+```text
+sample actually connects to server.example
+```
+
+The two observations reinforce each other.
+
+---
+
+# 29. Obfuscation
+
+**Obfuscation** makes code or data harder to understand.
+
+Malware may use:
+
+- Encoded strings
+- Confusing control flow
+- Renamed functions
+- Encrypted configuration
+- Packed code
+
+Purpose:
+
+> Make analysis and detection more difficult.
+
+---
+
+# 30. Packing
+
+A **packer** transforms or compresses an executable so that its original code is not immediately visible.
+
+Conceptually:
+
+```text
+Original Program
+      ↓
+Packing
+      ↓
+Packed Executable
+      ↓
+Runtime Unpacking
+      ↓
+Original Code
+```
+
+This can make static analysis harder.
+
+---
+
+# 31. Indicators of Compromise (IOCs)
+
+During analysis, collect useful indicators.
+
+Examples:
+
+### File IOC
+
+```text
+SHA-256 hash
+```
+
+### Network IOC
+
+```text
+Domain
+IP address
+URL
+```
+
+### Host IOC
+
+```text
+File path
+Registry key
+Mutex/name
+Process name
+```
+
+IOCs help defenders search for related activity.
+
+---
+
+# 32. IOC vs IOA
+
+### IOC — Indicator of Compromise
+
+Evidence that compromise or malicious activity may have occurred.
+
+Examples:
+
+```text
+Known malicious hash
+Suspicious domain
+Malicious file
+```
+
+### IOA — Indicator of Attack
+
+Behavior suggesting an attack is occurring.
+
+Examples:
+
+```text
+Suspicious process behavior
+Unusual authentication activity
+Abnormal execution chain
+```
+
+### Memory trick
+
+> **IOC = What was left behind**  
+> **IOA = What the attacker is doing**
+
+---
+
+# 33. Static Analysis Tool Categories
+
+| Tool Type | Purpose |
+|---|---|
+| Strings | Extract readable strings |
+| File identification | Determine file type |
+| PE analyzers | Examine PE structure |
+| Disassembler | View assembly |
+| Decompiler | Generate pseudocode |
+| Hex editor | Inspect raw bytes |
+| Hashing tools | Identify sample |
+
+Ghidra is especially useful for:
+
+```text
+Disassembly
++
+Decompilation
++
+Function analysis
++
+Cross-references
+```
+
+---
+
+# 34. Dynamic Analysis Tool Categories
+
+| Tool Category | Purpose |
+|---|---|
+| Process monitor | Process/file/registry activity |
+| Process explorer | Process inspection |
+| Network analyzer | Network traffic |
+| Packet capture | Capture packets |
+| System monitoring | System changes |
+| Sandbox | Automated behavioral analysis |
+| Debugger | Runtime code analysis |
+
+---
+
+# 35. Example Analysis Scenario
+
+Suppose you receive:
+
+```text
+unknown.exe
+```
+
+### Step 1 — Hash
+
+Calculate:
+
+```text
+SHA-256
+```
+
+### Step 2 — Identify
+
+Determine:
+
+```text
+Windows PE executable
+```
+
+### Step 3 — Strings
+
+You discover:
+
+```text
+example.test
+config.dat
+cmd.exe
+```
+
+### Step 4 — Ghidra
+
+You find functions related to:
+
+```text
+network communication
+file handling
+process creation
+```
+
+### Step 5 — Controlled Dynamic Analysis
+
+In an isolated lab, you observe:
+
+```text
+unknown.exe
+     ↓
+creates child process
+     ↓
+creates temporary file
+     ↓
+performs DNS lookup
+     ↓
+attempts network connection
+```
+
+### Step 6 — Correlate
+
+Static findings:
+
+```text
+Network-related strings
+```
+
+Dynamic findings:
+
+```text
+Actual network activity
+```
+
+This provides stronger evidence than either method alone.
+
+---
+
+# 36. Important Difference: Static vs Dynamic
+
+### Static asks:
+
+> "What does this program appear capable of doing?"
+
+### Dynamic asks:
+
+> "What does this program actually do when executed under these conditions?"
+
+This distinction is extremely important in exams.
+
+---
+
+# 37. Advantages and Disadvantages
+
+## Static Analysis
+
+### Advantages
+
+- Does not require execution
+- Safer starting point
+- Can inspect hidden functionality
+- Can identify suspicious APIs
+- Can examine program logic
+
+### Disadvantages
+
+- Obfuscation can make analysis difficult
+- Packed malware may hide code
+- Does not directly show runtime behavior
+- Analysts may misinterpret unused code
+
+---
+
+## Dynamic Analysis
+
+### Advantages
+
+- Shows actual behavior
+- Reveals runtime network activity
+- Shows file and registry changes
+- Can reveal child processes
+- Useful against heavily obfuscated samples
+
+### Disadvantages
+
+- Requires safe isolation
+- Malware may detect the analysis environment
+- Behavior may change depending on conditions
+- Some malicious functionality may remain dormant
+
+---
+
+# 38. Anti-Analysis Techniques
+
+Malware may attempt to detect:
+
+- Virtual machines
+- Debuggers
+- Sandboxes
+- Analysis tools
+- Unusual system configurations
+
+It may then:
+
+```text
+Normal environment → malicious behavior
+Analysis environment → harmless behavior
+```
+
+Therefore:
+
+> **No observed malicious behavior does not automatically mean the sample is benign.**
+
+---
+
+# 39. Common Analyst Mistakes
+
+### Mistake 1
+
+Running unknown malware directly on the host.
+
+**Correct:** Use an isolated analysis environment.
+
+### Mistake 2
+
+Assuming one suspicious string proves malware.
+
+**Correct:** Correlate multiple indicators.
+
+### Mistake 3
+
+Assuming no suspicious strings means safe.
+
+**Correct:** Malware can encrypt or dynamically generate strings.
+
+### Mistake 4
+
+Assuming an imported API proves malicious intent.
+
+**Correct:** Analyze how and where the API is used.
+
+### Mistake 5
+
+Relying only on static analysis.
+
+**Correct:** Combine static and dynamic evidence when appropriate.
+
+---
+
+# 40. Static Analysis Exam Checklist
+
+Remember:
+
+```text
+HASH
+ ↓
+FILE TYPE
+ ↓
+METADATA
+ ↓
+STRINGS
+ ↓
+IMPORTS
+ ↓
+PE STRUCTURE
+ ↓
+DISASSEMBLY
+ ↓
+DECOMPILATION
+ ↓
+IOCs
+```
+
+---
+
+# 41. Dynamic Analysis Exam Checklist
+
+Remember:
+
+```text
+PROCESS
+ ↓
+FILES
+ ↓
+REGISTRY
+ ↓
+NETWORK
+ ↓
+MEMORY
+ ↓
+BEHAVIOR
+ ↓
+IOCs
+```
+
+---
+
+# 42. Static + Dynamic Combined
+
+The strongest basic workflow is:
+
+```text
+             Malware Sample
+                   │
+          ┌────────┴────────┐
+          ↓                 ↓
+       STATIC             DYNAMIC
+          │                 │
+     Strings              Process
+     Imports              Files
+     PE Info              Registry
+     Ghidra               Network
+     Code                 Memory
+          │                 │
+          └────────┬────────┘
+                   ↓
+             Correlation
+                   ↓
+          Behavior + IOCs
+                   ↓
+              Detection
+```
+
+---
+
+# 43. Key Terms
+
+| Term | Meaning |
+|---|---|
+| Static Analysis | Analyze without execution |
+| Dynamic Analysis | Analyze while executing in a controlled environment |
+| Strings | Extract readable text from binary |
+| Disassembly | Machine code → assembly |
+| Decompilation | Machine code → pseudocode |
+| Ghidra | Reverse-engineering framework |
+| PE | Windows executable format |
+| Import | External function used by program |
+| Entry Point | Initial execution location |
+| XREF | Cross-reference |
+| Sandbox | Isolated analysis environment |
+| IOC | Indicator of Compromise |
+| IOA | Indicator of Attack |
+| Obfuscation | Making code harder to understand |
+| Packer | Transforms/hides executable code |
+
+---
+
+# 44. Memory Tricks
+
+## Static
+
+> **S = Stop execution and Study**
+
+Think:
+
+```text
+HASH → STRINGS → IMPORTS → CODE
+```
+
+## Dynamic
+
+> **D = Do it safely and Detect behavior**
+
+Think:
+
+```text
+PROCESS → FILE → REGISTRY → NETWORK
+```
+
+## Ghidra
+
+Remember:
+
+> **Ghidra = "Go deeper into the code."**
+
+Main concepts:
+
+```text
+Disassemble
+Decompile
+Functions
+XREF
+Strings
+```
+
+---
+
+# 45. MCQs
+
+### Q1. What is static malware analysis?
+
+A. Executing malware on a production system  
+B. Examining malware without executing it  
+C. Blocking malware at a firewall  
+D. Encrypting malware  
+
+**Answer: B**
+
+---
+
+### Q2. What does the `strings` utility primarily do?
+
+A. Executes binaries  
+B. Captures packets  
+C. Extracts readable strings from files  
+D. Deletes malware  
+
+**Answer: C**
+
+---
+
+### Q3. Ghidra is primarily associated with:
+
+A. Password management  
+B. Reverse engineering  
+C. Network routing  
+D. Email filtering  
+
+**Answer: B**
+
+---
+
+### Q4. What does disassembly produce?
+
+A. Source code  
+B. Assembly instructions  
+C. Network packets  
+D. Hash values  
+
+**Answer: B**
+
+---
+
+### Q5. What does decompilation attempt to produce?
+
+A. Higher-level pseudocode  
+B. A network packet  
+C. A hash  
+D. A firewall rule  
+
+**Answer: A**
+
+---
+
+### Q6. Which is dynamic analysis?
+
+A. Extracting strings  
+B. Examining PE headers  
+C. Observing a sample while it executes in an isolated environment  
+D. Calculating SHA-256  
+
+**Answer: C**
+
+---
+
+### Q7. Which can be an IOC?
+
+A. SHA-256 hash  
+B. Monitor brightness  
+C. Keyboard layout  
+D. Screen resolution alone  
+
+**Answer: A**
+
+---
+
+### Q8. Why might strings analysis fail to reveal useful information?
+
+A. Malware can encrypt or obfuscate strings  
+B. Strings cannot exist in binaries  
+C. Hashes remove strings  
+D. Ghidra deletes strings  
+
+**Answer: A**
+
+---
+
+### Q9. What is the safest general starting point for an unknown executable?
+
+A. Run it on the office PC  
+B. Email it to colleagues  
+C. Begin with controlled static analysis  
+D. Upload it to a production server  
+
+**Answer: C**
+
+---
+
+### Q10. Which statement is correct?
+
+A. An imported API always proves malware  
+B. No network traffic proves the file is safe  
+C. Static and dynamic analysis can complement each other  
+D. Strings analysis is always sufficient  
+
+**Answer: C**
+
+---
+
+# 46. HARD SCENARIO QUESTIONS
+
+## Scenario 1
+
+An executable contains no obvious URLs or IP addresses when examined with `strings`.
+
+Can you conclude that it is harmless?
+
+**Answer: No.**
+
+Possible explanations include:
+
+- Encrypted strings
+- Encoded strings
+- Runtime-generated strings
+- Packed executable
+- Dynamically retrieved configuration
+
+Further analysis is required.
+
+---
+
+## Scenario 2
+
+Ghidra shows a program importing networking APIs.
+
+Does this prove that the program is malicious?
+
+**Answer: No.**
+
+Many legitimate programs use networking APIs.
+
+The analyst should determine:
+
+- Where the functions are called
+- What data is passed
+- What destinations are contacted
+- What behavior occurs during execution
+
+---
+
+## Scenario 3
+
+A suspicious executable does nothing when executed inside a sandbox.
+
+Does that prove it is safe?
+
+**Answer: No.**
+
+Possible reasons:
+
+- Environment detection
+- Delayed execution
+- Missing dependency
+- Trigger-based behavior
+- Network dependency
+- Analysis-environment detection
+
+---
+
+## Scenario 4
+
+Static analysis identifies a suspicious domain, while dynamic analysis shows the sample attempting to communicate with the same domain.
+
+What does this provide?
+
+**Answer: Stronger behavioral evidence.**
+
+The static and dynamic findings corroborate each other.
+
+---
+
+# 47. Exam Trap Questions
+
+### Trap 1
+
+**"Static analysis means the file can never be analyzed using a computer."**
+
+False.
+
+Static analysis is performed using tools; it simply means the sample is not executed.
+
+---
+
+### Trap 2
+
+**"Dynamic analysis is always better than static analysis."**
+
+False.
+
+Both have strengths and weaknesses.
+
+---
+
+### Trap 3
+
+**"A suspicious API means the executable is definitely malware."**
+
+False.
+
+Context matters.
+
+---
+
+### Trap 4
+
+**"A VM makes malware completely safe."**
+
+False.
+
+Isolation reduces risk but does not guarantee safety.
+
+---
+
+### Trap 5
+
+**"No suspicious behavior means the sample is benign."**
+
+False.
+
+Malware can use anti-analysis, delayed execution, or conditional behavior.
+
+---
+
+# 48. 30-SECOND REVISION
+
+```text
+STATIC = DON'T RUN
+
+Hash
+↓
+File Type
+↓
+Strings
+↓
+Imports
+↓
+PE Structure
+↓
+Ghidra
+↓
+Disassembly
+↓
+Decompilation
+↓
+IOCs
+
+
+DYNAMIC = RUN SAFELY + OBSERVE
+
+Process
+↓
+Files
+↓
+Registry
+↓
+Network
+↓
+Memory
+↓
+Behavior
+↓
+IOCs
+```
+
+### Most important tools/concepts
+
+```text
+Strings → readable text
+Ghidra → reverse engineering
+Disassembler → assembly
+Decompiler → pseudocode
+Sandbox → controlled execution
+Wireshark → network observation
+Hash → file fingerprint
+IOC → evidence/indicator
+```
+
+---
+
+# 49. Final Takeaway
+
+The core idea of Day 44 is:
+
+> **Static analysis tells you what a malware sample contains and may be capable of doing. Dynamic analysis tells you what it actually does under the conditions you observe.**
+
+A professional analyst combines both:
+
+```text
+STATIC
+  +
+DYNAMIC
+  ↓
+CORRELATION
+  ↓
+BEHAVIOR UNDERSTANDING
+  ↓
+IOC EXTRACTION
+  ↓
+DETECTION & RESPONSE
+```
+
+**Day 44 Key Sentence:**
+
+> **"Static analysis examines the sample without execution; dynamic analysis observes its behavior during controlled execution; tools such as Strings and Ghidra help reveal its structure, code, and indicators."**

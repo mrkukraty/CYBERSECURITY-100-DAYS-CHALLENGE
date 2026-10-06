@@ -1,0 +1,974 @@
+# DAY 48 — MALWARE DETECTION TOOL
+
+## Topic
+**Create a Python script to detect basic malicious behaviors.**
+
+> **Safety:** The tool below is a basic defensive/educational scanner. It performs static inspection and does **not execute suspicious files**.
+
+---
+
+# 1. What is a Malware Detection Tool?
+
+A malware detection tool examines files or system activity and looks for indicators associated with malicious software.
+
+A basic scanner can look for:
+
+- Suspicious file extensions
+- Known suspicious strings
+- Embedded URLs/domains
+- Suspicious command references
+- Hashes
+- Unusual file characteristics
+- Potentially dangerous API names
+- High-risk keywords
+
+A real antivirus/EDR product uses much more sophisticated techniques.
+
+---
+
+# 2. Detection Approaches
+
+Common malware-detection approaches include:
+
+### Signature-based detection
+
+Looks for known patterns or hashes.
+
+```text
+File
+ ↓
+Compare with known signatures
+ ↓
+Match?
+ ↓
+Possible malware
+```
+
+### Heuristic detection
+
+Looks for suspicious characteristics rather than requiring an exact signature.
+
+Example:
+
+```text
+Executable
++
+Suspicious APIs
++
+Encoded strings
++
+Unusual behavior
+=
+Higher risk
+```
+
+### Behavioral detection
+
+Observes what a program actually does.
+
+Examples:
+
+- Unexpected process creation
+- Suspicious file modification
+- Unusual network connections
+- Registry modifications
+
+### Machine-learning detection
+
+Uses statistical or machine-learning models to identify patterns associated with malicious files.
+
+---
+
+# 3. Our Day 48 Tool
+
+We will build a simple Python **Static Malware Indicator Scanner**.
+
+It will:
+
+```text
+Select File
+   ↓
+Calculate SHA-256
+   ↓
+Identify File Information
+   ↓
+Read Safe Text Content
+   ↓
+Search Suspicious Indicators
+   ↓
+Calculate Risk Score
+   ↓
+Generate Report
+```
+
+The scanner **does not execute the sample**.
+
+---
+
+# 4. Indicators Used
+
+Our educational scanner looks for examples such as:
+
+```text
+powershell
+cmd.exe
+wscript
+cscript
+rundll32
+regsvr32
+schtasks
+encoded
+download
+http://
+https://
+```
+
+These are **indicators, not proof of malware**.
+
+For example, a legitimate administrative program may contain `powershell` or `cmd.exe`.
+
+---
+
+# 5. Python Concepts Used
+
+This project demonstrates:
+
+- `hashlib`
+- File handling
+- Regular expressions
+- String searching
+- Exception handling
+- Dictionaries
+- Functions
+- Risk scoring
+
+---
+
+# 6. Basic Tool Architecture
+
+```text
+             Malware Detection Tool
+                      │
+          ┌───────────┴───────────┐
+          ↓                       ↓
+      File Hash               File Scan
+          │                       │
+      SHA-256              Suspicious Strings
+          │                       │
+          └───────────┬───────────┘
+                      ↓
+                 Risk Score
+                      ↓
+                   Report
+```
+
+---
+
+# 7. Risk Scoring
+
+A simple scoring system can be used for learning.
+
+Example:
+
+```text
+Indicator                     Score
+------------------------------------
+PowerShell reference            +2
+Command shell reference         +2
+Suspicious script host          +2
+URL                              +1
+Download-related string         +2
+Suspicious executable API        +2
+```
+
+Example:
+
+```text
+0–2     Low
+3–5     Medium
+6+      High
+```
+
+This is only an educational heuristic.
+
+A real security product would use much more sophisticated logic.
+
+---
+
+# 8. Important Principle
+
+### Detection ≠ Proof
+
+If the scanner reports:
+
+```text
+HIGH RISK
+```
+
+that does **not** automatically mean:
+
+> "This file is definitely malware."
+
+It means:
+
+> "This file contains characteristics that deserve further investigation."
+
+---
+
+# 9. What the Tool Should Report
+
+A useful report contains:
+
+```text
+File name
+File size
+SHA-256
+Indicators found
+Number of indicators
+Risk score
+Risk level
+```
+
+Example:
+
+```text
+File: sample.exe
+SHA-256: ...
+Indicators:
+  powershell
+  http://
+  cmd.exe
+
+Risk Score: 5
+Risk Level: MEDIUM
+```
+
+---
+
+# 10. Safe Analysis Workflow
+
+```text
+1. Obtain authorized sample
+          ↓
+2. Calculate hash
+          ↓
+3. Scan without executing
+          ↓
+4. Record indicators
+          ↓
+5. Investigate suspicious findings
+          ↓
+6. If necessary, perform controlled analysis
+          ↓
+7. Document findings
+```
+
+---
+
+# 11. Limitations
+
+Our scanner cannot reliably detect:
+
+- Polymorphic malware
+- Sophisticated obfuscation
+- Encrypted payloads
+- Memory-only malware
+- Advanced rootkits
+- Sophisticated behavioral attacks
+- Unknown malware with no obvious indicators
+
+Therefore:
+
+> **A simple Python scanner is a learning tool, not an antivirus replacement.**
+
+---
+
+# 12. Day 48 Learning Objectives
+
+By completing this project, you should understand:
+
+- How file hashing works
+- How static scanning works
+- What indicators are
+- What signatures are
+- What heuristic detection means
+- How risk scoring works
+- Why false positives occur
+- Why detection requires multiple sources of evidence
+
+::: separator :::
+
+# 13. Python Project
+
+Create:
+
+```text
+malware_detector.py
+```
+
+Use this defensive static scanner:
+
+```python
+import hashlib
+import re
+import sys
+from pathlib import Path
+
+
+# Suspicious indicators for educational analysis.
+# These are NOT proof that a file is malicious.
+INDICATORS = {
+    "powershell": 2,
+    "cmd.exe": 2,
+    "wscript": 2,
+    "cscript": 2,
+    "rundll32": 2,
+    "regsvr32": 2,
+    "schtasks": 2,
+    "download": 2,
+    "http://": 1,
+    "https://": 1,
+    "encoded": 1,
+}
+
+
+def calculate_sha256(file_path):
+    """Calculate SHA-256 without executing the file."""
+    sha256 = hashlib.sha256()
+
+    with open(file_path, "rb") as file:
+        for chunk in iter(lambda: file.read(1024 * 1024), b""):
+            sha256.update(chunk)
+
+    return sha256.hexdigest()
+
+
+def extract_text(file_path):
+    """
+    Extract printable ASCII strings from a file.
+
+    This only reads the file.
+    It does NOT execute it.
+    """
+    data = Path(file_path).read_bytes()
+
+    strings = re.findall(rb"[ -~]{4,}", data)
+
+    return [
+        item.decode("ascii", errors="ignore").lower()
+        for item in strings
+    ]
+
+
+def scan_file(file_path):
+    print("=" * 60)
+    print("BASIC MALWARE INDICATOR SCANNER")
+    print("=" * 60)
+
+    path = Path(file_path)
+
+    if not path.exists():
+        print("[ERROR] File does not exist.")
+        return
+
+    if not path.is_file():
+        print("[ERROR] Path is not a file.")
+        return
+
+    print(f"\nFile: {path.name}")
+    print(f"Size: {path.stat().st_size:,} bytes")
+
+    # Hash
+    try:
+        file_hash = calculate_sha256(path)
+        print(f"SHA-256: {file_hash}")
+    except Exception as error:
+        print(f"[ERROR] Hash calculation failed: {error}")
+        return
+
+    # Extract strings
+    try:
+        strings = extract_text(path)
+    except Exception as error:
+        print(f"[ERROR] Could not read file: {error}")
+        return
+
+    print(f"\nExtracted strings: {len(strings)}")
+
+    # Search indicators
+    findings = []
+    total_score = 0
+
+    for indicator, score in INDICATORS.items():
+        matches = []
+
+        for string in strings:
+            if indicator in string:
+                matches.append(string[:150])
+
+        if matches:
+            findings.append((indicator, score, matches))
+            total_score += score
+
+    # Risk level
+    if total_score >= 6:
+        risk = "HIGH"
+    elif total_score >= 3:
+        risk = "MEDIUM"
+    else:
+        risk = "LOW"
+
+    print("\n--- INDICATORS ---")
+
+    if not findings:
+        print("No configured indicators were found.")
+    else:
+        for indicator, score, matches in findings:
+            print(f"\n[+] {indicator}")
+            print(f"    Score: +{score}")
+
+            for match in matches[:3]:
+                print(f"    Evidence: {match}")
+
+    print("\n--- RESULT ---")
+    print(f"Risk Score : {total_score}")
+    print(f"Risk Level : {risk}")
+
+    print("\nWARNING:")
+    print("This is a basic heuristic scanner.")
+    print("A HIGH score does NOT prove that the file is malware.")
+    print("A LOW score does NOT prove that the file is safe.")
+
+
+def main():
+    if len(sys.argv) != 2:
+        print("Usage:")
+        print("python malware_detector.py <file>")
+        return
+
+    scan_file(sys.argv[1])
+
+
+if __name__ == "__main__":
+    main()
+```
+
+---
+
+# 14. Running the Tool
+
+For example:
+
+```text
+python malware_detector.py sample.exe
+```
+
+The program will:
+
+```text
+Read sample
+    ↓
+Calculate SHA-256
+    ↓
+Extract printable strings
+    ↓
+Search indicators
+    ↓
+Calculate score
+    ↓
+Display report
+```
+
+It does **not** execute `sample.exe`.
+
+---
+
+# 15. Example Output
+
+A hypothetical result might look like:
+
+```text
+============================================================
+BASIC MALWARE INDICATOR SCANNER
+============================================================
+
+File: sample.exe
+Size: 125,440 bytes
+SHA-256: abc123...
+
+Extracted strings: 847
+
+--- INDICATORS ---
+
+[+] powershell
+    Score: +2
+    Evidence: powershell.exe
+
+[+] https://
+    Score: +1
+    Evidence: https://example.test/api
+
+[+] cmd.exe
+    Score: +2
+    Evidence: cmd.exe /c ...
+
+--- RESULT ---
+Risk Score : 5
+Risk Level : MEDIUM
+
+WARNING:
+This is a basic heuristic scanner.
+A HIGH score does NOT prove that the file is malware.
+A LOW score does NOT prove that the file is safe.
+```
+
+---
+
+# 16. Why SHA-256 Is Included
+
+The SHA-256 hash gives the sample a unique identifier for practical purposes.
+
+Example:
+
+```text
+sample.exe
+     ↓
+SHA-256
+     ↓
+7f83b1657ff1fc53...
+```
+
+This allows an analyst to:
+
+- Track the sample
+- Compare copies
+- Document evidence
+- Identify whether a file changed
+
+---
+
+# 17. Why Strings Are Included
+
+Strings can reveal clues such as:
+
+```text
+URLs
+File paths
+Commands
+Registry paths
+Error messages
+Configuration
+```
+
+This connects directly to **Day 44 — Static and Dynamic Analysis**.
+
+---
+
+# 18. How Day 48 Connects to Previous Days
+
+```text
+Day 43
+Malware Analysis
+      ↓
+Day 44
+Static/Dynamic Analysis
+      ↓
+Day 45
+[Your challenge topic]
+      ↓
+Day 46
+Anti-Forensics
+      ↓
+Day 48
+Malware Detection Tool
+```
+
+The project combines several concepts:
+
+```text
+Hashing
++
+Strings
++
+Static Analysis
++
+Heuristics
++
+IOC Identification
++
+Risk Scoring
+```
+
+---
+
+# 19. False Positive
+
+A **false positive** occurs when the tool reports something suspicious when the file is actually legitimate.
+
+Example:
+
+```text
+Legitimate administration tool
+        ↓
+Contains "powershell"
+        ↓
+Scanner flags it
+        ↓
+False Positive
+```
+
+Therefore:
+
+> Detection results require analyst validation.
+
+---
+
+# 20. False Negative
+
+A **false negative** occurs when malicious software is not detected.
+
+Example:
+
+```text
+Obfuscated malware
+       ↓
+No obvious strings
+       ↓
+Scanner reports LOW
+       ↓
+Malware was missed
+```
+
+Therefore:
+
+> A LOW score does not guarantee safety.
+
+---
+
+# 21. Improving the Tool
+
+Future versions could add:
+
+### Level 1
+
+- File type detection
+- More signatures
+- Better string extraction
+- JSON reports
+
+### Level 2
+
+- PE metadata analysis
+- Import analysis
+- Entropy calculation
+- YARA integration
+
+### Level 3
+
+- Controlled behavioral monitoring
+- Network telemetry
+- Process monitoring
+- Sandbox integration
+
+### Level 4
+
+- Machine-learning classification
+- Threat-intelligence integration
+- SIEM integration
+- Automated incident reporting
+
+---
+
+# 22. Possible Architecture for an Advanced Version
+
+```text
+                    Malware Sample
+                          │
+             ┌────────────┼────────────┐
+             ↓            ↓            ↓
+           Hash         Strings      Metadata
+             │            │            │
+             └────────────┼────────────┘
+                          ↓
+                   Static Analysis
+                          │
+                          ↓
+                    Risk Engine
+                          │
+             ┌────────────┴────────────┐
+             ↓                         ↓
+          Low Risk                 Suspicious
+                                       │
+                                       ↓
+                             Controlled Analysis
+                                       │
+                                       ↓
+                               Behavioral Evidence
+                                       │
+                                       ↓
+                                   Final Report
+```
+
+---
+
+# 23. MCQs
+
+### Q1. What is the main purpose of a malware detection tool?
+
+A. Create malware  
+B. Identify suspicious characteristics  
+C. Disable operating systems  
+D. Increase CPU speed  
+
+**Answer: B**
+
+---
+
+### Q2. Which algorithm can be used to fingerprint a file?
+
+A. SHA-256  
+B. HTTP  
+C. DNS  
+D. FTP  
+
+**Answer: A**
+
+---
+
+### Q3. What is heuristic detection?
+
+A. Detection based only on exact hashes  
+B. Detection based on suspicious characteristics  
+C. Deleting suspicious files  
+D. Encrypting files  
+
+**Answer: B**
+
+---
+
+### Q4. A false positive means:
+
+A. Malware was missed  
+B. A legitimate item was incorrectly flagged  
+C. The scanner crashed  
+D. A hash was calculated incorrectly  
+
+**Answer: B**
+
+---
+
+### Q5. A false negative means:
+
+A. A malicious item was not detected  
+B. A legitimate file was flagged  
+C. The file was encrypted  
+D. The scanner found too many indicators  
+
+**Answer: A**
+
+---
+
+### Q6. Why does the basic scanner extract strings?
+
+A. To execute them  
+B. To find useful textual indicators  
+C. To delete them  
+D. To encrypt them  
+
+**Answer: B**
+
+---
+
+### Q7. Does finding `powershell` prove a file is malicious?
+
+A. Yes  
+B. No  
+
+**Answer: B**
+
+---
+
+### Q8. What is the safest approach for an unknown executable?
+
+A. Run it directly on the host  
+B. Execute it on a production server  
+C. Start with non-executing static analysis  
+D. Send it to every computer  
+
+**Answer: C**
+
+---
+
+# 24. HARD SCENARIOS
+
+## Scenario 1
+
+Your scanner gives a suspicious executable a score of 8.
+
+Can you immediately classify it as confirmed malware?
+
+**Answer: No.**
+
+The score only indicates that multiple suspicious indicators were detected.
+
+Further analysis is required.
+
+---
+
+## Scenario 2
+
+A legitimate IT administration tool receives a HIGH score because it contains command-line and PowerShell references.
+
+What is this?
+
+**Answer: Potential false positive.**
+
+Context and additional analysis are required.
+
+---
+
+## Scenario 3
+
+A known malicious sample receives a LOW score.
+
+What could explain this?
+
+**Answer:**
+
+Possible:
+
+- Obfuscation
+- Encryption
+- Packing
+- Runtime-generated strings
+- Missing indicators in the scanner
+
+This is a potential false negative.
+
+---
+
+# 25. EXAM TRAPS
+
+### Trap 1
+
+> "A malware scanner with no findings proves a file is safe."
+
+**False.**
+
+---
+
+### Trap 2
+
+> "A high heuristic score proves malware."
+
+**False.**
+
+It indicates suspicion.
+
+---
+
+### Trap 3
+
+> "SHA-256 tells you whether a file is malicious."
+
+**False.**
+
+It identifies the file; it does not inherently classify it.
+
+---
+
+### Trap 4
+
+> "Strings analysis is enough for malware detection."
+
+**False.**
+
+Modern malware can use obfuscation, packing, encryption, and runtime-generated content.
+
+---
+
+# 26. MEMORY TRICK
+
+Remember:
+
+> **H-S-R**
+
+### H — Hash
+
+Identify the file.
+
+### S — Scan
+
+Look for suspicious indicators.
+
+### R — Report
+
+Document the findings.
+
+```text
+HASH
+ ↓
+SCAN
+ ↓
+RISK SCORE
+ ↓
+REPORT
+ ↓
+INVESTIGATE
+```
+
+---
+
+# 27. 30-SECOND REVISION
+
+```text
+MALWARE DETECTION TOOL
+        ↓
+Calculate SHA-256
+        ↓
+Extract Strings
+        ↓
+Search Indicators
+        ↓
+Apply Heuristic Score
+        ↓
+LOW / MEDIUM / HIGH
+        ↓
+Investigate
+```
+
+### Remember:
+
+```text
+Signature Detection → Known patterns
+Heuristic Detection → Suspicious characteristics
+Behavioral Detection → Observed activity
+Hash → File fingerprint
+IOC → Investigation indicator
+False Positive → Legitimate item flagged
+False Negative → Malicious item missed
+```
+
+---
+
+# 28. FINAL TAKEAWAY
+
+> **A basic malware detection tool combines file hashing, static analysis, indicator matching, and heuristic scoring to identify files that deserve further investigation. Detection is not the same as confirmation: both false positives and false negatives are possible.**
+
+### Most important formula:
+
+```text
+HASH
++
+STRINGS
++
+INDICATORS
++
+HEURISTICS
+=
+BASIC MALWARE DETECTION
+```
+
+And the most important security principle:
+
+> **Never execute an unknown sample merely to see whether your scanner detects it. Start with safe static analysis and use an isolated, authorized analysis environment for any required behavioral investigation.**

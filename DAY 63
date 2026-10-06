@@ -1,0 +1,998 @@
+# DAY 63 – DEFENSIVE CODING
+## Write Secure Code to Prevent Common Vulnerabilities
+
+> **Goal:** Learn how developers prevent vulnerabilities such as injection, XSS, broken access control, insecure authentication, path traversal and unsafe error handling.
+
+---
+
+# 1. WHAT IS DEFENSIVE CODING?
+
+Defensive coding means designing and implementing software so that unexpected, malicious or invalid input cannot easily cause security problems.
+
+Simple definition:
+
+> **Defensive coding = writing software with security controls built into the design and implementation.**
+
+---
+
+# 2. SECURE CODING MINDSET
+
+Instead of:
+
+> "What if the user behaves normally?"
+
+Ask:
+
+> **"What if every input is unexpected or malicious?"**
+
+---
+
+# 3. SECURE DEVELOPMENT FLOW
+
+```text
+Requirements
+ ↓
+Threat Modeling
+ ↓
+Secure Design
+ ↓
+Secure Coding
+ ↓
+Testing
+ ↓
+Code Review
+ ↓
+Deployment
+ ↓
+Monitoring
+ ↓
+Patch
+```
+
+---
+
+# 4. INPUT VALIDATION
+
+Never blindly trust:
+
+- Form data
+- URL parameters
+- API requests
+- Cookies
+- Headers
+- Uploaded files
+- JSON
+- Usernames
+- Filenames
+
+---
+
+# 5. ALLOWLIST VS BLOCKLIST
+
+### Allowlist
+
+Define what is allowed.
+
+Example:
+
+```python
+import re
+
+if not re.fullmatch(r"[A-Za-z0-9_]{3,20}", username):
+    raise ValueError("Invalid username")
+```
+
+### Blocklist
+
+Define what is forbidden.
+
+Example:
+
+```text
+Block:
+<script>
+```
+
+Allowlisting is often safer when the valid input format is known.
+
+---
+
+# 6. INPUT VALIDATION CHECKLIST
+
+Validate:
+
+- Type
+- Length
+- Format
+- Range
+- Encoding
+- Allowed values
+- Business rules
+
+Example:
+
+```text
+Age:
+1–120
+
+Role:
+admin/user/auditor
+
+Quantity:
+1–100
+```
+
+---
+
+# 7. SQL INJECTION PREVENTION
+
+### Unsafe
+
+```python
+query = "SELECT * FROM users WHERE name = '" + username + "'"
+```
+
+User input becomes part of SQL syntax.
+
+### Safer
+
+```python
+cursor.execute(
+    "SELECT * FROM users WHERE name = ?",
+    (username,)
+)
+```
+
+This uses parameterized queries.
+
+Memory:
+
+> **SQLi defense = parameterized queries.**
+
+---
+
+# 8. WHY PARAMETERIZATION WORKS
+
+The database distinguishes:
+
+```text
+SQL CODE
+```
+
+from:
+
+```text
+USER DATA
+```
+
+This prevents input from being interpreted as SQL syntax in the normal parameterized-query model.
+
+---
+
+# 9. XSS PREVENTION
+
+General defenses:
+
+- Context-appropriate output encoding
+- Safe templating
+- Avoid unsafe HTML sinks
+- Content Security Policy
+- Input validation where appropriate
+
+Prefer:
+
+```javascript
+element.textContent = userInput;
+```
+
+instead of unsafe HTML insertion when HTML is not required.
+
+---
+
+# 10. DANGEROUS HTML SINKS
+
+Examples:
+
+```javascript
+innerHTML
+outerHTML
+document.write()
+insertAdjacentHTML()
+```
+
+These require careful handling of untrusted content.
+
+---
+
+# 11. CONTEXT MATTERS
+
+Output encoding depends on where data is inserted:
+
+```text
+HTML
+Attribute
+JavaScript
+CSS
+URL
+```
+
+Therefore:
+
+> **There is no single universal "escape everything" function.**
+
+---
+
+# 12. CSRF PREVENTION
+
+For cookie-authenticated state-changing requests, defenses may include:
+
+- CSRF tokens
+- SameSite cookies
+- Origin validation
+- Appropriate Referer validation
+- Safe HTTP method design
+
+Memory:
+
+> **CSRF = Token + SameSite + Origin**
+
+---
+
+# 13. AUTHENTICATION
+
+Authentication asks:
+
+> **Who are you?**
+
+Use:
+
+- Strong password policies
+- MFA
+- Secure password storage
+- Account lockout/rate controls where appropriate
+- Secure session management
+
+---
+
+# 14. PASSWORD STORAGE
+
+Never store:
+
+```text
+plaintext password
+```
+
+Use a password hashing scheme designed for passwords, with unique salts.
+
+Examples include:
+
+- Argon2
+- bcrypt
+- scrypt
+- PBKDF2
+
+---
+
+# 15. HASHING VS ENCRYPTION
+
+### Hashing
+
+One-way transformation generally used for:
+
+- Password verification
+- Integrity-related uses
+
+### Encryption
+
+Designed to be reversible with a key.
+
+Used for:
+
+- Confidential data
+
+Memory:
+
+> **Password → Hash**
+
+> **Secret data → Encryption when confidentiality is required**
+
+---
+
+# 16. AUTHORIZATION
+
+Authentication:
+
+> Who are you?
+
+Authorization:
+
+> What are you allowed to do?
+
+Never rely only on the frontend.
+
+Bad:
+
+```text
+Frontend hides Admin button
+```
+
+Secure:
+
+```text
+Server checks user role
+       ↓
+Allows/denies operation
+```
+
+---
+
+# 17. IDOR / BROKEN ACCESS CONTROL
+
+Unsafe concept:
+
+```text
+GET /api/user/1001
+```
+
+Server trusts the object ID without checking whether the authenticated user is allowed to access it.
+
+Defensive approach:
+
+```text
+Authenticate
+ ↓
+Identify requested object
+ ↓
+Check authorization
+ ↓
+Allow/Deny
+```
+
+---
+
+# 18. PATH TRAVERSAL DEFENSE
+
+Avoid directly trusting user-provided paths.
+
+Better approach:
+
+- Use server-side file IDs
+- Use allowlists
+- Canonicalize paths
+- Verify the resolved path remains inside the permitted directory
+- Apply least privilege
+
+Concept:
+
+```python
+from pathlib import Path
+
+base = Path("/safe/files").resolve()
+candidate = (base / user_input).resolve()
+
+if base not in candidate.parents:
+    raise ValueError("Invalid path")
+```
+
+The exact implementation should account for platform and application requirements.
+
+---
+
+# 19. COMMAND INJECTION
+
+Avoid constructing shell commands from untrusted strings.
+
+Prefer direct APIs.
+
+Instead of:
+
+```python
+os.system(user_input)
+```
+
+prefer a fixed executable and argument list where an external process is genuinely required:
+
+```python
+import subprocess
+
+subprocess.run(
+    ["program", "--fixed-option", validated_value],
+    shell=False,
+    check=True
+)
+```
+
+---
+
+# 20. SSRF DEFENSE
+
+Server-Side Request Forgery occurs when an application can be manipulated into making unintended server-side requests.
+
+Defenses can include:
+
+- Destination allowlists
+- URL validation
+- Network segmentation
+- Blocking internal destinations
+- Restricting protocols
+- Validating redirects
+- Egress controls
+
+---
+
+# 21. FILE UPLOAD SECURITY
+
+Never trust:
+
+```text
+filename
+extension
+Content-Type
+```
+
+alone.
+
+Defenses:
+
+- Allowlist file types
+- Size limits
+- Generate server-side names
+- Store outside executable locations
+- Scan files where appropriate
+- Restrict permissions
+- Validate actual file format
+- Avoid direct execution
+
+---
+
+# 22. SECURE SESSION MANAGEMENT
+
+Use:
+
+- Secure cookies
+- HttpOnly
+- SameSite
+- Session expiration
+- Session rotation where appropriate
+- Logout/session invalidation
+- TLS
+
+Example:
+
+```http
+Set-Cookie: session=...;
+Secure;
+HttpOnly;
+SameSite=Lax
+```
+
+---
+
+# 23. SECURITY HEADERS
+
+Common examples:
+
+```text
+Content-Security-Policy
+Strict-Transport-Security
+X-Content-Type-Options
+Referrer-Policy
+Permissions-Policy
+```
+
+Security headers are defense-in-depth.
+
+Missing one does not automatically prove exploitation.
+
+---
+
+# 24. ERROR HANDLING
+
+Bad:
+
+```text
+Database connection failed:
+Server=db-prod-01
+User=admin
+Password=...
+```
+
+Better:
+
+```text
+An internal error occurred.
+Reference ID: 12345
+```
+
+Detailed information belongs in appropriately protected server-side logs.
+
+---
+
+# 25. LOGGING
+
+Log useful security information:
+
+- Authentication events
+- Authorization failures
+- Administrative actions
+- Important configuration changes
+- Security errors
+
+Do not unnecessarily log:
+
+- Passwords
+- Session tokens
+- Private keys
+- Sensitive personal data
+
+---
+
+# 26. SECRETS MANAGEMENT
+
+Never hard-code:
+
+```python
+API_KEY = "secret123"
+```
+
+Use:
+
+- Environment/configuration management
+- Secret managers
+- Secure deployment systems
+- Proper access controls
+
+Also avoid accidentally committing secrets to source control.
+
+---
+
+# 27. DEPENDENCY SECURITY
+
+Applications depend on external libraries.
+
+Defenses:
+
+- Dependency inventory
+- Version control
+- Security updates
+- Vulnerability scanning
+- Lock files where appropriate
+- Trusted package sources
+- SBOM
+
+---
+
+# 28. SECURE API CODING
+
+Validate:
+
+- Authentication
+- Authorization
+- Input
+- Rate limits
+- Data exposure
+- Content types
+- Error responses
+
+Never assume:
+
+> "Because it is an API, the client is trusted."
+
+---
+
+# 29. RATE LIMITING
+
+Useful for:
+
+- Login
+- Password reset
+- OTP
+- Expensive API requests
+- Resource-intensive operations
+
+Example:
+
+```text
+Too many attempts
+       ↓
+Temporary delay/block
+       ↓
+Log event
+       ↓
+Alert if suspicious
+```
+
+---
+
+# 30. DEFENSIVE CODING CHECKLIST
+
+```text
+Input validation
+Authentication
+Authorization
+Parameterized queries
+Output encoding
+CSRF protection
+Secure sessions
+Safe file handling
+Safe process execution
+Error handling
+Logging
+Secrets management
+Dependency security
+Rate limiting
+Least privilege
+```
+
+---
+
+# 31. SECURE CODE REVIEW
+
+When reviewing code ask:
+
+### Input
+
+Is user input trusted?
+
+### Authorization
+
+Can users access objects they shouldn't?
+
+### Secrets
+
+Are credentials hard-coded?
+
+### Database
+
+Are queries parameterized?
+
+### Files
+
+Can users control paths?
+
+### Processes
+
+Can users influence commands?
+
+### Output
+
+Could data reach an unsafe HTML/JS sink?
+
+### Errors
+
+Does the application reveal sensitive information?
+
+---
+
+# 32. EXAMPLE SECURE LOGIN DESIGN
+
+```text
+User
+ ↓
+HTTPS
+ ↓
+Validate input
+ ↓
+Rate-limit login
+ ↓
+Password hash verification
+ ↓
+MFA if required
+ ↓
+Create secure session
+ ↓
+Log security event
+```
+
+---
+
+# 33. DEFENSIVE CODING LAB
+
+Build a small Python web application with:
+
+### Feature 1
+
+User registration
+
+### Feature 2
+
+Login
+
+### Feature 3
+
+Profile page
+
+### Feature 4
+
+Admin-only page
+
+Implement:
+
+- Password hashing
+- Input validation
+- Parameterized database queries
+- Authorization checks
+- Secure cookies
+- Error handling
+- Logging
+
+---
+
+# 34. CODE REVIEW EXERCISE
+
+Consider:
+
+```python
+username = request.form["username"]
+
+query = (
+    "SELECT * FROM users WHERE username='"
+    + username
+    + "'"
+)
+```
+
+Problem:
+
+> Potential SQL injection.
+
+Improvement:
+
+```python
+cursor.execute(
+    "SELECT * FROM users WHERE username = ?",
+    (username,)
+)
+```
+
+---
+
+# 35. DEFENSIVE CODING VS VULNERABILITY SCANNING
+
+| Defensive Coding | Vulnerability Scanning |
+|---|---|
+| Prevents weaknesses | Searches for weaknesses |
+| Developer-focused | Security/testing-focused |
+| During development | Testing/deployment |
+| Secure design | Detection |
+| Code review | Automated assessment |
+
+Best security programs use both.
+
+---
+
+# 36. HARD SCENARIO MCQs
+
+### Q1
+
+What is the strongest general defense against SQL injection?
+
+A. Parameterized queries  
+B. Hiding the database name  
+C. Client-side validation only  
+D. Changing the font
+
+**Answer: A**
+
+### Q2
+
+A frontend hides an Admin button from normal users. Is this sufficient authorization?
+
+A. Yes  
+B. No; the server must enforce authorization  
+C. Only on mobile  
+D. Only with HTTPS
+
+**Answer: B**
+
+### Q3
+
+A developer logs every request including passwords.
+
+What is the problem?
+
+A. Sensitive information exposure through logs  
+B. Better security  
+C. Faster authentication  
+D. Stronger hashing
+
+**Answer: A**
+
+### Q4
+
+What should be preferred when executing a fixed external program?
+
+A. Shell concatenation with user input  
+B. Fixed executable + validated arguments + `shell=False`  
+C. `eval()`  
+D. `os.system()` with raw input
+
+**Answer: B**
+
+### Q5
+
+Which is most appropriate for storing user passwords?
+
+A. Plaintext  
+B. Reversible encryption only  
+C. Password-hashing scheme with unique salts  
+D. Base64
+
+**Answer: C**
+
+---
+
+# 37. HARDER SCENARIOS
+
+### Q6
+
+A user changes:
+
+```text
+/account?id=1001
+```
+
+to:
+
+```text
+/account?id=1002
+```
+
+and sees another user's data.
+
+What is the likely issue?
+
+A. Broken access control/IDOR  
+B. DNS failure  
+C. CSRF only  
+D. Encryption failure
+
+**Answer: A**
+
+### Q7
+
+A developer blocks `<script>` to prevent XSS.
+
+Is this a complete defense?
+
+A. Yes  
+B. No; context-appropriate output encoding and safe handling are more fundamental  
+C. Only for APIs  
+D. Only with HTTPS
+
+**Answer: B**
+
+### Q8
+
+An application accepts a filename and directly combines it with a server directory.
+
+What should the developer consider?
+
+A. Path traversal  
+B. DNS poisoning  
+C. Password spraying  
+D. ARP spoofing
+
+**Answer: A**
+
+### Q9
+
+A password-reset endpoint allows unlimited requests.
+
+What risk should developers consider?
+
+A. Abuse/automated attacks and resource exhaustion  
+B. Better security  
+C. Guaranteed SQL injection  
+D. Guaranteed XSS
+
+**Answer: A**
+
+### Q10
+
+An API checks authorization only in JavaScript.
+
+What is wrong?
+
+A. Client-side controls can be bypassed; server-side authorization is required  
+B. JavaScript is always insecure  
+C. APIs do not require authorization  
+D. HTTPS fixes it
+
+**Answer: A**
+
+---
+
+# 38. VERY HARD SCENARIOS
+
+### Q11
+
+An application validates an uploaded file using only the extension `.jpg`.
+
+What is the concern?
+
+A. Extension alone may not establish that the content is actually a safe image  
+B. JPG files cannot be uploaded  
+C. HTTPS is disabled  
+D. Password hashing is broken
+
+**Answer: A**
+
+### Q12
+
+A developer escapes HTML output but inserts the same user data into a JavaScript context.
+
+What is the problem?
+
+A. Encoding must be appropriate for the output context  
+B. HTML encoding always works everywhere  
+C. SQL injection is guaranteed  
+D. No security issue exists
+
+**Answer: A**
+
+### Q13
+
+A server makes requests to URLs supplied by users.
+
+What vulnerability should be considered?
+
+A. SSRF  
+B. CSRF only  
+C. XSS only  
+D. ARP spoofing
+
+**Answer: A**
+
+### Q14
+
+A production application contains an API key in source code.
+
+What is the appropriate response?
+
+A. Treat it as exposed, rotate/revoke as appropriate, remove it from source and use secure secret management  
+B. Hide it with Base64  
+C. Rename the variable  
+D. Add another copy
+
+**Answer: A**
+
+### Q15
+
+A database account used by an application has full administrative privileges.
+
+What principle is violated?
+
+A. Least privilege  
+B. Defense in depth  
+C. Availability  
+D. Non-repudiation
+
+**Answer: A**
+
+---
+
+# 39. DAY 63 MASTER MEMORY
+
+> **V-A-I-S-S-E-L-D**
+
+```text
+V = Validate input
+A = Authenticate
+I = Authorize
+S = Sanitize/encode appropriately
+S = Secure sessions
+E = Errors handled safely
+L = Least privilege
+D = Dependencies/secrets protected
+```
+
+---
+
+# 40. ONE-LINE EXAM ANSWER
+
+> **Defensive coding is the practice of designing and implementing software with security controls such as input validation, parameterized queries, output encoding, authentication, authorization, secure session management, safe error handling, least privilege and secure secret management to prevent common vulnerabilities.**
+
+# DAY 63 GOLDEN RULE
+
+> **Never trust input, never rely on the client for security, and enforce security controls on the server.**
