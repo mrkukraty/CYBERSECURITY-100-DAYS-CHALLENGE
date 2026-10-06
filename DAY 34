@@ -1,0 +1,2024 @@
+# DAY 34 – WIRELESS INTRUSION DETECTION
+
+## Detecting Wi-Fi Attacks • Rogue APs • Evil Twins • Deauthentication • MAC Anomalies • Wireless Monitoring
+
+---
+
+# 1. DAY 34 OBJECTIVE
+
+Today you will learn:
+
+- What Wireless Intrusion Detection is
+- WIDS and WIPS
+- How wireless networks normally operate
+- Wireless attack indicators
+- Rogue Access Points
+- Evil Twin attacks
+- Deauthentication attacks
+- MAC address anomalies
+- Beacon and probe analysis
+- Authentication anomalies
+- Signal-strength analysis
+- Wireless monitoring
+- Alert correlation
+- Detection techniques
+- Wireless incident-response workflow
+- Practical defensive lab
+- Scenario-based exam questions
+
+> **Important:** Detection and monitoring should be performed only on networks you own or are authorized to monitor.
+
+---
+
+# 2. WHAT IS WIRELESS INTRUSION DETECTION?
+
+**Wireless Intrusion Detection System (WIDS)** is a security system or process that monitors wireless networks for suspicious activity, unauthorized devices, policy violations, and wireless attacks.
+
+Simple idea:
+
+```text
+Wi-Fi Environment
+       ↓
+Wireless Monitoring
+       ↓
+Collect Events
+       ↓
+Analyze Behavior
+       ↓
+Detect Anomalies
+       ↓
+Generate Alert
+       ↓
+Investigate
+```
+
+---
+
+# 3. EXAM DEFINITION
+
+> **Wireless Intrusion Detection is the process of monitoring wireless traffic and wireless devices to identify unauthorized access points, suspicious clients, attacks, and abnormal behavior.**
+
+---
+
+# 4. WIDS VS WIPS
+
+Two important terms:
+
+### WIDS
+
+**Wireless Intrusion Detection System**
+
+Primarily:
+
+> **Detects and alerts.**
+
+### WIPS
+
+**Wireless Intrusion Prevention System**
+
+Can:
+
+> **Detect and take automated prevention actions according to configured policy.**
+
+Memory:
+
+> **IDS = Detect**  
+> **IPS = Detect + Prevent**
+
+---
+
+# 5. NORMAL WI-FI ENVIRONMENT
+
+A basic wireless network:
+
+```text
+             ┌──────────────┐
+             │ Access Point │
+             └──────┬───────┘
+                    │
+          ┌─────────┼─────────┐
+          ↓         ↓         ↓
+        Laptop    Phone     Tablet
+```
+
+The AP normally has:
+
+- SSID
+- BSSID
+- Channel
+- Security configuration
+- MAC address
+- Connected clients
+
+---
+
+# 6. IMPORTANT WIRELESS TERMS
+
+| Term | Meaning |
+|---|---|
+| AP | Access Point |
+| STA | Wireless client/station |
+| SSID | Network name |
+| BSSID | Identifier of a specific AP radio/network |
+| Channel | Wireless frequency/channel used |
+| RSSI | Received Signal Strength Indicator |
+| WIDS | Wireless Intrusion Detection System |
+| WIPS | Wireless Intrusion Prevention System |
+
+---
+
+# 7. SSID VS BSSID
+
+### SSID
+
+The network name users see.
+
+Example:
+
+```text
+NAVLAN-WIFI
+```
+
+### BSSID
+
+Typically identifies the AP/radio using a MAC address.
+
+Example:
+
+```text
+AA:BB:CC:DD:EE:FF
+```
+
+Important:
+
+> Multiple APs can use the same SSID.
+
+Therefore:
+
+> **SSID alone is not enough to identify an authorized AP.**
+
+---
+
+# 8. WHAT DOES A WIDS MONITOR?
+
+A wireless detection system can monitor information such as:
+
+```text
+SSID
+BSSID
+Channel
+Signal strength
+Security type
+Client devices
+Authentication events
+Association events
+Probe activity
+Beacon activity
+Management frames
+Traffic patterns
+```
+
+---
+
+# 9. WIRELESS ATTACK DETECTION MINDSET
+
+Do not ask only:
+
+> "Is this packet malicious?"
+
+Instead ask:
+
+```text
+Who?
+What?
+Where?
+When?
+How often?
+Is it authorized?
+Does it match normal behavior?
+```
+
+---
+
+# 10. COMMON WIRELESS THREATS
+
+Important threats include:
+
+1. Rogue AP
+2. Evil Twin
+3. Deauthentication attack
+4. Unauthorized client
+5. MAC spoofing
+6. Weak security configuration
+7. Misconfigured AP
+8. Wireless reconnaissance
+9. Ad-hoc/unauthorized networks
+10. Excessive authentication failures
+
+---
+
+# 11. ROGUE ACCESS POINT
+
+A **rogue AP** is an unauthorized wireless access point connected to or operating within an organization's environment.
+
+Example:
+
+```text
+Authorized Network
+
+        AP-A
+         │
+    ┌────┼────┐
+    │    │    │
+  PC-1 PC-2 PC-3
+
+
+Unauthorized
+
+        Rogue AP
+           │
+       Unknown device
+```
+
+---
+
+# 12. ROGUE AP DETECTION
+
+Potential indicators:
+
+- Unknown BSSID
+- Unknown hardware
+- Unexpected SSID
+- Unexpected channel
+- Unexpected encryption
+- Unexpected physical location
+- Unexpected wired connection
+- Strong signal in a restricted area
+
+But:
+
+> An unknown AP is an **investigation lead**, not automatically proof of an attack.
+
+---
+
+# 13. EVIL TWIN
+
+An **Evil Twin** is a malicious or unauthorized AP designed to imitate a legitimate wireless network.
+
+Example:
+
+```text
+Legitimate:
+Company-WiFi
+BSSID: AA:AA:AA:AA:AA:AA
+
+Suspicious:
+Company-WiFi
+BSSID: BB:BB:BB:BB:BB:BB
+```
+
+The SSID looks identical.
+
+---
+
+# 14. EVIL TWIN DETECTION
+
+Potential indicators:
+
+```text
+Same SSID
++
+Unexpected BSSID
++
+Different security configuration
++
+Unexpected signal/location
++
+Unexpected authentication behavior
+```
+
+Example:
+
+```text
+Company-WiFi
+├── Authorized AP
+│   └── WPA2/WPA3 Enterprise
+│
+└── Unknown AP
+    └── Different security configuration
+```
+
+---
+
+# 15. IMPORTANT EVIL-TWIN TRAP
+
+Two APs having the same SSID does **not automatically mean Evil Twin**.
+
+Organizations commonly deploy multiple legitimate APs using the same SSID.
+
+Therefore verify:
+
+- BSSID
+- AP inventory
+- Channel
+- Security configuration
+- Physical location
+- Network connection
+- Management records
+
+---
+
+# 16. DEAUTHENTICATION ATTACK
+
+Wi-Fi uses management frames for connection management.
+
+A deauthentication attack attempts to force a client to disconnect from an AP by causing deauthentication events.
+
+Conceptually:
+
+```text
+Client
+   │
+   │ Connected
+   ↓
+Access Point
+
+Suspicious activity
+   ↓
+Repeated deauthentication
+   ↓
+Client disconnects
+```
+
+---
+
+# 17. DEAUTH DETECTION
+
+Potential indicators:
+
+- Sudden increase in deauthentication frames
+- Many clients disconnecting simultaneously
+- Repeated authentication/association cycles
+- Unusual source addresses
+- Disruption occurring at predictable intervals
+
+But:
+
+> Deauthentication frames can also occur normally.
+
+Therefore detection should consider frequency, source, timing, and affected clients.
+
+---
+
+# 18. AUTHENTICATION FAILURE SPIKE
+
+Suppose an AP normally receives:
+
+```text
+5 authentication failures/hour
+```
+
+Suddenly:
+
+```text
+500 authentication failures/hour
+```
+
+This deserves investigation.
+
+Possible explanations:
+
+- Misconfigured client
+- Network problem
+- Password issue
+- Device malfunction
+- Attack attempt
+
+Again:
+
+> An anomaly is an indicator, not proof.
+
+---
+
+# 19. ASSOCIATION EVENTS
+
+A wireless client typically goes through connection-related stages.
+
+Simplified:
+
+```text
+Discovery
+   ↓
+Authentication
+   ↓
+Association
+   ↓
+Network access
+```
+
+Monitoring unusual association patterns can reveal suspicious behavior.
+
+---
+
+# 20. BEACON FRAMES
+
+APs commonly transmit beacon frames advertising network information.
+
+They can contain information such as:
+
+- SSID
+- Supported capabilities
+- Channel-related information
+- Security capabilities
+- Supported rates
+
+A wireless monitoring system can use beacon information to identify APs.
+
+---
+
+# 21. DETECTING UNAUTHORIZED SSIDS
+
+Suppose the authorized list is:
+
+```text
+NAVLAN
+NAVLAN-GUEST
+NAVLAN-IOT
+```
+
+The monitoring system observes:
+
+```text
+NAVLAN
+NAVLAN-GUEST
+NAVLAN-IOT
+FREE-WIFI
+NAVLAN-FREE
+```
+
+The unexpected SSIDs should be investigated.
+
+---
+
+# 22. MAC ADDRESS MONITORING
+
+Each wireless interface normally has a MAC address.
+
+A WIDS can maintain an inventory:
+
+```text
+AP-01 → AA:AA:AA:AA:AA:01
+AP-02 → AA:AA:AA:AA:AA:02
+AP-03 → AA:AA:AA:AA:AA:03
+```
+
+If a new BSSID appears:
+
+```text
+AA:AA:AA:AA:AA:99
+```
+
+the system can generate:
+
+> **Unknown AP detected**
+
+---
+
+# 23. MAC SPOOFING
+
+An attacker may attempt to imitate an authorized MAC address.
+
+Therefore:
+
+> **MAC address alone should not be treated as a perfect identity.**
+
+Use multiple indicators:
+
+```text
+MAC
++
+SSID
++
+Channel
++
+Signal
++
+Security configuration
++
+Physical location
++
+Network connection
+```
+
+---
+
+# 24. SIGNAL STRENGTH
+
+Signal strength can provide useful clues.
+
+Example:
+
+```text
+Authorized AP:
+RSSI ≈ -60 dBm
+
+Unexpected AP:
+RSSI ≈ -20 dBm
+```
+
+A very strong unexpected signal may indicate an AP physically close to the monitored area.
+
+But:
+
+> Signal strength does not prove malicious intent.
+
+---
+
+# 25. LOCATION ANALYSIS
+
+If the organization knows where APs are physically installed:
+
+```text
+AP-01 → Building A, Floor 1
+AP-02 → Building A, Floor 2
+AP-03 → Building B, Floor 1
+```
+
+An unknown AP can be investigated using:
+
+- Signal strength
+- Multiple sensors
+- Direction/location techniques
+- Physical inspection
+- Switch-port information
+
+---
+
+# 26. CHANNEL ANOMALIES
+
+Suppose authorized APs use:
+
+```text
+Channel 1
+Channel 6
+Channel 11
+```
+
+A new device suddenly appears on an unexpected channel.
+
+Possible reasons:
+
+- Neighboring network
+- Legitimate AP
+- Temporary device
+- Misconfiguration
+- Rogue AP
+
+Therefore:
+
+> Channel anomaly = investigate, not automatically attack.
+
+---
+
+# 27. SECURITY CONFIGURATION
+
+An organization might require:
+
+```text
+WPA2-Enterprise
+```
+
+but monitoring detects:
+
+```text
+Same SSID
+Open network
+```
+
+This is a strong indicator requiring investigation.
+
+Compare:
+
+```text
+SSID
+BSSID
+Authentication
+Encryption
+Channel
+```
+
+---
+
+# 28. OPEN WI-FI DETECTION
+
+If a protected organizational SSID suddenly appears as an open network:
+
+```text
+Company-WiFi
+Security: Open
+```
+
+while the authorized configuration is:
+
+```text
+Company-WiFi
+Security: WPA2/WPA3 Enterprise
+```
+
+this is suspicious.
+
+---
+
+# 29. WIRELESS RECONNAISSANCE
+
+Wireless monitoring may observe clients and APs performing discovery activity.
+
+Indicators can include:
+
+- Probe requests
+- Probe responses
+- New devices
+- Repeated discovery activity
+- Unexpected devices
+
+However, normal devices frequently perform wireless discovery.
+
+Therefore:
+
+> Context matters.
+
+---
+
+# 30. PROBE REQUESTS
+
+A wireless client may send probe requests to discover available networks.
+
+Example concept:
+
+```text
+Client
+   ↓
+"Is SSID X available?"
+```
+
+This is normal behavior.
+
+A high volume or unusual pattern can be investigated, but probe requests alone are not evidence of an attack.
+
+---
+
+# 31. PROBE REQUEST PRIVACY
+
+Modern devices may use mechanisms that reduce the usefulness of probe information for tracking.
+
+Therefore:
+
+> Wireless monitoring should not assume probe information always provides a stable identity.
+
+---
+
+# 32. WIRELESS ANOMALY DETECTION
+
+A useful WIDS compares:
+
+```text
+Observed behavior
+        VS
+Expected baseline
+```
+
+Example:
+
+### Normal
+
+```text
+20 clients
+5 APs
+Normal channels
+Normal authentication
+```
+
+### Anomaly
+
+```text
+35 clients
+6 APs
+Unexpected BSSID
+Authentication failures increased
+Multiple deauth events
+```
+
+This deserves investigation.
+
+---
+
+# 33. BASELINE
+
+A **baseline** describes normal network behavior.
+
+Record:
+
+```text
+Authorized APs
+Authorized SSIDs
+BSSIDs
+Channels
+Security configuration
+Normal client count
+Typical signal ranges
+Normal authentication rate
+```
+
+Without a baseline, anomaly detection becomes much harder.
+
+---
+
+# 34. ALERT SEVERITY
+
+Not every event should be treated equally.
+
+Example:
+
+| Event | Possible Severity |
+|---|---|
+| New neighboring AP | Low |
+| Unknown AP inside facility | High |
+| Repeated deauth affecting many clients | High |
+| Security downgrade | High |
+| One authentication failure | Low |
+| Large authentication failure spike | Medium/High |
+| Known authorized AP change | Informational |
+
+Actual severity depends on environment and context.
+
+---
+
+# 35. ALERT CORRELATION
+
+One event may be harmless.
+
+Several related events are more significant.
+
+Example:
+
+```text
+Unknown AP
+     +
+Same SSID as authorized AP
+     +
+Different security
+     +
+Strong signal
+     +
+Clients disconnect
+     ↓
+HIGHER CONFIDENCE
+```
+
+This is much stronger than:
+
+```text
+Unknown AP only
+```
+
+---
+
+# 36. WIRELESS DETECTION WORKFLOW
+
+Remember:
+
+> **D-B-M-A-I-R**
+
+### D — Discover
+
+Identify wireless devices.
+
+### B — Baseline
+
+Understand normal behavior.
+
+### M — Monitor
+
+Continuously observe.
+
+### A — Analyze
+
+Look for anomalies.
+
+### I — Investigate
+
+Validate suspicious events.
+
+### R — Respond
+
+Contain/remediate according to policy.
+
+---
+
+# 37. WIDS ARCHITECTURE
+
+A typical architecture:
+
+```text
+        Wireless Sensors
+        /      |      \
+       /       |       \
+      ↓        ↓        ↓
+   Sensor 1  Sensor 2  Sensor 3
+       \       |       /
+        \      |      /
+         ↓     ↓     ↓
+       WIDS Server
+            ↓
+       Event Analysis
+            ↓
+          Alerts
+            ↓
+      Security Team
+```
+
+---
+
+# 38. WIRELESS SENSOR
+
+A wireless sensor monitors the radio environment.
+
+It can collect information about:
+
+- APs
+- Clients
+- Channels
+- Management activity
+- Signal information
+- Wireless events
+
+---
+
+# 39. CENTRAL WIDS
+
+A centralized system can aggregate information from multiple sensors.
+
+Advantages:
+
+- Wider visibility
+- Centralized alerts
+- Correlation
+- Historical records
+- Easier investigation
+- Organization-wide monitoring
+
+---
+
+# 40. DETECTION TECHNIQUES
+
+Important detection approaches:
+
+### Signature-based
+
+Looks for known patterns.
+
+### Anomaly-based
+
+Looks for deviations from normal behavior.
+
+### Policy-based
+
+Checks whether activity violates organizational rules.
+
+### Behavioral
+
+Looks at communication and device behavior.
+
+---
+
+# 41. SIGNATURE DETECTION
+
+Example:
+
+```text
+Known attack pattern
+       ↓
+WIDS rule
+       ↓
+Match
+       ↓
+Alert
+```
+
+Advantage:
+
+> Good for known attacks.
+
+Limitation:
+
+> May miss new/unknown attack patterns.
+
+---
+
+# 42. ANOMALY DETECTION
+
+Example:
+
+```text
+Normal:
+10 authentication failures/hour
+
+Observed:
+900 authentication failures/hour
+```
+
+The system detects a deviation.
+
+Advantage:
+
+> Can identify unusual behavior.
+
+Limitation:
+
+> May produce false positives.
+
+---
+
+# 43. POLICY-BASED DETECTION
+
+Example policy:
+
+> Only approved APs may operate inside the organization.
+
+Detected:
+
+```text
+Unknown AP
+```
+
+Alert:
+
+> Policy violation.
+
+---
+
+# 44. FALSE POSITIVE
+
+A **false positive** occurs when the system reports suspicious activity that is actually legitimate.
+
+Example:
+
+```text
+New AP detected
+```
+
+But investigation shows:
+
+> IT installed a new authorized AP.
+
+---
+
+# 45. FALSE NEGATIVE
+
+A **false negative** occurs when malicious activity happens but the detection system fails to identify it.
+
+Example:
+
+```text
+Evil Twin
+```
+
+exists but the WIDS does not generate an alert.
+
+---
+
+# 46. DETECTION QUALITY
+
+A good WIDS should aim for:
+
+```text
+High detection
++
+Low unnecessary alerts
+```
+
+Too many alerts:
+
+> Alert fatigue.
+
+Too few alerts:
+
+> Missed threats.
+
+---
+
+# 47. EVIL TWIN INVESTIGATION
+
+When the same SSID appears from multiple BSSIDs:
+
+```text
+SSID: Company-WiFi
+
+BSSID A → Authorized
+BSSID B → Unknown
+```
+
+Check:
+
+```text
+1. Is BSSID B in AP inventory?
+2. Is its security configuration correct?
+3. Is it connected to the organization's network?
+4. Where is its signal strongest?
+5. Which clients associate with it?
+6. Are users experiencing unexpected authentication behavior?
+```
+
+---
+
+# 48. ROGUE AP INVESTIGATION
+
+Workflow:
+
+```text
+Unknown AP
+   ↓
+Record SSID/BSSID
+   ↓
+Check inventory
+   ↓
+Check security configuration
+   ↓
+Check location
+   ↓
+Check wired connection
+   ↓
+Identify owner
+   ↓
+Contain if unauthorized
+   ↓
+Document
+```
+
+---
+
+# 49. DEAUTH INVESTIGATION
+
+If many clients disconnect:
+
+```text
+Observe:
+Deauth spike
+     ↓
+Identify affected AP
+     ↓
+Identify affected clients
+     ↓
+Check timing
+     ↓
+Check source information
+     ↓
+Check RF/environmental issues
+     ↓
+Correlate with authentication events
+```
+
+Do not conclude attack from one deauth frame.
+
+---
+
+# 50. WIRELESS INCIDENT RESPONSE
+
+Use:
+
+```text
+Detect
+ ↓
+Validate
+ ↓
+Identify
+ ↓
+Contain
+ ↓
+Eradicate
+ ↓
+Recover
+ ↓
+Review
+```
+
+---
+
+# 51. EXAMPLE INCIDENT
+
+Suppose:
+
+```text
+09:00 — Normal
+09:15 — Unknown AP detected
+09:17 — Same SSID as corporate Wi-Fi
+09:18 — Multiple clients disconnect
+09:19 — Authentication failures increase
+```
+
+This is significantly more suspicious than:
+
+```text
+Unknown AP detected
+```
+
+The events should be correlated.
+
+---
+
+# 52. WHAT TO COLLECT
+
+During investigation, document:
+
+```text
+Timestamp
+SSID
+BSSID
+Channel
+RSSI
+Security type
+Affected clients
+Authentication events
+Association events
+Deauthentication events
+Sensor location
+Related wired-network information
+```
+
+---
+
+# 53. WIRELESS LOGGING
+
+Useful logs include:
+
+- Authentication logs
+- Association logs
+- AP controller logs
+- WIDS alerts
+- DHCP logs
+- RADIUS logs
+- Switch logs
+- Firewall logs
+
+Correlation between these sources increases confidence.
+
+---
+
+# 54. RADIUS CORRELATION
+
+Enterprise Wi-Fi may use:
+
+```text
+Client
+   ↓
+AP
+   ↓
+RADIUS
+   ↓
+Authentication
+```
+
+A WIDS alert can be correlated with authentication records.
+
+Example:
+
+```text
+Unknown AP
++
+Unexpected authentication behavior
++
+RADIUS anomalies
+```
+
+This can strengthen an investigation.
+
+---
+
+# 55. DHCP CORRELATION
+
+If an unknown wireless client obtains an IP address:
+
+```text
+Wireless Client
+      ↓
+Rogue/unknown AP
+      ↓
+DHCP
+      ↓
+IP address
+```
+
+DHCP logs may help identify:
+
+- Assigned IP
+- MAC address
+- Timestamp
+
+---
+
+# 56. SWITCH CORRELATION
+
+For a suspected rogue AP connected to the wired network:
+
+```text
+Rogue AP
+   ↓
+Ethernet
+   ↓
+Switch Port
+   ↓
+Network
+```
+
+Switch information can help determine where the device is connected.
+
+---
+
+# 57. IMPORTANT DISTINCTION
+
+### Rogue AP
+
+Unauthorized AP connected to/within the organizational environment.
+
+### Evil Twin
+
+AP impersonating or mimicking a legitimate wireless network.
+
+They can overlap, but they are not identical concepts.
+
+---
+
+# 58. EVIL TWIN VS ROGUE AP
+
+| Rogue AP | Evil Twin |
+|---|---|
+| Unauthorized AP | Impersonating/mimicking legitimate network |
+| May use different SSID | Often uses same/similar SSID |
+| Main concern unauthorized device | Main concern deception |
+| Could be accidental or malicious | Usually malicious/unauthorized |
+
+---
+
+# 59. DEAUTH VS EVIL TWIN
+
+### Deauthentication
+
+Goal:
+
+> Disrupt/force disconnection.
+
+### Evil Twin
+
+Goal:
+
+> Impersonate a legitimate network and potentially attract clients.
+
+An attacker may combine techniques, but they are different attack concepts.
+
+---
+
+# 60. WIRELESS SECURITY DEFENSE
+
+Use:
+
+- WPA2/WPA3
+- Enterprise authentication where appropriate
+- Strong authentication
+- Protected management frames where supported
+- Network segmentation
+- AP inventory
+- WIDS/WIPS
+- Rogue AP monitoring
+- Secure AP configuration
+- Regular firmware updates
+- Centralized logging
+- Physical security
+
+---
+
+# 61. PROTECTED MANAGEMENT FRAMES
+
+**802.11w / Protected Management Frames (PMF)** can help protect certain management frames.
+
+Modern Wi-Fi security deployments can use PMF according to supported standards and configuration.
+
+This can reduce exposure to certain management-frame attacks.
+
+---
+
+# 62. WPA3
+
+WPA3 provides improved Wi-Fi security compared with older security mechanisms.
+
+Important:
+
+> Using WPA3 does not eliminate every wireless security problem.
+
+You still need:
+
+- Secure configuration
+- Strong authentication
+- Monitoring
+- Updates
+- Correct network segmentation
+
+---
+
+# 63. WIRELESS MONITORING TOOLS
+
+Common categories include:
+
+- Wireshark
+- Kismet
+- Aircrack-ng suite for authorized assessment/monitoring
+- Enterprise WIDS/WIPS platforms
+- AP controller monitoring
+- Wireless spectrum-analysis tools
+
+For defensive monitoring, the key skill is understanding what the observed data means rather than simply running a tool.
+
+---
+
+# 64. WIRESHARK AND WIRELESS
+
+Wireshark can analyze captured wireless frames when the capture setup provides suitable 802.11 traffic.
+
+Potentially useful protocol/filter areas include:
+
+```text
+wlan
+```
+
+and wireless management/control/data frames.
+
+Depending on the capture environment and driver, monitor mode and radiotap metadata may be available.
+
+---
+
+# 65. IMPORTANT WIRESHARK CONCEPT
+
+A normal Ethernet capture:
+
+```text
+Ethernet → IP → TCP
+```
+
+A wireless capture may provide:
+
+```text
+Radiotap
+   ↓
+802.11
+   ↓
+LLC/SNAP
+   ↓
+IP
+   ↓
+TCP
+```
+
+The exact layers depend on the capture method.
+
+---
+
+# 66. WIRELESS PCAP INVESTIGATION
+
+Start with:
+
+```text
+1. Identify APs
+2. Identify clients
+3. Identify SSIDs
+4. Identify BSSIDs
+5. Review channels
+6. Review management frames
+7. Look for authentication/association anomalies
+8. Check deauthentication patterns
+9. Correlate timestamps
+10. Validate
+```
+
+---
+
+# 67. PRACTICAL LAB – SAFE DEFENSIVE SETUP
+
+Use equipment you own or a dedicated lab.
+
+```text
+┌───────────────┐
+│ Authorized AP  │
+└───────┬───────┘
+        │
+   ┌────┴─────┐
+   ↓          ↓
+Client 1    Client 2
+
+Monitoring machine
+       ↓
+   WIDS/PCAP
+```
+
+Create a baseline first.
+
+---
+
+# 68. LAB STEP 1 — INVENTORY
+
+Record:
+
+```text
+SSID
+BSSID
+Channel
+Security
+Location
+Authorized clients
+```
+
+Example:
+
+```text
+SSID: LAB-WIFI
+BSSID: AA:BB:CC:DD:EE:01
+Channel: 6
+Security: WPA2/WPA3
+Location: Lab
+```
+
+---
+
+# 69. LAB STEP 2 — CAPTURE NORMAL TRAFFIC
+
+Use your authorized wireless monitoring setup.
+
+Observe:
+
+- Beacons
+- Association activity
+- Normal client behavior
+- Channels
+- Signal levels
+
+Record the baseline.
+
+---
+
+# 70. LAB STEP 3 — IDENTIFY ANOMALIES
+
+Introduce only controlled configuration changes in your own lab.
+
+For example:
+
+```text
+Authorized:
+LAB-WIFI
+WPA2/WPA3
+
+Test:
+LAB-WIFI
+Different security configuration
+```
+
+Your goal is to detect the mismatch.
+
+---
+
+# 71. LAB STEP 4 — CREATE A DETECTION TABLE
+
+Example:
+
+| Indicator | Expected | Observed | Status |
+|---|---|---|---|
+| SSID | LAB-WIFI | LAB-WIFI | Normal |
+| BSSID | Known | Unknown | Investigate |
+| Security | WPA2/WPA3 | Open | Suspicious |
+| Channel | 6 | 11 | Investigate |
+| RSSI | Normal | Very strong | Investigate |
+
+---
+
+# 72. LAB STEP 5 — CORRELATE
+
+Do not rely on one field.
+
+Combine:
+
+```text
+SSID
++
+BSSID
++
+Security
++
+Channel
++
+RSSI
++
+Location
+```
+
+Then determine whether the device is:
+
+```text
+Authorized
+Unknown
+Misconfigured
+Potentially Rogue
+```
+
+---
+
+# 73. LAB STEP 6 — REPORT
+
+Example finding:
+
+```text
+Finding:
+Unknown Wireless Access Point
+
+SSID:
+LAB-WIFI
+
+BSSID:
+AA:BB:CC:DD:EE:99
+
+Security:
+Unexpected configuration
+
+Severity:
+High / Investigation Required
+
+Evidence:
+Observed from authorized monitoring sensor.
+
+Recommendation:
+Validate ownership and remove or isolate if unauthorized.
+```
+
+---
+
+# 74. DETECTION CHECKLIST
+
+```text
+□ Maintain AP inventory
+□ Maintain SSID inventory
+□ Record BSSIDs
+□ Monitor channels
+□ Monitor security configuration
+□ Monitor authentication failures
+□ Monitor association events
+□ Monitor deauthentication patterns
+□ Monitor unknown APs
+□ Monitor unknown clients
+□ Correlate events
+□ Maintain logs
+□ Investigate anomalies
+□ Document findings
+```
+
+---
+
+# 75. HARD SCENARIO MCQs
+
+## Q1
+
+What is the primary purpose of WIDS?
+
+A. Encrypt Wi-Fi  
+B. Detect and alert on suspicious wireless activity  
+C. Assign IP addresses  
+D. Replace DHCP
+
+**Answer: B**
+
+---
+
+## Q2
+
+What is the primary distinction between WIDS and WIPS?
+
+A. WIDS is wired and WIPS is wireless  
+B. WIDS detects; WIPS can additionally take prevention actions  
+C. WIDS encrypts; WIPS decrypts  
+D. There is no distinction
+
+**Answer: B**
+
+---
+
+## Q3
+
+An organization detects an AP broadcasting the same SSID as its legitimate network but with an unknown BSSID.
+
+What should the analyst do first?
+
+A. Immediately declare it an Evil Twin  
+B. Validate the BSSID against the authorized AP inventory and investigate further  
+C. Ignore it  
+D. Change every employee password immediately
+
+**Answer: B**
+
+---
+
+## Q4
+
+Why isn't a duplicate SSID alone proof of an Evil Twin?
+
+A. Multiple legitimate APs can use the same SSID  
+B. SSIDs cannot be duplicated  
+C. BSSIDs do not exist  
+D. Wi-Fi does not use SSIDs
+
+**Answer: A**
+
+---
+
+## Q5
+
+A WIDS observes a sudden spike in deauthentication frames affecting many clients.
+
+What is the best conclusion?
+
+A. It definitely proves an attack  
+B. It is a suspicious anomaly requiring investigation  
+C. It proves DNS poisoning  
+D. It proves malware infection
+
+**Answer: B**
+
+---
+
+## Q6
+
+Which combination provides stronger evidence of a possible Evil Twin?
+
+A. Unknown AP only  
+B. Same SSID + unknown BSSID + different security configuration + suspicious location  
+C. Same channel only  
+D. One probe request
+
+**Answer: B**
+
+---
+
+## Q7
+
+Why is a wireless baseline important?
+
+A. It establishes expected behavior for comparison  
+B. It encrypts traffic  
+C. It replaces authentication  
+D. It prevents all attacks
+
+**Answer: A**
+
+---
+
+## Q8
+
+An unknown AP appears outside the organization's building and has a weak signal.
+
+What is the best response?
+
+A. Automatically classify it as malicious  
+B. Investigate and determine whether it belongs to a neighboring network  
+C. Shut down the organization's Wi-Fi  
+D. Delete all logs
+
+**Answer: B**
+
+---
+
+## Q9
+
+An organization normally uses WPA2/WPA3 Enterprise, but an AP using the same SSID appears as an open network.
+
+What is this?
+
+A. A potentially serious configuration/security anomaly  
+B. Normal TCP behavior  
+C. DNS resolution  
+D. DHCP renewal
+
+**Answer: A**
+
+---
+
+## Q10
+
+Why should MAC addresses not be treated as perfect identity?
+
+A. MAC addresses can be changed/spoofed  
+B. MAC addresses are encrypted  
+C. MAC addresses do not exist in Wi-Fi  
+D. MAC addresses are IP addresses
+
+**Answer: A**
+
+---
+
+# 76. HARDER SCENARIO MCQs
+
+## Q11
+
+A WIDS detects an unknown BSSID. Investigation shows it belongs to a neighboring company's AP.
+
+What is this?
+
+A. Confirmed Evil Twin  
+B. False positive relative to the organization's threat policy  
+C. Confirmed malware  
+D. Deauthentication attack
+
+**Answer: B**
+
+---
+
+## Q12
+
+An organization has 20 legitimate APs using the same SSID. A 21st AP appears with the same SSID.
+
+What is the best first step?
+
+A. Immediately block it  
+B. Compare its BSSID, security configuration, location, controller inventory, and wired connectivity  
+C. Assume all 20 existing APs are compromised  
+D. Disable WPA3
+
+**Answer: B**
+
+---
+
+## Q13
+
+A client repeatedly disconnects from Wi-Fi. The WIDS shows many deauthentication frames.
+
+What additional information is most useful?
+
+A. Only the SSID  
+B. Timing, source information, affected clients, AP logs, RF conditions, and authentication events  
+C. CPU temperature  
+D. Browser history
+
+**Answer: B**
+
+---
+
+## Q14
+
+A WIDS generates thousands of alerts every day, most of which are legitimate neighboring APs.
+
+What problem exists?
+
+A. Alert fatigue / excessive false positives  
+B. Perfect detection  
+C. Encryption failure  
+D. DNS failure
+
+**Answer: A**
+
+---
+
+## Q15
+
+A wireless monitoring system sees a strong signal from an unknown AP inside a secure facility.
+
+What is the best next step?
+
+A. Treat the signal as proof of an attacker  
+B. Correlate BSSID, SSID, security, location, switch information, and authorized inventory  
+C. Ignore it because signal strength is irrelevant  
+D. Disable all APs
+
+**Answer: B**
+
+---
+
+## Q16
+
+Which event is the strongest indicator when considered together?
+
+A. One probe request  
+B. One unknown SSID  
+C. Same corporate SSID + unknown BSSID + security downgrade + clients connecting + suspicious location  
+D. One beacon frame
+
+**Answer: C**
+
+---
+
+## Q17
+
+A security analyst sees many authentication failures. Which explanation should be considered?
+
+A. Attack only  
+B. Misconfiguration, user errors, device problems, or attack activity  
+C. DNS only  
+D. ARP only
+
+**Answer: B**
+
+---
+
+## Q18
+
+Why is correlation important in wireless intrusion detection?
+
+A. One event can have many legitimate explanations  
+B. Correlation disables encryption  
+C. Correlation replaces authentication  
+D. One packet always proves an attack
+
+**Answer: A**
+
+---
+
+## Q19
+
+Which detection method compares current activity against normal behavior?
+
+A. Anomaly-based detection  
+B. Encryption  
+C. Authentication  
+D. NAT
+
+**Answer: A**
+
+---
+
+## Q20
+
+A WIDS detects an unknown AP, but the AP inventory is updated shortly afterward and confirms it was newly installed by IT.
+
+What was the original alert?
+
+A. True positive attack  
+B. False positive  
+C. False negative  
+D. Exploitation
+
+**Answer: B**
+
+---
+
+# 77. EXAM TRAPS
+
+### Trap 1
+
+> "Same SSID = Evil Twin."
+
+❌ False.
+
+Multiple legitimate APs can use the same SSID.
+
+---
+
+### Trap 2
+
+> "Unknown AP = confirmed attacker."
+
+❌ False.
+
+It may be a neighboring AP, temporary device, or authorized but undocumented AP.
+
+---
+
+### Trap 3
+
+> "One deauthentication packet proves an attack."
+
+❌ False.
+
+Deauthentication can occur legitimately.
+
+---
+
+### Trap 4
+
+> "MAC address proves device identity."
+
+❌ False.
+
+MAC addresses can be spoofed/changed.
+
+---
+
+### Trap 5
+
+> "WIDS prevents attacks."
+
+❌ Not primarily.
+
+WIDS focuses on **detection and alerting**. WIPS adds prevention capabilities.
+
+---
+
+# 78. DAY 34 QUICK REVISION
+
+| Topic | Remember |
+|---|---|
+| WIDS | Detect wireless threats |
+| WIPS | Detect + prevent |
+| SSID | Network name |
+| BSSID | AP/radio identifier |
+| Rogue AP | Unauthorized AP |
+| Evil Twin | AP impersonating legitimate network |
+| Deauth | Can force/disrupt client disconnection |
+| Beacon | AP advertisement/management frame |
+| Probe | Client/AP discovery activity |
+| Baseline | Normal behavior |
+| Anomaly | Deviation from normal |
+| False positive | Legitimate event flagged |
+| False negative | Attack missed |
+| RSSI | Signal-strength indicator |
+| PMF | Protects certain management frames |
+| Correlation | Combine multiple indicators |
+
+---
+
+# 79. MEMORY TRICKS
+
+## WIDS Workflow
+
+> **D-B-M-A-I-R**
+
+```text
+D = Discover
+B = Baseline
+M = Monitor
+A = Analyze
+I = Investigate
+R = Respond
+```
+
+---
+
+## Rogue AP
+
+> **U-S-C-L**
+
+```text
+U = Unknown
+S = SSID/BSSID
+C = Configuration
+L = Location
+```
+
+---
+
+## Evil Twin
+
+> **S-B-S-L**
+
+```text
+S = Same SSID
+B = Different/unknown BSSID
+S = Security mismatch
+L = Location/context
+```
+
+---
+
+## Wireless Investigation
+
+> **W-H-A-T**
+
+```text
+W = Who?
+H = How?
+A = Authorized?
+T = Timing?
+```
+
+---
+
+# 80. DAY 34 MASTER CONCEPT
+
+The most important idea today is:
+
+> **Wireless intrusion detection is not about identifying one "bad packet." It is about establishing a normal wireless baseline, monitoring APs and clients, detecting anomalies, correlating multiple indicators, validating the evidence, and responding appropriately.**
+
+```text
+NORMAL BASELINE
+      ↓
+MONITOR
+      ↓
+ANOMALY
+      ↓
+CORRELATE
+      ↓
+VALIDATE
+      ↓
+INVESTIGATE
+      ↓
+RESPOND
+```
+
+# ⭐ ONE-LINE EXAM ANSWER
+
+> **Wireless Intrusion Detection (WIDS) monitors wireless networks for unauthorized APs, suspicious clients, abnormal authentication/association activity, management-frame anomalies, and other indicators of wireless attacks, generating alerts for investigation.**
+
+# 🏆 DAY 34 GOLDEN RULE
+
+> **Never classify a wireless event from a single indicator alone. Combine SSID, BSSID, security configuration, channel, signal, timing, location, authentication events, and network context before declaring an attack.**

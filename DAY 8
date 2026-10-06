@@ -1,0 +1,1065 @@
+# DAY 8 – RECONNAISSANCE TECHNIQUES
+## Passive and Active Information Gathering
+
+---
+
+# 1. What is Reconnaissance?
+
+**Reconnaissance (Recon)** is the process of gathering information about a target before performing deeper security testing.
+
+### Simple Definition
+
+> **Reconnaissance = Collect information about the target to understand its attack surface.**
+
+The information can include:
+
+- Domains
+- IP addresses
+- DNS records
+- Subdomains
+- Technologies
+- Email addresses
+- Public documents
+- Network services
+- Organization information
+- Security controls
+
+---
+
+# 2. Why is Reconnaissance Important?
+
+Recon helps a penetration tester understand:
+
+- What systems exist?
+- What domains are associated with the organization?
+- What services are exposed?
+- What technologies are being used?
+- What information is publicly available?
+- Which assets should be investigated further?
+
+### Basic Flow
+
+```text
+Reconnaissance
+      ↓
+Identify Assets
+      ↓
+Understand Attack Surface
+      ↓
+Scanning
+      ↓
+Enumeration
+      ↓
+Vulnerability Analysis
+```
+
+---
+
+# 3. Passive vs Active Reconnaissance
+
+There are two major types:
+
+```text
+                 RECONNAISSANCE
+                       |
+             ┌─────────┴─────────┐
+             ↓                   ↓
+        PASSIVE RECON        ACTIVE RECON
+             |                   |
+       Minimal direct       Direct interaction
+        interaction          with target
+```
+
+---
+
+# 4. Passive Reconnaissance
+
+**Passive reconnaissance** involves collecting information without directly probing the target's systems.
+
+The tester primarily uses publicly available or third-party information.
+
+### Examples
+
+- Search engines
+- Public websites
+- Public DNS information
+- WHOIS/RDAP information
+- Public documents
+- Certificate Transparency logs
+- Public code repositories
+- Social media/public profiles
+- Search-engine caches/indexes where available
+
+### Main Advantage
+
+> Less likely to trigger alerts on the target because the tester is not actively probing its infrastructure.
+
+---
+
+# 5. Active Reconnaissance
+
+**Active reconnaissance** involves directly interacting with the authorized target.
+
+Examples:
+
+- Port scanning
+- Service discovery
+- Host discovery
+- Banner/service identification
+- Direct DNS queries against authorized infrastructure
+- Application requests
+
+### Main Advantage
+
+It can provide more direct and accurate technical information.
+
+### Disadvantage
+
+The activity may:
+
+- Appear in logs
+- Trigger IDS/IPS alerts
+- Trigger firewall rules
+- Be detected by security monitoring
+
+---
+
+# 6. Passive vs Active Recon – Exam Table
+
+| Passive Recon | Active Recon |
+|---|---|
+| Minimal direct interaction | Direct interaction |
+| Uses public/third-party sources | Queries/probes target |
+| Lower chance of detection | Higher chance of detection |
+| Usually less intrusive | Can be more intrusive |
+| Search engines, public records | Port/service discovery |
+| Public documents | Direct network requests |
+
+### Memory Trick
+
+> **Passive = Observe**
+
+> **Active = Interact**
+
+---
+
+# 7. OSINT
+
+**OSINT = Open-Source Intelligence**
+
+OSINT is the collection and analysis of information from publicly available sources.
+
+Examples:
+
+- Websites
+- Search engines
+- Public databases
+- Public documents
+- News articles
+- Public code repositories
+- Certificate transparency records
+- Public social media information
+
+### Important
+
+OSINT does **not** mean hacking.
+
+It means gathering information from available sources.
+
+---
+
+# 8. Domain Information
+
+A domain is a human-readable name used to identify an Internet service.
+
+Example:
+
+```text
+example.com
+```
+
+Recon may identify:
+
+```text
+example.com
+mail.example.com
+vpn.example.com
+portal.example.com
+```
+
+These additional names may represent **subdomains**.
+
+---
+
+# 9. Subdomain Enumeration
+
+**Subdomain enumeration** identifies subdomains associated with a target domain.
+
+Example:
+
+```text
+example.com
+    |
+    ├── www.example.com
+    ├── mail.example.com
+    ├── vpn.example.com
+    └── portal.example.com
+```
+
+### Why is it useful?
+
+Different subdomains may host different services or applications.
+
+### Important
+
+Subdomain discovery is part of **attack-surface discovery**.
+
+---
+
+# 10. DNS Reconnaissance
+
+**DNS = Domain Name System**
+
+DNS translates domain names into information such as IP addresses and other DNS records.
+
+Common record types:
+
+| Record | Purpose |
+|---|---|
+| A | IPv4 address |
+| AAAA | IPv6 address |
+| CNAME | Alias for another hostname |
+| MX | Mail server |
+| NS | Authoritative name server |
+| TXT | Text information, often used for verification/security policies |
+| SOA | Zone authority information |
+
+---
+
+# 11. Example DNS Recon
+
+Suppose:
+
+```text
+example.com
+```
+
+DNS information may reveal:
+
+```text
+A     → 203.0.113.10
+MX    → mail.example.com
+NS    → ns1.example.com
+CNAME → app.example.com
+```
+
+This helps build a picture of the organization's infrastructure.
+
+---
+
+# 12. WHOIS / RDAP
+
+**WHOIS** historically provided domain registration information.
+
+**RDAP (Registration Data Access Protocol)** is the modern standardized protocol for registration-data queries.
+
+Depending on privacy and registrar policies, information may include:
+
+- Registrar
+- Registration dates
+- Nameservers
+- Domain status
+- Registration-related information
+
+### Exam Memory
+
+> **WHOIS/RDAP = Domain registration information**
+
+---
+
+# 13. IP Address Reconnaissance
+
+An organization may have:
+
+- Public IP addresses
+- Private IP addresses
+- IPv4 addresses
+- IPv6 addresses
+
+Recon can help identify publicly associated infrastructure.
+
+### Important
+
+```text
+Private IP
+→ Usually used inside private networks
+
+Public IP
+→ Routable on the public Internet
+```
+
+---
+
+# 14. Search Engines in Recon
+
+Search engines can reveal publicly indexed information.
+
+A security professional may investigate:
+
+- Organization websites
+- Public documents
+- Technology information
+- Publicly indexed subdomains
+- Security-related pages
+- Accidentally exposed information
+
+### Important Concept
+
+> **Search engines can reveal information that organizations did not realize was publicly discoverable.**
+
+---
+
+# 15. Search Operators
+
+Search engines support operators that help narrow results.
+
+Examples:
+
+```text
+site:example.com
+```
+
+Searches results associated with a specific domain.
+
+```text
+filetype:pdf
+```
+
+Looks for PDF documents.
+
+```text
+site:example.com filetype:pdf
+```
+
+Looks for PDF documents associated with a domain.
+
+### Authorized Security Use
+
+These techniques can help identify publicly exposed information during an authorized assessment.
+
+---
+
+# 16. Certificate Transparency
+
+Certificate Transparency (**CT**) logs record publicly issued TLS certificates.
+
+They can sometimes reveal hostnames/subdomains associated with an organization.
+
+Example:
+
+```text
+example.com
+api.example.com
+portal.example.com
+dev.example.com
+```
+
+### Why useful?
+
+A certificate may reveal a hostname that was not obvious from the organization's main website.
+
+---
+
+# 17. Public Code Repositories
+
+Public repositories can reveal information such as:
+
+- Programming languages
+- Frameworks
+- Application structure
+- Developer usernames
+- Documentation
+- Historical configuration information
+
+Examples of repository platforms include:
+
+- GitHub
+- GitLab
+- Bitbucket
+
+### Security Concern
+
+Developers may accidentally publish:
+
+- API keys
+- Passwords
+- Tokens
+- Internal URLs
+- Configuration files
+
+### Defensive Lesson
+
+> **Never commit secrets to public repositories.**
+
+---
+
+# 18. Metadata
+
+**Metadata** is information about a file or document.
+
+A document may contain metadata such as:
+
+- Author
+- Creation date
+- Software used
+- Modification date
+- Organization information
+
+### Security Relevance
+
+Public documents may unintentionally reveal information about an organization's technology or employees.
+
+---
+
+# 19. Email Address Reconnaissance
+
+Publicly available information may reveal organizational email formats.
+
+Example:
+
+```text
+firstname.lastname@example.com
+```
+
+This can help understand the organization's naming convention.
+
+### Security Concern
+
+Email information can also be abused for:
+
+- Phishing
+- Social engineering
+- Password attacks
+
+Therefore, organizations should minimize unnecessary exposure of sensitive information.
+
+---
+
+# 20. Technology Fingerprinting
+
+Technology fingerprinting attempts to identify technologies used by a web application or service.
+
+Possible information:
+
+- Web server
+- Programming language
+- Framework
+- CMS
+- JavaScript libraries
+- Operating-system indicators
+
+Example:
+
+```text
+Website
+   ↓
+Fingerprinting
+   ↓
+Web Server → Apache
+Framework  → Example Framework
+CMS        → Example CMS
+```
+
+### Why useful?
+
+Knowing technologies can help testers determine which security checks are relevant.
+
+---
+
+# 21. Banner Grabbing
+
+**Banner grabbing** is the process of obtaining service information, often including software/service identification.
+
+Example concept:
+
+```text
+Target Service
+      ↓
+Service Response
+      ↓
+Version / Product Information
+```
+
+### Security Risk
+
+Detailed version information can help an attacker identify potentially vulnerable software.
+
+### Defensive Recommendation
+
+Avoid unnecessarily exposing detailed service information.
+
+---
+
+# 22. Network Discovery
+
+Network discovery identifies hosts and services within an authorized environment.
+
+Example:
+
+```text
+Network
+  |
+  ├── PC-01
+  ├── PC-02
+  ├── Server-01
+  └── Printer-01
+```
+
+This helps determine the available attack surface.
+
+---
+
+# 23. Port Scanning
+
+A **port scan** checks ports on a host to determine which are reachable/open.
+
+Common ports:
+
+| Port | Common Service |
+|---:|---|
+| 22 | SSH |
+| 25 | SMTP |
+| 53 | DNS |
+| 80 | HTTP |
+| 110 | POP3 |
+| 143 | IMAP |
+| 443 | HTTPS |
+| 445 | SMB |
+| 3389 | RDP |
+
+### Important
+
+An open port does **not automatically mean a vulnerability exists**.
+
+It indicates that a service may be listening/reachable.
+
+---
+
+# 24. Nmap
+
+**Nmap (Network Mapper)** is one of the most commonly known tools for network discovery and security auditing.
+
+It can help identify:
+
+- Hosts
+- Open ports
+- Services
+- Service versions
+- Operating-system indicators
+
+### Memory
+
+> **Nmap = Network Discovery + Port/Service Enumeration**
+
+Use it only against systems you own or are explicitly authorized to test.
+
+---
+
+# 25. Reconnaissance Tools
+
+Common tools and sources include:
+
+| Tool/Source | Purpose |
+|---|---|
+| Search engines | Public information |
+| WHOIS/RDAP | Domain registration information |
+| DNS tools | DNS records |
+| Certificate Transparency | Certificate/hostname discovery |
+| Nmap | Network discovery/scanning |
+| Amass | Attack-surface/subdomain discovery |
+| theHarvester | Publicly available organizational information |
+| Shodan | Internet-exposed device/service information |
+| Censys | Internet-exposed host/certificate information |
+| Maltego | Relationship/link analysis |
+
+---
+
+# 26. Shodan
+
+**Shodan** is a search engine for Internet-connected devices and services.
+
+It can provide information about publicly exposed:
+
+- Servers
+- Devices
+- Services
+- Ports
+- Service banners
+
+### Security Use
+
+Security professionals can use it to understand what an organization may have exposed to the Internet.
+
+### Important
+
+Only investigate assets within the authorized scope of an assessment.
+
+---
+
+# 27. Maltego
+
+**Maltego** is a reconnaissance and link-analysis tool.
+
+It can help visualize relationships between entities such as:
+
+```text
+Organization
+     ↓
+Domain
+     ↓
+Subdomain
+     ↓
+IP Address
+     ↓
+Infrastructure
+```
+
+### Memory
+
+> **Maltego = Visualize relationships**
+
+---
+
+# 28. theHarvester
+
+**theHarvester** is an OSINT/reconnaissance tool designed to collect publicly available information associated with a target.
+
+Depending on available sources, it can help identify information such as:
+
+- Email addresses
+- Hostnames
+- Domains
+- Publicly indexed information
+
+### Memory
+
+> **theHarvester = Public information collection**
+
+---
+
+# 29. Amass
+
+**Amass** is a tool used for attack-surface mapping and asset discovery.
+
+It can help discover relationships involving:
+
+- Domains
+- Subdomains
+- DNS
+- IP addresses
+- Infrastructure
+
+### Memory
+
+> **Amass = Attack Surface Mapping**
+
+---
+
+# 30. Passive Recon Example
+
+Suppose an organization authorizes a security assessment of:
+
+```text
+example.com
+```
+
+The tester starts with public information:
+
+```text
+Search Engine
+     ↓
+Public Website
+     ↓
+DNS/RDAP
+     ↓
+Certificate Transparency
+     ↓
+Public Documents
+     ↓
+Public Code Repositories
+```
+
+No intrusive probing is performed.
+
+This is primarily **passive reconnaissance**.
+
+---
+
+# 31. Active Recon Example
+
+After authorization, the tester directly interacts with the target:
+
+```text
+Authorized Target
+       ↓
+Host Discovery
+       ↓
+Port Discovery
+       ↓
+Service Detection
+       ↓
+Enumeration
+```
+
+This is **active reconnaissance**.
+
+---
+
+# 32. Passive + Active Recon
+
+A professional assessment may use both.
+
+```text
+          TARGET
+             |
+       ┌─────┴─────┐
+       ↓           ↓
+   PASSIVE       ACTIVE
+       ↓           ↓
+ Public Data    Direct Probing
+       |           |
+       └─────┬─────┘
+             ↓
+       Attack Surface
+             ↓
+        Further Testing
+```
+
+---
+
+# 33. Reconnaissance vs Scanning vs Enumeration
+
+This distinction is extremely important.
+
+### Reconnaissance
+
+> Gather information about the target.
+
+### Scanning
+
+> Identify reachable hosts, ports, and services.
+
+### Enumeration
+
+> Obtain detailed information from discovered services/resources.
+
+### Example
+
+```text
+Recon
+↓
+Find example.com
+
+Scanning
+↓
+Find port 443
+
+Enumeration
+↓
+Identify the HTTPS service and gather additional service/application details
+```
+
+---
+
+# 34. Passive vs Active – Scenario Question
+
+### Scenario:
+
+A penetration tester searches public websites, DNS information, certificate logs, and public documents without sending probes to the target infrastructure.
+
+What type of reconnaissance is this?
+
+**Answer: Passive Reconnaissance**
+
+---
+
+### Scenario:
+
+A tester sends authorized network probes to determine which ports are open on a target server.
+
+What type is this?
+
+**Answer: Active Reconnaissance**
+
+---
+
+# 35. Attack Surface
+
+The **attack surface** is the collection of exposed assets, services, interfaces, applications, and other points that could potentially be targeted.
+
+Example:
+
+```text
+Organization
+     |
+     ├── Web Application
+     ├── API
+     ├── VPN
+     ├── Email Service
+     ├── Remote Access
+     └── Public Cloud Services
+```
+
+### Reconnaissance Goal
+
+> **Build an accurate picture of the attack surface.**
+
+---
+
+# 36. Digital Footprint
+
+A **digital footprint** is the information about an organization or person that exists online.
+
+For an organization, it may include:
+
+- Domains
+- Websites
+- Social media
+- Public documents
+- Code repositories
+- Certificates
+- Public IP infrastructure
+- Employee information
+
+### Security Principle
+
+> **The larger the unnecessary digital footprint, the more information may be available to attackers.**
+
+---
+
+# 37. Reconnaissance and Social Engineering
+
+Reconnaissance can also provide information useful for social engineering.
+
+For example, publicly available information may reveal:
+
+```text
+Employee Name
+      ↓
+Job Position
+      ↓
+Organization
+      ↓
+Email Format
+      ↓
+Potential Social Engineering Target
+```
+
+### Defensive Lesson
+
+Organizations should educate employees about oversharing information publicly.
+
+---
+
+# 38. Reconnaissance Report
+
+A good recon report may contain:
+
+```text
+Target
+   ↓
+Domains
+   ↓
+Subdomains
+   ↓
+IP Addresses
+   ↓
+Technologies
+   ↓
+Services
+   ↓
+Public Information
+   ↓
+Potential Attack Surface
+```
+
+The information should be organized and verified before being used for later testing.
+
+---
+
+# 39. Common Recon Mistakes
+
+### Mistake 1
+Testing systems without authorization.
+
+### Mistake 2
+Assuming every discovered asset belongs to the target.
+
+### Mistake 3
+Treating an open port as automatically vulnerable.
+
+### Mistake 4
+Trusting one information source without verification.
+
+### Mistake 5
+Ignoring scope restrictions.
+
+### Mistake 6
+Collecting unnecessary sensitive information.
+
+### Mistake 7
+Failing to document sources and findings.
+
+---
+
+# 40. Defensive Measures Against Reconnaissance
+
+Organizations can reduce unnecessary exposure by:
+
+- Removing unused public services
+- Limiting unnecessary DNS information
+- Avoiding secrets in public repositories
+- Removing sensitive metadata from public documents
+- Monitoring exposed infrastructure
+- Using appropriate access controls
+- Minimizing unnecessary technology/version disclosure
+- Regularly reviewing public-facing assets
+- Training employees about information disclosure
+
+---
+
+# 41. DAY 8 QUICK REVISION
+
+```text
+RECONNAISSANCE
+       ↓
+Information Gathering
+       |
+       ├── Passive Recon
+       |      ↓
+       |   Public Sources
+       |
+       └── Active Recon
+              ↓
+          Direct Interaction
+```
+
+### Passive Recon
+
+> Gather information without directly probing the target.
+
+### Active Recon
+
+> Directly interact with the authorized target to gather technical information.
+
+### OSINT
+
+> Intelligence gathered from publicly available sources.
+
+### DNS
+
+> Resolves names and provides DNS records.
+
+### Subdomain Enumeration
+
+> Finding subdomains associated with a domain.
+
+### Port Scanning
+
+> Identifying reachable/open ports.
+
+### Enumeration
+
+> Gathering detailed information about discovered services/resources.
+
+### Attack Surface
+
+> All potentially exposed points that could be targeted.
+
+---
+
+# 🔥 DAY 8 MEMORY TRICKS
+
+## 1. Passive vs Active
+
+> **Passive = Observe**
+
+> **Active = Interact**
+
+---
+
+## 2. Recon → Scan → Enumerate
+
+Remember:
+
+> **Find → Check → Detail**
+
+**Recon** → Find information
+
+**Scanning** → Check hosts/ports/services
+
+**Enumeration** → Get details
+
+---
+
+## 3. DNS Records
+
+Remember:
+
+> **A = Address**
+
+> **AAAA = IPv6 Address**
+
+> **MX = Mail**
+
+> **NS = Name Server**
+
+> **CNAME = Alias**
+
+> **TXT = Text**
+
+> **SOA = Authority**
+
+---
+
+## 4. Recon Tools
+
+Remember:
+
+> **“Search, DNS, Nmap, Amass, Shodan, Maltego.”**
+
+- Search engines → Public information
+- DNS tools → DNS information
+- Nmap → Network discovery
+- Amass → Attack-surface mapping
+- Shodan → Internet-exposed services
+- Maltego → Relationship visualization
+
+---
+
+# ⭐ MOST IMPORTANT EXAM POINTS
+
+1. **Reconnaissance = information gathering.**
+2. **Passive recon = minimal/no direct interaction with target infrastructure.**
+3. **Active recon = direct interaction with the authorized target.**
+4. **OSINT = Open-Source Intelligence.**
+5. **DNS helps identify domain-related infrastructure.**
+6. **Subdomain enumeration identifies subdomains.**
+7. **A record = IPv4 address.**
+8. **AAAA record = IPv6 address.**
+9. **MX record = mail server.**
+10. **NS record = name server.**
+11. **CNAME = alias.**
+12. **Nmap = network discovery and scanning.**
+13. **Shodan = search engine for Internet-connected devices/services.**
+14. **Maltego = relationship/link analysis.**
+15. **Amass = attack-surface and subdomain discovery.**
+16. **Port open ≠ automatically vulnerable.**
+17. **Scanning discovers; enumeration provides details.**
+18. **Recon helps map the attack surface.**
+19. **Certificate Transparency can reveal hostnames associated with certificates.**
+20. **Always perform reconnaissance within the authorized scope.**
+
+# ONE-LINE REVISION
+
+> **Reconnaissance gathers information, passive recon observes public information, active recon interacts with the target, scanning discovers services, and enumeration collects detailed information about those services.**

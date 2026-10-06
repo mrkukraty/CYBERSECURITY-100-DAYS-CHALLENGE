@@ -1,0 +1,1174 @@
+# DAY 10 – DNS ENUMERATION
+## DNS Records • Subdomain Enumeration • Zone Transfers
+
+---
+
+# 1. What is DNS?
+
+**DNS = Domain Name System**
+
+DNS is a system that translates human-readable domain names into information used by networks.
+
+### Simple Example
+
+```text
+www.example.com
+       ↓
+      DNS
+       ↓
+IP Address / DNS Records
+```
+
+Instead of remembering an IP address, users can use a domain name.
+
+### Simple Definition
+
+> **DNS is like the Internet's directory service.**
+
+---
+
+# 2. Why is DNS Important in Cybersecurity?
+
+DNS can reveal useful information about an organization's infrastructure.
+
+Security professionals may identify:
+
+- Domains
+- Subdomains
+- IP addresses
+- Mail servers
+- Name servers
+- DNS configuration
+- Other DNS records
+- Potentially exposed infrastructure
+
+This information helps build the organization's **attack surface**.
+
+---
+
+# 3. What is DNS Enumeration?
+
+**DNS enumeration** is the process of gathering DNS-related information about a target domain.
+
+It can include discovering:
+
+- DNS records
+- Subdomains
+- Name servers
+- Mail servers
+- IP addresses
+- DNS configuration
+
+### Simple Definition
+
+> **DNS Enumeration = Collect detailed DNS information about a domain.**
+
+---
+
+# 4. DNS Resolution
+
+When you enter:
+
+```text
+www.example.com
+```
+
+a DNS resolver looks up the required information.
+
+Simplified:
+
+```text
+User
+ ↓
+DNS Resolver
+ ↓
+DNS Hierarchy
+ ↓
+Authoritative DNS Server
+ ↓
+DNS Response
+ ↓
+IP Address / Record
+```
+
+---
+
+# 5. DNS Hierarchy
+
+DNS is hierarchical.
+
+```text
+                    Root
+                     |
+                    .com
+                     |
+                example.com
+                     |
+              www.example.com
+```
+
+### Levels
+
+- Root
+- Top-Level Domain (TLD)
+- Second-level domain
+- Subdomain/hostname
+
+---
+
+# 6. Important DNS Terms
+
+### Domain
+
+Example:
+
+```text
+example.com
+```
+
+### Subdomain
+
+Example:
+
+```text
+mail.example.com
+```
+
+### DNS Resolver
+
+A server that performs DNS queries on behalf of clients.
+
+### Authoritative DNS Server
+
+A DNS server that provides authoritative answers for a DNS zone.
+
+### DNS Zone
+
+A portion of the DNS namespace managed by an organization or DNS administrator.
+
+---
+
+# 7. Important DNS Record Types
+
+These are extremely important for exams.
+
+| Record | Meaning | Purpose |
+|---|---|---|
+| A | IPv4 address | Maps hostname to IPv4 |
+| AAAA | IPv6 address | Maps hostname to IPv6 |
+| CNAME | Canonical name | Alias to another hostname |
+| MX | Mail exchange | Identifies mail servers |
+| NS | Name server | Identifies authoritative name servers |
+| TXT | Text | Verification/policy information |
+| SOA | Start of Authority | Zone administrative information |
+| PTR | Pointer | Reverse DNS mapping |
+| SRV | Service | Locates specific services |
+
+---
+
+# 8. A Record
+
+An **A record** maps a hostname to an IPv4 address.
+
+Example:
+
+```text
+example.com
+     ↓
+203.0.113.10
+```
+
+### Memory
+
+> **A = Address (IPv4)**
+
+---
+
+# 9. AAAA Record
+
+An **AAAA record** maps a hostname to an IPv6 address.
+
+Example:
+
+```text
+example.com
+     ↓
+2001:db8::10
+```
+
+### Memory
+
+> **AAAA = IPv6 Address**
+
+---
+
+# 10. CNAME Record
+
+**CNAME = Canonical Name**
+
+It creates an alias from one hostname to another hostname.
+
+Example:
+
+```text
+www.example.com
+       ↓
+web.example.net
+```
+
+### Memory
+
+> **CNAME = Alias**
+
+---
+
+# 11. MX Record
+
+**MX = Mail Exchange**
+
+It identifies mail servers responsible for receiving email for a domain.
+
+Example:
+
+```text
+example.com
+     ↓
+MX
+     ↓
+mail.example.com
+```
+
+### Memory
+
+> **MX = Mail**
+
+---
+
+# 12. NS Record
+
+**NS = Name Server**
+
+It identifies the authoritative name servers for a DNS zone.
+
+Example:
+
+```text
+example.com
+    ↓
+NS
+    ↓
+ns1.example.com
+ns2.example.com
+```
+
+### Memory
+
+> **NS = Name Server**
+
+---
+
+# 13. TXT Record
+
+A **TXT record** contains text associated with a domain.
+
+It can be used for things such as:
+
+- Domain verification
+- SPF information
+- Security policies
+- Other administrative information
+
+### Security Relevance
+
+TXT records may reveal useful information about an organization's configuration.
+
+---
+
+# 14. SOA Record
+
+**SOA = Start of Authority**
+
+The SOA record contains administrative information about a DNS zone.
+
+It can include information related to:
+
+- Primary authoritative name server
+- Zone administrator contact representation
+- Serial number
+- Refresh timing
+- Retry timing
+- Expiration timing
+- Minimum/negative caching information
+
+### Memory
+
+> **SOA = Start of Authority**
+
+---
+
+# 15. PTR Record
+
+**PTR = Pointer**
+
+PTR records are commonly used for **reverse DNS**.
+
+They map an IP address back to a hostname.
+
+### Forward DNS
+
+```text
+Hostname
+   ↓
+IP Address
+```
+
+### Reverse DNS
+
+```text
+IP Address
+   ↓
+Hostname
+```
+
+### Memory
+
+> **PTR = Reverse DNS**
+
+---
+
+# 16. SRV Record
+
+**SRV = Service Record**
+
+SRV records help identify the hostname and port associated with particular services.
+
+Concept:
+
+```text
+Service
+   ↓
+SRV
+   ↓
+Hostname + Port
+```
+
+They are commonly used by various network services and applications.
+
+---
+
+# 17. DNS Record Memory Trick
+
+Remember:
+
+```text
+A     → IPv4 Address
+AAAA  → IPv6 Address
+CNAME → Alias
+MX    → Mail
+NS    → Name Server
+TXT   → Text
+SOA   → Authority
+PTR   → Reverse DNS
+SRV   → Service
+```
+
+### Easy Sentence
+
+> **“A AAAA CNAME Mail, Name Text Authority, Pointer Service.”**
+
+---
+
+# 18. Forward DNS Lookup
+
+Forward lookup asks:
+
+> **What IP address belongs to this hostname?**
+
+Example:
+
+```text
+www.example.com
+       ↓
+DNS
+       ↓
+203.0.113.10
+```
+
+---
+
+# 19. Reverse DNS Lookup
+
+Reverse lookup asks:
+
+> **What hostname is associated with this IP address?**
+
+Example:
+
+```text
+203.0.113.10
+       ↓
+DNS
+       ↓
+server.example.com
+```
+
+PTR records are commonly involved.
+
+---
+
+# 20. Subdomain Enumeration
+
+**Subdomain enumeration** is the process of discovering subdomains associated with a domain.
+
+Example:
+
+```text
+example.com
+    |
+    ├── www.example.com
+    ├── mail.example.com
+    ├── vpn.example.com
+    ├── portal.example.com
+    └── api.example.com
+```
+
+Each may represent a different service or application.
+
+---
+
+# 21. Why Enumerate Subdomains?
+
+Subdomain enumeration helps identify an organization's external attack surface.
+
+For example:
+
+```text
+www.example.com
+       ↓
+Main Website
+
+api.example.com
+       ↓
+API
+
+mail.example.com
+       ↓
+Mail Service
+
+vpn.example.com
+       ↓
+Remote Access
+```
+
+Different subdomains may have different security configurations.
+
+---
+
+# 22. Passive Subdomain Enumeration
+
+Passive enumeration uses information already available from public sources.
+
+Possible sources include:
+
+- Certificate Transparency logs
+- Search engines
+- Public DNS information
+- Public datasets
+- Search indexes
+- Other authorized OSINT sources
+
+### Advantage
+
+Less direct interaction with the target.
+
+### Memory
+
+> **Passive = Discover from existing information**
+
+---
+
+# 23. Active Subdomain Enumeration
+
+Active enumeration directly queries or interacts with authorized DNS infrastructure.
+
+Examples:
+
+- DNS queries
+- Testing candidate hostnames
+- DNS brute-force techniques within an authorized environment
+
+### Advantage
+
+Can discover information that isn't publicly indexed.
+
+### Disadvantage
+
+Creates traffic that may be logged or detected.
+
+---
+
+# 24. DNS Zone
+
+A **DNS zone** is an administratively managed portion of the DNS namespace.
+
+Example:
+
+```text
+example.com
+    |
+    ├── www
+    ├── mail
+    ├── vpn
+    └── api
+```
+
+A DNS zone contains DNS records for the namespace under its management.
+
+---
+
+# 25. Zone Transfer
+
+A **DNS zone transfer** is a mechanism used to replicate DNS zone data between authoritative DNS servers.
+
+Common types:
+
+### AXFR
+
+**Full zone transfer**
+
+Transfers the complete zone.
+
+### IXFR
+
+**Incremental zone transfer**
+
+Transfers changes made since a previous version of the zone.
+
+---
+
+# 26. Why Are Zone Transfers Important in Security?
+
+If an unauthorized party can obtain a complete zone through a misconfigured zone transfer, they may learn many DNS records at once.
+
+Potentially exposed information could include:
+
+- Hostnames
+- Subdomains
+- Internal naming
+- IP addresses
+- Service infrastructure
+
+### Security Problem
+
+```text
+Misconfigured DNS Server
+          ↓
+Unauthorized Zone Transfer
+          ↓
+Large Amount of DNS Information
+```
+
+---
+
+# 27. Correctly Configured Zone Transfer
+
+Zone transfers should normally be restricted to authorized secondary DNS servers.
+
+Concept:
+
+```text
+Primary DNS
+     |
+     | Authorized Zone Transfer
+     ↓
+Secondary DNS
+```
+
+Not:
+
+```text
+Primary DNS
+     |
+     | Unauthorized Request
+     ↓
+Anyone
+```
+
+---
+
+# 28. AXFR vs IXFR
+
+| AXFR | IXFR |
+|---|---|
+| Full zone transfer | Incremental zone transfer |
+| Transfers complete zone | Transfers changes |
+| Can contain many records | Transfers only updates |
+| Used for full synchronization | Efficient for updates |
+
+### Memory
+
+> **AXFR = All**
+
+> **IXFR = Incremental**
+
+---
+
+# 29. DNS Zone Transfer Misconfiguration
+
+A poorly configured authoritative DNS server may allow unauthorized clients to request zone data.
+
+This is a security issue because it can reveal the organization's DNS structure.
+
+### Important
+
+> **Zone transfer itself is not a vulnerability. Unauthorized zone transfer is a configuration/security problem.**
+
+---
+
+# 30. DNS Enumeration Tools
+
+Common tools include:
+
+- `dig`
+- `nslookup`
+- `host`
+- Nmap
+- Amass
+- Subfinder
+- DNSRecon
+- DNSDumpster
+- theHarvester
+
+---
+
+# 31. dig
+
+**dig = Domain Information Groper**
+
+`dig` is a command-line DNS query tool.
+
+It can query DNS records such as:
+
+- A
+- AAAA
+- MX
+- NS
+- TXT
+- SOA
+- CNAME
+- PTR
+
+### Concept
+
+```text
+dig
+ ↓
+DNS Query
+ ↓
+DNS Response
+```
+
+Example in an authorized lab:
+
+```text
+dig example.com
+```
+
+---
+
+# 32. nslookup
+
+`nslookup` is a DNS query and troubleshooting tool.
+
+It can be used to examine DNS information.
+
+Example:
+
+```text
+nslookup example.com
+```
+
+### Memory
+
+> **nslookup = DNS Lookup**
+
+---
+
+# 33. host
+
+`host` is a simple command-line utility for performing DNS lookups.
+
+Example:
+
+```text
+host example.com
+```
+
+It can provide information such as:
+
+- IP addresses
+- Mail servers
+- Name servers
+
+---
+
+# 34. Nmap for DNS Enumeration
+
+Nmap includes scripts that can assist with DNS-related enumeration.
+
+In an authorized lab, Nmap can be used to investigate DNS services and configurations.
+
+### Memory
+
+> **Nmap = Network scanning + useful enumeration scripts**
+
+---
+
+# 35. Amass
+
+Amass can assist with:
+
+- Subdomain discovery
+- DNS enumeration
+- Attack-surface mapping
+- Infrastructure relationships
+
+### Memory
+
+> **Amass = Attack Surface Mapping**
+
+---
+
+# 36. DNSRecon
+
+**DNSRecon** is a DNS enumeration tool.
+
+It can assist with gathering information such as:
+
+- DNS records
+- Name servers
+- Mail servers
+- Subdomains
+- Other DNS-related information
+
+### Memory
+
+> **DNSRecon = DNS Reconnaissance**
+
+---
+
+# 37. DNSDumpster
+
+DNSDumpster is a DNS reconnaissance service that can help visualize or discover publicly available DNS-related information.
+
+It may provide information about:
+
+- Domains
+- Subdomains
+- IP addresses
+- DNS infrastructure
+
+Always verify results before treating them as confirmed.
+
+---
+
+# 38. Subdomain Enumeration Techniques
+
+There are several approaches.
+
+### 1. Search Engine Discovery
+
+Search publicly indexed information.
+
+### 2. Certificate Transparency
+
+Look for hostnames appearing in certificates.
+
+### 3. DNS Queries
+
+Query DNS records.
+
+### 4. Wordlist-Based Discovery
+
+Test likely subdomain names in an authorized environment.
+
+Example concept:
+
+```text
+www.example.com
+mail.example.com
+vpn.example.com
+api.example.com
+dev.example.com
+```
+
+### 5. Passive Databases
+
+Use public datasets containing previously observed DNS information.
+
+---
+
+# 39. Virtual Host vs Subdomain
+
+These concepts are related but not identical.
+
+### Subdomain
+
+A DNS name such as:
+
+```text
+api.example.com
+```
+
+### Virtual Host
+
+A web server configuration that allows multiple websites/hostnames to be served by the same server or IP.
+
+Therefore:
+
+> **A subdomain is a DNS concept; a virtual host is commonly a web-server hosting concept.**
+
+---
+
+# 40. DNS Enumeration Example
+
+Suppose:
+
+```text
+example.com
+```
+
+The tester discovers:
+
+```text
+A:
+203.0.113.10
+
+MX:
+mail.example.com
+
+NS:
+ns1.example.com
+ns2.example.com
+
+Subdomains:
+www.example.com
+api.example.com
+vpn.example.com
+```
+
+This creates a basic infrastructure map.
+
+---
+
+# 41. Zone Transfer Scenario
+
+### Scenario
+
+A company has:
+
+```text
+Primary DNS
+     ↓
+Secondary DNS
+```
+
+The administrator intends only the secondary DNS server to receive zone transfers.
+
+However, the DNS server is configured to allow transfers from unauthorized clients.
+
+An authorized security tester identifies this configuration problem.
+
+### Result
+
+The tester may be able to obtain zone information containing many DNS records.
+
+### Finding
+
+> **Improperly restricted DNS zone transfer**
+
+---
+
+# 42. DNS Enumeration vs Zone Transfer
+
+### DNS Enumeration
+
+A broad activity of collecting DNS information.
+
+### Zone Transfer
+
+A specific DNS mechanism for transferring zone data between DNS servers.
+
+### Important
+
+> **Zone transfer is one possible source of DNS information; DNS enumeration is the broader activity.**
+
+---
+
+# 43. DNS Enumeration vs Subdomain Enumeration
+
+### DNS Enumeration
+
+Can include:
+
+- A
+- AAAA
+- MX
+- NS
+- TXT
+- SOA
+- PTR
+- SRV
+- Other DNS information
+
+### Subdomain Enumeration
+
+Specifically focuses on discovering:
+
+```text
+*.example.com
+```
+
+### Memory
+
+> **DNS Enumeration = Broad DNS information**
+
+> **Subdomain Enumeration = Find DNS names**
+
+---
+
+# 44. Security Risks of DNS Misconfiguration
+
+Poor DNS configuration can result in:
+
+- Information disclosure
+- Unauthorized zone transfers
+- Subdomain takeover opportunities in some configurations
+- Incorrect DNS records
+- Weak access controls
+- Exposure of internal naming information
+
+---
+
+# 45. DNS Security Best Practices
+
+Organizations should:
+
+1. Restrict zone transfers to authorized secondary servers.
+2. Monitor DNS logs.
+3. Remove unused DNS records.
+4. Review old subdomains.
+5. Avoid unnecessary information disclosure.
+6. Protect DNS administration interfaces.
+7. Use secure DNS management practices.
+8. Monitor for unauthorized DNS changes.
+9. Regularly review public-facing DNS records.
+10. Keep authoritative DNS infrastructure properly configured.
+
+---
+
+# 46. Subdomain Takeover – Basic Concept
+
+A **subdomain takeover** can occur when a subdomain points to an external service/resource that has been removed or is no longer claimed by the organization, while the DNS record remains.
+
+Simplified:
+
+```text
+sub.example.com
+       ↓
+External Service
+       ↓
+Resource Removed
+       ↓
+DNS Record Still Exists
+       ↓
+Potential Takeover Risk
+```
+
+### Important
+
+A dangling DNS record does **not automatically mean takeover is possible**. The external service must also be claimable under the relevant provider's conditions.
+
+---
+
+# 47. DNS Enumeration in a Pentest
+
+A typical authorized workflow:
+
+```text
+Authorization
+      ↓
+Scope
+      ↓
+Domain Identification
+      ↓
+DNS Record Enumeration
+      ↓
+Subdomain Enumeration
+      ↓
+Identify IP Addresses
+      ↓
+Identify Services
+      ↓
+Check Configuration
+      ↓
+Document Findings
+```
+
+---
+
+# 48. DAY 10 QUICK REVISION
+
+### DNS
+
+> Domain Name System.
+
+### DNS Enumeration
+
+> Gathering DNS-related information about a target.
+
+### A
+
+> IPv4 address.
+
+### AAAA
+
+> IPv6 address.
+
+### CNAME
+
+> Alias.
+
+### MX
+
+> Mail server.
+
+### NS
+
+> Name server.
+
+### TXT
+
+> Text/verification/policy information.
+
+### SOA
+
+> Start of Authority.
+
+### PTR
+
+> Reverse DNS.
+
+### SRV
+
+> Service location.
+
+### AXFR
+
+> Full zone transfer.
+
+### IXFR
+
+> Incremental zone transfer.
+
+### Subdomain Enumeration
+
+> Discovering subdomains.
+
+### Zone Transfer
+
+> Replication of DNS zone data between authoritative DNS servers.
+
+---
+
+# 🔥 DAY 10 MEMORY TRICKS
+
+## 1. DNS Records
+
+Remember:
+
+> **A = Address**
+
+> **AAAA = IPv6 Address**
+
+> **CNAME = Alias**
+
+> **MX = Mail**
+
+> **NS = Name Server**
+
+> **TXT = Text**
+
+> **SOA = Authority**
+
+> **PTR = Reverse**
+
+> **SRV = Service**
+
+---
+
+## 2. AXFR vs IXFR
+
+> **AXFR = ALL**
+
+> **IXFR = Incremental**
+
+---
+
+## 3. DNS vs Subdomain Enumeration
+
+> **DNS Enumeration = Find DNS information**
+
+> **Subdomain Enumeration = Find subdomains**
+
+---
+
+## 4. Forward vs Reverse DNS
+
+> **Forward: Name → IP**
+
+> **Reverse: IP → Name**
+
+---
+
+## 5. Day 10 Tool Memory
+
+```text
+dig       → DNS Queries
+nslookup  → DNS Lookup
+host      → Simple DNS Lookup
+DNSRecon  → DNS Enumeration
+Amass     → Attack-Surface/Subdomain Discovery
+Nmap      → Network Scanning + Enumeration
+```
+
+---
+
+# ⭐ MOST IMPORTANT EXAM POINTS
+
+1. **DNS = Domain Name System.**
+2. **DNS enumeration gathers information about DNS infrastructure.**
+3. **A record maps a hostname to IPv4.**
+4. **AAAA maps a hostname to IPv6.**
+5. **CNAME creates an alias.**
+6. **MX identifies mail servers.**
+7. **NS identifies authoritative name servers.**
+8. **TXT can contain verification/security-policy information.**
+9. **SOA provides zone authority/administrative information.**
+10. **PTR is commonly used for reverse DNS.**
+11. **SRV identifies services and their locations.**
+12. **Forward DNS = hostname → IP.**
+13. **Reverse DNS = IP → hostname.**
+14. **Subdomain enumeration discovers subdomains.**
+15. **AXFR = full zone transfer.**
+16. **IXFR = incremental zone transfer.**
+17. **Unauthorized zone transfer can disclose DNS information.**
+18. **Zone transfer itself is a legitimate DNS replication mechanism.**
+19. **DNS enumeration is broader than zone transfer.**
+20. **dig, nslookup, host, DNSRecon, Amass and Nmap can assist with DNS-related enumeration.**
+21. **A public DNS record does not automatically mean the associated system is authorized for testing.**
+22. **Always perform DNS enumeration only within the defined penetration-testing scope.**
+
+# ONE-LINE REVISION
+
+> **DNS enumeration gathers DNS information, subdomain enumeration discovers DNS names, AXFR performs a full zone transfer, IXFR transfers changes, and tools such as dig, nslookup, DNSRecon and Amass help security professionals investigate DNS infrastructure.**

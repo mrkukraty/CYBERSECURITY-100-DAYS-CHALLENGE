@@ -1,0 +1,1698 @@
+# DAY 28 – REVIEW AND PRACTICE
+
+## Web Application Security • OWASP Top 10 • SQL Injection • XSS • Directory Traversal • CSRF • Web Scanning
+
+---
+
+# 1. DAY 28 OBJECTIVE
+
+Today you will consolidate:
+
+```text
+Day 22 → OWASP Top 10:2025
+Day 23 → SQL Injection
+Day 24 → XSS
+Day 25 → Directory Traversal
+Day 26 → CSRF
+Day 27 → Developing a Web Scanner
+```
+
+The goal is not just to memorize vulnerabilities.
+
+You should be able to:
+
+> **Identify → Understand → Test Safely → Validate → Assess Impact → Report → Remediate → Retest**
+
+---
+
+# 2. MASTER WEB SECURITY WORKFLOW
+
+```text
+                WEB APPLICATION
+                       │
+                       ▼
+                 Map Application
+                       │
+                       ▼
+                 Identify Inputs
+                       │
+          ┌────────────┼────────────┐
+          ▼            ▼            ▼
+        SQLi          XSS         CSRF
+          │            │            │
+          └────────────┼────────────┘
+                       ▼
+               Directory Traversal
+                       │
+                       ▼
+                Validate Findings
+                       │
+                       ▼
+                 Assess Impact
+                       │
+                       ▼
+                    Report
+                       │
+                       ▼
+                  Remediate
+                       │
+                       ▼
+                    Retest
+```
+
+---
+
+# 3. OWASP TOP 10:2025 REVISION
+
+| # | Category | Core Idea |
+|---|---|---|
+| A01 | Broken Access Control | User can perform actions they should not be allowed to perform |
+| A02 | Security Misconfiguration | Unsafe configuration/defaults |
+| A03 | Software Supply Chain Failures | Risks in dependencies/build/update supply chain |
+| A04 | Cryptographic Failures | Weak/missing protection of sensitive data |
+| A05 | Injection | Untrusted input changes interpreter behavior |
+| A06 | Insecure Design | Security weakness in architecture/design |
+| A07 | Authentication Failures | Weak or broken identity/session controls |
+| A08 | Software or Data Integrity Failures | Untrusted or tampered software/data |
+| A09 | Security Logging & Alerting Failures | Important security events aren't adequately logged/alerted |
+| A10 | Mishandling of Exceptional Conditions | Unsafe handling of errors/failures/unexpected states |
+
+### Memory
+
+> **ACCESS → CONFIG → SUPPLY → CRYPTO → INJECT → DESIGN → AUTH → INTEGRITY → LOG → EXCEPTION**
+
+---
+
+# 4. THE MOST IMPORTANT VULNERABILITIES
+
+## SQL Injection
+
+```text
+Untrusted input
+      ↓
+SQL query
+      ↓
+Query behavior altered
+```
+
+### Primary defense
+
+> **Parameterized queries / prepared statements**
+
+---
+
+## XSS
+
+```text
+Untrusted input
+      ↓
+Web application
+      ↓
+Browser
+      ↓
+Unexpected script execution
+```
+
+### Primary defense
+
+> **Context-appropriate output encoding**
+
+---
+
+## Directory Traversal
+
+```text
+User-controlled path
+       ↓
+Path processing
+       ↓
+Unintended filesystem location
+```
+
+### Primary defense
+
+> **Controlled identifiers + canonicalization + allowlisting + least privilege**
+
+---
+
+## CSRF
+
+```text
+Victim logged in
+       ↓
+Attacker-controlled cross-site request
+       ↓
+Victim browser
+       ↓
+Authenticated state-changing request
+```
+
+### Primary defenses
+
+> **CSRF tokens + appropriate SameSite policy + origin validation + safe HTTP method design**
+
+---
+
+# 5. SQLi VS XSS VS CSRF VS TRAVERSAL
+
+| Vulnerability | Main Target | Main Problem |
+|---|---|---|
+| SQLi | Database/interpreter | Input changes SQL behavior |
+| XSS | Browser | Untrusted content executes in browser |
+| CSRF | Application action | Victim browser sends unwanted authenticated request |
+| Directory Traversal | Filesystem | User-controlled path escapes intended location |
+
+### Memory
+
+```text
+SQLi        → DATABASE
+XSS         → BROWSER
+CSRF        → REQUEST
+Traversal   → FILESYSTEM
+```
+
+---
+
+# 6. AUTHENTICATION VS AUTHORIZATION
+
+This is one of the most important exam concepts.
+
+### Authentication
+
+> **Who are you?**
+
+Examples:
+
+```text
+Username + Password
+MFA
+Certificate
+Passkey
+```
+
+### Authorization
+
+> **What are you allowed to do?**
+
+Example:
+
+```text
+Normal User → View own profile
+Admin       → Manage users
+```
+
+### Memory
+
+> **AuthN = Identity**
+
+> **AuthZ = Permission**
+
+---
+
+# 7. BROKEN ACCESS CONTROL
+
+Example:
+
+```text
+User A
+  ↓
+/profile/123
+```
+
+User changes the identifier and accesses another user's resource without authorization.
+
+This can indicate an **IDOR / broken access control** issue.
+
+### Important
+
+The server must enforce authorization.
+
+Never trust:
+
+```text
+Hidden buttons
+Client-side checks
+URL obscurity
+Hidden fields
+```
+
+---
+
+# 8. SQL INJECTION REVISION
+
+## Definition
+
+> SQL Injection occurs when untrusted input is improperly incorporated into SQL and changes the intended query behavior.
+
+---
+
+## Common Locations
+
+```text
+Login
+Search
+Forms
+URL parameters
+API parameters
+Filters
+Admin interfaces
+```
+
+---
+
+## Types
+
+```text
+In-band
+Blind
+Out-of-band
+```
+
+Blind SQLi commonly includes:
+
+```text
+Boolean-based
+Time-based
+```
+
+---
+
+# 9. SQLi PRIMARY DEFENSE
+
+### Unsafe concept
+
+```python
+query = "SELECT * FROM users WHERE name = '" + username + "'"
+```
+
+### Safer approach
+
+```python
+query = "SELECT * FROM users WHERE name = ?"
+cursor.execute(query, (username,))
+```
+
+The key principle is:
+
+> **Keep SQL code separate from user-supplied data.**
+
+---
+
+# 10. SQLi DEFENSE STACK
+
+```text
+Parameterized Queries
+        +
+Input Validation
+        +
+Least-Privilege DB Account
+        +
+Safe Error Handling
+        +
+Security Testing
+```
+
+---
+
+# 11. XSS REVISION
+
+## Definition
+
+> XSS occurs when untrusted content is improperly handled and interpreted as executable content in a user's browser.
+
+### Three major types
+
+```text
+Reflected
+Stored
+DOM-based
+```
+
+### Memory
+
+> **R-S-D**
+
+**Reflected → Stored → DOM**
+
+---
+
+# 12. XSS LOCATIONS
+
+Potential inputs:
+
+```text
+Search
+Comments
+Profile fields
+Reviews
+Chat
+URL parameters
+Error messages
+Rich text
+API responses
+```
+
+---
+
+# 13. XSS DEFENSE
+
+Primary general defense:
+
+> **Context-appropriate output encoding**
+
+Additional defenses:
+
+```text
+CSP
+Safe DOM APIs
+Secure framework practices
+Input validation
+HttpOnly cookies
+Secure cookie configuration
+```
+
+---
+
+# 14. DANGEROUS DOM SINKS
+
+Examples:
+
+```javascript
+innerHTML
+outerHTML
+document.write()
+insertAdjacentHTML()
+```
+
+Prefer safe text handling where appropriate:
+
+```javascript
+textContent
+```
+
+### Important
+
+Frameworks such as React may automatically escape content, but unsafe raw-HTML features can reintroduce XSS risk.
+
+---
+
+# 15. DIRECTORY TRAVERSAL REVISION
+
+## Definition
+
+> Directory Traversal is a vulnerability in which improperly handled user-controlled path information allows access outside the intended directory.
+
+Common parameters:
+
+```text
+file=
+filename=
+path=
+document=
+download=
+template=
+page=
+image=
+resource=
+```
+
+---
+
+# 16. TRAVERSAL DEFENSE
+
+### Best approach
+
+Instead of accepting arbitrary filesystem paths:
+
+```text
+User
+ ↓
+File ID
+ ↓
+Server-side lookup
+ ↓
+Known file
+```
+
+Also use:
+
+```text
+Canonicalization
++
+Allowlisting
++
+Least privilege
++
+Safe archive extraction
+```
+
+---
+
+# 17. ZIP SLIP
+
+Zip Slip is a related path traversal problem involving archive extraction.
+
+Unsafe concept:
+
+```text
+Archive
+ ↓
+Malicious path
+ ↓
+Extraction
+ ↓
+File escapes extraction directory
+```
+
+Safe extraction must ensure each resolved destination remains inside the intended extraction directory.
+
+---
+
+# 18. CSRF REVISION
+
+## Definition
+
+> CSRF tricks a victim's browser into making an unwanted request to a website where the victim is authenticated.
+
+### Important condition
+
+Usually:
+
+```text
+Authenticated browser
++
+State-changing action
++
+Insufficient CSRF protection
+```
+
+---
+
+# 19. CSRF DEFENSE
+
+```text
+CSRF Token
++
+SameSite Cookie Policy
++
+Origin Validation
++
+Appropriate Referer Validation
++
+Safe HTTP Methods
+```
+
+### Remember
+
+> **Authentication does NOT equal CSRF protection.**
+
+---
+
+# 20. CSRF VS XSS
+
+### XSS
+
+Attacker-controlled content executes in the browser.
+
+### CSRF
+
+Victim browser is tricked into sending an unwanted request.
+
+```text
+XSS → EXECUTE
+CSRF → REQUEST
+```
+
+---
+
+# 21. CORS VS CSRF
+
+### CORS
+
+Controls whether browser JavaScript can access cross-origin responses according to server policy.
+
+### CSRF
+
+Concerns unwanted state-changing requests.
+
+```text
+CORS → Response access
+CSRF → Request forgery
+```
+
+They are not interchangeable defenses.
+
+---
+
+# 22. COOKIE SECURITY REVISION
+
+Important attributes:
+
+| Attribute | Main Purpose |
+|---|---|
+| Secure | Send cookie only over HTTPS |
+| HttpOnly | Prevent JavaScript from directly reading cookie |
+| SameSite | Control cross-site cookie behavior |
+
+### Memory
+
+> **H-S-S**
+
+HttpOnly → Secure → SameSite
+
+---
+
+# 23. WEB SCANNER REVISION
+
+A basic scanner performs:
+
+```text
+Target
+ ↓
+Scope Validation
+ ↓
+HTTP Request
+ ↓
+Parse Response
+ ↓
+Analyze
+ ↓
+Potential Findings
+ ↓
+Report
+```
+
+---
+
+# 24. PYTHON WEB SCANNER LIBRARIES
+
+| Library | Use |
+|---|---|
+| requests | HTTP |
+| BeautifulSoup | HTML |
+| urllib.parse | URL parsing |
+| argparse | CLI |
+| json | Structured reports |
+| logging | Logging |
+| datetime | Timestamps |
+
+---
+
+# 25. WEB SCANNER CHECKS
+
+A basic scanner can inspect:
+
+```text
+HTTP status
+Page title
+Links
+Forms
+Security headers
+Cookies
+HTTPS
+Server information
+Directory listing indicators
+```
+
+But:
+
+> **Scanner finding ≠ confirmed vulnerability**
+
+---
+
+# 26. FALSE POSITIVE VS FALSE NEGATIVE
+
+### False Positive
+
+Scanner says vulnerability exists:
+
+```text
+Scanner → Vulnerable
+Reality → Not vulnerable
+```
+
+### False Negative
+
+Scanner says nothing:
+
+```text
+Scanner → No finding
+Reality → Vulnerability exists
+```
+
+### Memory
+
+> **Positive = Scanner says YES**
+
+> **Negative = Scanner says NO**
+
+---
+
+# 27. NMAP VS WEB SCANNER
+
+| Nmap | Web Scanner |
+|---|---|
+| Network/service discovery | Web application analysis |
+| Ports | HTTP responses/forms/headers |
+| Services | Web attack surface |
+| OS/service information | Web configuration indicators |
+
+---
+
+# 28. NIKTO VS CUSTOM WEB SCANNER
+
+| Nikto | Custom Scanner |
+|---|---|
+| Ready-made web-server scanner | Your own logic |
+| Broad predefined checks | Custom checks |
+| Fast to use | Flexible |
+| Mature tool | Educational/development project |
+
+---
+
+# 29. WEB SECURITY TESTING FLOW
+
+```text
+1. Authorization
+        ↓
+2. Scope
+        ↓
+3. Reconnaissance
+        ↓
+4. Application Mapping
+        ↓
+5. Identify Inputs
+        ↓
+6. Authentication Testing
+        ↓
+7. Authorization Testing
+        ↓
+8. Input Validation Testing
+        ↓
+9. Session Testing
+        ↓
+10. Configuration Testing
+        ↓
+11. Validate Findings
+        ↓
+12. Risk Assessment
+        ↓
+13. Report
+        ↓
+14. Remediation
+        ↓
+15. Retest
+```
+
+---
+
+# 30. FINDING VS VULNERABILITY VS RISK
+
+These terms are often confused.
+
+### Finding
+
+Something the tester/scanner observed.
+
+### Vulnerability
+
+A confirmed weakness that can create a security problem.
+
+### Risk
+
+Potential loss or impact considering likelihood and consequences.
+
+```text
+Observation
+    ↓
+Finding
+    ↓
+Validation
+    ↓
+Vulnerability
+    ↓
+Risk Assessment
+```
+
+---
+
+# 31. WEB VULNERABILITY VALIDATION
+
+When a scanner reports a finding:
+
+```text
+1. Reproduce
+2. Check evidence
+3. Understand application behavior
+4. Determine security impact
+5. Eliminate false positive
+6. Document
+```
+
+Never report:
+
+> "Scanner said vulnerable."
+
+Instead report:
+
+> "Testing demonstrated..."
+
+---
+
+# 32. SECURITY TESTING PRINCIPLE
+
+Always establish a baseline.
+
+```text
+Normal Request
+      ↓
+Observe Normal Response
+      ↓
+Controlled Test
+      ↓
+Compare
+      ↓
+Determine Difference
+```
+
+This reduces false conclusions.
+
+---
+
+# 33. SAFE WEB EXPLOITATION LAB
+
+Use intentionally vulnerable applications such as:
+
+```text
+OWASP Juice Shop
+OWASP WebGoat
+DVWA
+```
+
+Use an isolated:
+
+```text
+Host-Only Network
+```
+
+or:
+
+```text
+Internal Network
+```
+
+### Lab architecture
+
+```text
+┌───────────────┐
+│ Kali Linux    │
+│ Browser/Tools │
+└───────┬───────┘
+        │
+        │ Isolated Lab
+        │
+        ▼
+┌───────────────┐
+│ Vulnerable    │
+│ Web App       │
+└───────────────┘
+```
+
+---
+
+# 34. PRACTICAL DAY 28 LAB
+
+## Task 1 – Application Mapping
+
+Identify:
+
+```text
+Homepage
+Login
+Forms
+Parameters
+API endpoints
+Static files
+```
+
+---
+
+## Task 2 – Security Headers
+
+Record:
+
+```text
+CSP
+HSTS
+X-Content-Type-Options
+Referrer-Policy
+Permissions-Policy
+```
+
+---
+
+## Task 3 – Authentication
+
+Ask:
+
+```text
+How does the application authenticate users?
+How are sessions maintained?
+Are cookies used?
+Are security attributes configured?
+```
+
+---
+
+## Task 4 – Authorization
+
+Use two test accounts in your lab:
+
+```text
+User A
+User B
+```
+
+Check whether each account can access only its authorized resources.
+
+---
+
+## Task 5 – SQLi Review
+
+Identify input points.
+
+Do not immediately attempt destructive actions.
+
+First establish:
+
+```text
+Normal input
+↓
+Normal response
+↓
+Controlled test
+↓
+Response difference
+↓
+Validation
+```
+
+---
+
+## Task 6 – XSS Review
+
+Identify:
+
+```text
+Search
+Comments
+Profile
+Feedback
+URL parameters
+```
+
+Determine where user input appears.
+
+Use harmless test markers in the lab.
+
+---
+
+## Task 7 – Traversal Review
+
+Identify file-related parameters:
+
+```text
+file
+filename
+document
+download
+```
+
+Determine whether the application safely resolves paths.
+
+Use only controlled files in the lab.
+
+---
+
+## Task 8 – CSRF Review
+
+Identify state-changing forms.
+
+Check:
+
+```text
+CSRF token
+SameSite
+Origin
+Referer
+HTTP method
+```
+
+---
+
+## Task 9 – Scanner
+
+Run your Python scanner.
+
+Record:
+
+```text
+Scanner finding
+Evidence
+Severity
+Manual validation result
+```
+
+---
+
+# 35. PRACTICE REPORT
+
+Use:
+
+```text
+Finding:
+[Name]
+
+Target:
+[Authorized lab target]
+
+Endpoint:
+[Endpoint]
+
+Parameter:
+[Parameter]
+
+Category:
+[OWASP category]
+
+Evidence:
+[Observed behavior]
+
+Impact:
+[Security impact]
+
+Severity:
+[Low/Medium/High/Critical]
+
+Recommendation:
+[Fix]
+
+Validation:
+[How finding was confirmed]
+
+Status:
+[Open/Fixed/Retested]
+```
+
+---
+
+# 36. HARD SCENARIO-BASED QUESTIONS
+
+## Q1
+
+A website requires a valid username and password before accessing `/account`.
+
+A tester discovers that changing an object identifier allows one user to access another user's information.
+
+What is the primary vulnerability?
+
+A. CSRF  
+B. Broken Access Control  
+C. XSS  
+D. Directory Traversal
+
+**Answer: B**
+
+---
+
+## Q2
+
+A scanner reports missing CSP.
+
+The tester verifies that all output is correctly encoded and no XSS is present.
+
+What is the correct conclusion?
+
+A. XSS is confirmed  
+B. CSP absence may be a defense-in-depth weakness, but XSS is not proven  
+C. SQL Injection is confirmed  
+D. CSRF is confirmed
+
+**Answer: B**
+
+---
+
+## Q3
+
+A user enters data into a search field. The application places the value directly into an SQL query without parameterization.
+
+What vulnerability should be investigated?
+
+A. SQL Injection  
+B. CSRF  
+C. Directory Traversal  
+D. CORS
+
+**Answer: A**
+
+---
+
+## Q4
+
+A comment submitted by one user is displayed to many other users, and unsafe browser-executable content can be interpreted when they view the comment.
+
+Which vulnerability is most likely?
+
+A. Stored XSS  
+B. CSRF  
+C. SQLi  
+D. SSRF
+
+**Answer: A**
+
+---
+
+## Q5
+
+An application accepts a filename from the user and constructs a filesystem path directly from it without canonicalization.
+
+What should be investigated?
+
+A. Directory Traversal  
+B. CSRF  
+C. CORS  
+D. DNS poisoning
+
+**Answer: A**
+
+---
+
+## Q6
+
+A user is authenticated using a session cookie. A state-changing POST request contains no effective CSRF protection.
+
+What vulnerability should be investigated?
+
+A. CSRF  
+B. SQL Injection  
+C. XSS only  
+D. Port scanning
+
+**Answer: A**
+
+---
+
+## Q7
+
+A scanner reports a missing CSRF token because it cannot find a form field named `csrf_token`. The application actually uses a custom request header and server-side validation.
+
+What is the likely result?
+
+A. False positive  
+B. Confirmed CSRF  
+C. Confirmed SQLi  
+D. Confirmed XSS
+
+**Answer: A**
+
+---
+
+## Q8
+
+Which is the best defense against SQL Injection?
+
+A. Parameterized queries  
+B. Hiding the database hostname  
+C. Using HTTPS only  
+D. Changing the website color
+
+**Answer: A**
+
+---
+
+## Q9
+
+Which is the strongest general defense against XSS?
+
+A. Context-appropriate output encoding  
+B. Changing the server port  
+C. Hiding the login page  
+D. Using FTP
+
+**Answer: A**
+
+---
+
+## Q10
+
+Which approach is safest for handling downloadable files?
+
+A. Accept arbitrary filesystem paths from the client  
+B. Use controlled file identifiers and server-side path resolution  
+C. Trust client-side validation  
+D. Store all files in the operating-system root directory
+
+**Answer: B**
+
+---
+
+# 37. HARDER SCENARIOS
+
+## Q11
+
+A web application uses:
+
+```text
+Cookie: session=...
+SameSite=Lax
+```
+
+but a sensitive state-changing operation can still be triggered through a browser navigation pattern allowed by the application's design.
+
+What is the best conclusion?
+
+A. SameSite automatically guarantees complete CSRF protection  
+B. CSRF risk must be evaluated according to the actual request and browser behavior  
+C. XSS is confirmed  
+D. SQL Injection is confirmed
+
+**Answer: B**
+
+---
+
+## Q12
+
+A scanner identifies an endpoint:
+
+```text
+POST /transfer
+```
+
+but does not automatically test it.
+
+Why is this a reasonable scanner design?
+
+A. State-changing endpoints can have real-world consequences, so automatic submission should be controlled  
+B. POST is not an HTTP method  
+C. POST cannot be scanned  
+D. HTTPS prevents POST
+
+**Answer: A**
+
+---
+
+## Q13
+
+A tester discovers that a user can change their own profile using:
+
+```text
+PUT /users/100
+```
+
+and changing `100` to another user's identifier exposes another user's data.
+
+What should be investigated?
+
+A. Broken Access Control / IDOR  
+B. CSRF only  
+C. CSP  
+D. Directory listing
+
+**Answer: A**
+
+---
+
+## Q14
+
+A scanner returns:
+
+```text
+No vulnerabilities found
+```
+
+but the application has a business rule allowing a normal user to approve their own financial transaction.
+
+Why might the scanner miss it?
+
+A. Business logic vulnerabilities often require contextual/manual analysis  
+B. HTTP cannot test business logic  
+C. HTTPS hides the vulnerability  
+D. JSON causes the scanner to fail
+
+**Answer: A**
+
+---
+
+## Q15
+
+A website properly prevents SQL Injection but contains stored XSS.
+
+What does this demonstrate?
+
+A. Fixing one vulnerability does not automatically fix other vulnerability classes  
+B. SQL Injection always causes XSS  
+C. XSS and SQLi are identical  
+D. The application is secure
+
+**Answer: A**
+
+---
+
+## Q16
+
+A developer says:
+
+> "We use HTTPS, so CSRF is impossible."
+
+What is the correct response?
+
+A. HTTPS alone does not provide CSRF protection  
+B. Correct  
+C. HTTPS disables cookies  
+D. HTTPS prevents XSS
+
+**Answer: A**
+
+---
+
+## Q17
+
+A developer says:
+
+> "We use HttpOnly cookies, therefore CSRF is impossible."
+
+What is the correct response?
+
+A. Incorrect; HttpOnly primarily prevents JavaScript from reading the cookie and does not by itself prevent CSRF  
+B. Correct  
+C. HttpOnly disables HTTPS  
+D. HttpOnly prevents SQL Injection
+
+**Answer: A**
+
+---
+
+## Q18
+
+A tester finds a directory listing containing backup files.
+
+What should happen next?
+
+A. Assess whether sensitive information is exposed and document the finding  
+B. Immediately delete the files  
+C. Publish the files  
+D. Modify production data
+
+**Answer: A**
+
+---
+
+## Q19
+
+A scanner discovers:
+
+```text
+Server: ExampleServer/1.2
+```
+
+What is the best interpretation?
+
+A. Information disclosure/fingerprinting indicator  
+B. Guaranteed remote code execution  
+C. Guaranteed SQL Injection  
+D. Guaranteed CSRF
+
+**Answer: A**
+
+---
+
+## Q20
+
+A scanner detects an input parameter that appears to reach a database query. It does not report SQL Injection.
+
+What should a skilled tester conclude?
+
+A. No SQL Injection exists  
+B. The scanner may have a false negative; manual testing is still necessary within scope  
+C. The server is secure  
+D. XSS is present
+
+**Answer: B**
+
+---
+
+# 38. MATCH THE VULNERABILITY
+
+| Scenario | Answer |
+|---|---|
+| User input changes SQL query behavior | SQL Injection |
+| Stored user content executes in browser | Stored XSS |
+| Victim browser sends unwanted authenticated action | CSRF |
+| File path escapes intended directory | Directory Traversal |
+| User accesses another user's resource | Broken Access Control |
+| Unsafe default/debug configuration | Security Misconfiguration |
+| Weak encryption/key handling | Cryptographic Failures |
+| Vulnerable dependency/build pipeline | Software Supply Chain Failure |
+
+---
+
+# 39. IDENTIFY THE DEFENSE
+
+| Vulnerability | Main Defense |
+|---|---|
+| SQL Injection | Parameterized Queries |
+| XSS | Output Encoding |
+| CSRF | CSRF Token / SameSite / Origin Validation |
+| Directory Traversal | Controlled IDs + Canonicalization |
+| Broken Access Control | Server-side Authorization |
+| Weak Authentication | Strong Authentication/MFA/secure sessions |
+| Supply Chain | Dependency/Supply-chain controls |
+| Cryptographic Failure | Strong cryptography + proper key management |
+
+---
+
+# 40. FIND THE WRONG STATEMENT
+
+### Statement A
+
+> "HTTPS prevents SQL Injection."
+
+❌ Wrong.
+
+HTTPS protects data in transit; it does not fix unsafe SQL construction.
+
+---
+
+### Statement B
+
+> "HttpOnly prevents JavaScript from directly reading a cookie."
+
+✅ Correct.
+
+---
+
+### Statement C
+
+> "A CSRF token should be validated server-side."
+
+✅ Correct.
+
+---
+
+### Statement D
+
+> "A missing CSP header proves XSS."
+
+❌ Wrong.
+
+---
+
+### Statement E
+
+> "Nmap is mainly a network/service discovery tool."
+
+✅ Correct.
+
+---
+
+# 41. DAY 22–28 MASTER COMPARISON
+
+| Day | Topic | Main Skill |
+|---|---|---|
+| 22 | OWASP Top 10 | Understand web risks |
+| 23 | SQL Injection | Database input security |
+| 24 | XSS | Browser-side input security |
+| 25 | Directory Traversal | Filesystem/path security |
+| 26 | CSRF | Request/session security |
+| 27 | Web Scanner | Automate web checks |
+| 28 | Review | Combine everything |
+
+---
+
+# 42. MASTER MEMORY MAP
+
+```text
+OWASP
+  │
+  ├── Access Control
+  │
+  ├── Configuration
+  │
+  ├── Supply Chain
+  │
+  ├── Cryptography
+  │
+  ├── Injection
+  │       └── SQLi
+  │
+  ├── Design
+  │
+  ├── Authentication
+  │       └── CSRF/session context
+  │
+  ├── Integrity
+  │
+  ├── Logging
+  │
+  └── Exceptions
+
+Other important web vulnerabilities:
+        │
+        ├── XSS
+        ├── Directory Traversal
+        └── CSRF
+```
+
+---
+
+# 43. 10-SECOND DIFFERENCE TABLE
+
+```text
+SQLi
+→ Database
+
+XSS
+→ Browser
+
+CSRF
+→ Authenticated Request
+
+Traversal
+→ Filesystem
+
+Broken Access Control
+→ Authorization
+
+CORS
+→ Cross-Origin Response Access
+
+CSP
+→ Browser Content Control
+
+Nmap
+→ Network Discovery
+
+Nikto
+→ Web Server Checks
+
+Web Scanner
+→ Automated Web Analysis
+```
+
+---
+
+# 44. EXAM RAPID-FIRE
+
+### Q: SQL Injection primary defense?
+
+**A:** Parameterized queries.
+
+### Q: XSS primary general defense?
+
+**A:** Context-appropriate output encoding.
+
+### Q: Three XSS types?
+
+**A:** Reflected, Stored, DOM-based.
+
+### Q: CSRF primary defense?
+
+**A:** CSRF token, with appropriate SameSite/origin defenses.
+
+### Q: Directory Traversal defense?
+
+**A:** Controlled identifiers, canonicalization, allowlisting and least privilege.
+
+### Q: Authentication?
+
+**A:** Who are you?
+
+### Q: Authorization?
+
+**A:** What are you allowed to do?
+
+### Q: HttpOnly?
+
+**A:** Restricts JavaScript access to the cookie.
+
+### Q: Secure cookie?
+
+**A:** Cookie should be sent over HTTPS.
+
+### Q: SameSite?
+
+**A:** Controls cross-site cookie behavior.
+
+### Q: Scanner finding?
+
+**A:** Potential issue requiring validation.
+
+### Q: False positive?
+
+**A:** Scanner reports a problem that isn't actually present.
+
+### Q: False negative?
+
+**A:** Scanner misses an existing problem.
+
+### Q: Nmap?
+
+**A:** Network/service discovery and scanning.
+
+### Q: Nikto?
+
+**A:** Web-server-focused checks.
+
+---
+
+# 45. FINAL DAY 28 CHALLENGE
+
+Before moving to Day 29, you should be able to answer these without notes:
+
+```text
+□ What is OWASP Top 10?
+□ What is Broken Access Control?
+□ What is SQL Injection?
+□ What causes SQL Injection?
+□ How do parameterized queries prevent SQLi?
+□ What is XSS?
+□ What are the three major XSS types?
+□ Why is output encoding important?
+□ What is Directory Traversal?
+□ Why is canonicalization important?
+□ What is Zip Slip?
+□ What is CSRF?
+□ Why does authentication not prevent CSRF?
+□ What is a CSRF token?
+□ What does SameSite do?
+□ What is the difference between XSS and CSRF?
+□ What is the difference between CORS and CSRF?
+□ What does HttpOnly do?
+□ What does Secure do?
+□ What does a web scanner do?
+□ Why can a scanner produce false positives?
+□ Why can a scanner produce false negatives?
+□ Why must scanner findings be manually validated?
+□ Why is scope control important?
+□ Why should scanners use timeouts and rate limits?
+```
+
+---
+
+# 🔥 MASTER SECURITY FORMULA
+
+```text
+DISCOVER
+   ↓
+MAP
+   ↓
+IDENTIFY INPUTS
+   ↓
+TEST AUTHENTICATION
+   ↓
+TEST AUTHORIZATION
+   ↓
+TEST INPUT HANDLING
+   ↓
+TEST SESSIONS
+   ↓
+CHECK CONFIGURATION
+   ↓
+VALIDATE
+   ↓
+ASSESS IMPACT
+   ↓
+REPORT
+   ↓
+REMEDIATE
+   ↓
+RETEST
+```
+
+---
+
+# 🧠 ULTIMATE MEMORY TRICK
+
+Remember the four major vulnerabilities from Days 23–26 as:
+
+## **D-B-F-R**
+
+**D → Database → SQL Injection**
+
+**B → Browser → XSS**
+
+**F → Filesystem → Directory Traversal**
+
+**R → Request → CSRF**
+
+```text
+SQLi       → DATABASE
+XSS        → BROWSER
+Traversal  → FILESYSTEM
+CSRF       → REQUEST
+```
+
+---
+
+# ⭐ DAY 28 ONE-LINE EXAM ANSWER
+
+> **Web application security testing involves systematically mapping an authorized application, identifying attack surfaces and inputs, testing authentication, authorization, input handling, sessions and configuration, validating potential vulnerabilities such as SQL Injection, XSS, Directory Traversal and CSRF, assessing their impact, reporting findings, applying remediation and retesting.**
+
+---
+
+# 🏆 DAY 28 MASTER CHECKPOINT
+
+If you remember only this:
+
+```text
+SQLi
+→ Parameterized Queries
+
+XSS
+→ Output Encoding
+
+Traversal
+→ Canonicalize + Controlled File IDs
+
+CSRF
+→ CSRF Token + SameSite + Origin Validation
+
+Access Control
+→ Server-side Authorization
+
+Scanner
+→ Finds POTENTIAL issues
+
+Validation
+→ Confirms REAL issues
+
+Report
+→ Evidence + Impact + Fix
+
+Retest
+→ Verify the fix
+```
+
+## Golden Rule
+
+> **Never confuse detection with exploitation, and never confuse a scanner finding with a confirmed vulnerability. Test only within explicit authorization and scope.**

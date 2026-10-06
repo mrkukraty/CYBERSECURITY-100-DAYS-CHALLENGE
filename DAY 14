@@ -1,0 +1,1345 @@
+# DAY 14 – REVIEW AND PRACTICE
+## Consolidating Information-Gathering Techniques
+
+---
+
+# 1. What You Have Learned So Far
+
+Your information-gathering journey has been:
+
+```text
+Day 7
+Penetration Testing
+        ↓
+Day 8
+Reconnaissance
+        ↓
+Day 9
+OSINT
+        ↓
+Day 10
+DNS Enumeration
+        ↓
+Day 11
+Nmap / Network Scanning
+        ↓
+Day 12
+Building an OSINT Tool
+        ↓
+Day 13
+Social Engineering
+```
+
+The important concept is understanding **how these topics connect**.
+
+---
+
+# 2. Complete Information-Gathering Workflow
+
+A simplified authorized security-assessment workflow:
+
+```text
+                    TARGET
+                       ↓
+              Scope & Authorization
+                       ↓
+                RECONNAISSANCE
+                       ↓
+          ┌────────────┴────────────┐
+          ↓                         ↓
+      PASSIVE                     ACTIVE
+          ↓                         ↓
+        OSINT                  DNS / Nmap
+          ↓                         ↓
+   Public Information        Technical Information
+          └────────────┬────────────┘
+                       ↓
+                  ENUMERATION
+                       ↓
+              INFORMATION ANALYSIS
+                       ↓
+             VULNERABILITY ASSESSMENT
+                       ↓
+                 REPORTING
+```
+
+### Important
+
+Not every assessment uses every technique.
+
+The exact workflow depends on:
+
+- Scope
+- Authorization
+- Target
+- Rules of engagement
+- Assessment objective
+
+---
+
+# 3. Information Gathering vs Exploitation
+
+This distinction is very important for exams.
+
+### Information Gathering
+
+Goal:
+
+> **Understand the target.**
+
+Examples:
+
+- Domain information
+- DNS records
+- Subdomains
+- IP addresses
+- Open ports
+- Services
+- Public technologies
+
+### Exploitation
+
+Goal:
+
+> **Demonstrate that a vulnerability can be exploited within the authorized scope.**
+
+### Memory
+
+> **Recon = Know the Target**
+
+> **Exploitation = Test the Weakness**
+
+---
+
+# 4. Passive vs Active Reconnaissance
+
+| Passive | Active |
+|---|---|
+| Does not directly interact with target infrastructure | Directly interacts with target infrastructure |
+| Search engines | DNS queries |
+| Public reports | Nmap |
+| Public repositories | HTTP requests |
+| Public records | Service detection |
+| Certificate information | Authorized scanning |
+
+### Memory
+
+> **Passive = Observe**
+
+> **Active = Interact**
+
+---
+
+# 5. OSINT Revision
+
+**OSINT = Open-Source Intelligence**
+
+It involves collecting and analyzing publicly available information.
+
+### Common OSINT Sources
+
+```text
+Search Engines
+     ↓
+Public Websites
+     ↓
+Public Documents
+     ↓
+Public Repositories
+     ↓
+DNS Information
+     ↓
+Certificate Information
+     ↓
+Public APIs
+```
+
+---
+
+# 6. OSINT Tools
+
+| Tool | Main Purpose |
+|---|---|
+| Maltego | Relationship/link analysis |
+| Recon-ng | Reconnaissance framework |
+| Shodan | Search for indexed Internet-exposed services/devices |
+| theHarvester | Public domain/email-related collection |
+| Amass | Attack-surface/subdomain discovery |
+| SpiderFoot | Automated OSINT |
+
+### Memory
+
+> **Maltego = MAP**
+
+> **Recon-ng = RECON**
+
+> **Shodan = SEARCH**
+
+> **Nmap = SCAN**
+
+---
+
+# 7. Maltego
+
+### Purpose
+
+Visualize relationships between entities.
+
+Example:
+
+```text
+Person
+  ↓
+Organization
+  ↓
+Domain
+  ↓
+IP Address
+  ↓
+Infrastructure
+```
+
+### Memory
+
+> **Maltego = Map Relationships**
+
+---
+
+# 8. Recon-ng
+
+Recon-ng is a modular reconnaissance framework.
+
+Important concepts:
+
+- Workspace
+- Modules
+- Data collection
+- Reconnaissance automation
+
+### Memory
+
+> **Recon-ng = Recon Framework**
+
+---
+
+# 9. Shodan
+
+Shodan is a search engine that indexes information about Internet-connected devices and services.
+
+### Important Difference
+
+```text
+Shodan
+   ↓
+Searches indexed information
+
+Nmap
+   ↓
+Actively scans an authorized target
+```
+
+### Exam Question
+
+**Which is active scanning?**
+
+**Answer: Nmap**
+
+---
+
+# 10. DNS Revision
+
+**DNS = Domain Name System**
+
+It translates domain names and provides other DNS-related information.
+
+Example:
+
+```text
+example.com
+      ↓
+DNS
+      ↓
+IP Address
+```
+
+---
+
+# 11. Important DNS Records
+
+| Record | Purpose |
+|---|---|
+| A | IPv4 address |
+| AAAA | IPv6 address |
+| CNAME | Alias |
+| MX | Mail server |
+| NS | Name server |
+| TXT | Text/policy/verification information |
+| SOA | Start of Authority |
+| PTR | Reverse DNS |
+| SRV | Service information |
+
+### Memory
+
+> **A = Address**
+
+> **AAAA = IPv6 Address**
+
+> **MX = Mail**
+
+> **NS = Name Server**
+
+> **CNAME = Alias**
+
+> **PTR = Reverse**
+
+---
+
+# 12. Forward vs Reverse DNS
+
+### Forward DNS
+
+```text
+Domain
+  ↓
+IP Address
+```
+
+Example:
+
+```text
+example.com → IP
+```
+
+### Reverse DNS
+
+```text
+IP Address
+  ↓
+Hostname
+```
+
+### Memory
+
+> **Forward = Name → IP**
+
+> **Reverse = IP → Name**
+
+---
+
+# 13. Zone Transfer
+
+A DNS zone transfer is a legitimate mechanism for transferring DNS zone information between authoritative servers.
+
+Two important types:
+
+### AXFR
+
+Full zone transfer.
+
+> **AXFR = ALL**
+
+### IXFR
+
+Incremental zone transfer.
+
+> **IXFR = INCREMENTAL**
+
+Unauthorized or improperly restricted zone transfers can expose DNS information.
+
+---
+
+# 14. Subdomain Enumeration
+
+Subdomain enumeration attempts to identify subdomains.
+
+Example:
+
+```text
+example.com
+     |
+     +-- mail.example.com
+     |
+     +-- portal.example.com
+     |
+     +-- vpn.example.com
+```
+
+### Important
+
+Subdomain enumeration is **one part of DNS/reconnaissance**, not the entire process.
+
+---
+
+# 15. Nmap Revision
+
+**Nmap = Network Mapper**
+
+Used for:
+
+- Host discovery
+- Port scanning
+- Service detection
+- Version detection
+- OS detection
+- NSE scripting
+
+---
+
+# 16. Nmap Core Workflow
+
+Remember:
+
+> **H-P-S-V-O-S**
+
+**H** → Host discovery  
+**P** → Port scanning  
+**S** → Service detection  
+**V** → Version detection  
+**O** → OS detection  
+**S** → Scripts
+
+---
+
+# 17. Important Nmap Options
+
+| Option | Meaning |
+|---|---|
+| `-sn` | Host discovery |
+| `-p` | Specify ports |
+| `-p-` | All TCP ports |
+| `-sS` | SYN scan |
+| `-sT` | TCP connect scan |
+| `-sU` | UDP scan |
+| `-sV` | Service/version detection |
+| `-O` | OS detection |
+| `-A` | Advanced/aggressive detection |
+| `-sC` | Default NSE scripts |
+| `-oN` | Normal output |
+| `-oX` | XML output |
+| `-oA` | Multiple output formats |
+
+Only use scanning options against systems you are authorized to assess.
+
+---
+
+# 18. Nmap Port States
+
+| State | Meaning |
+|---|---|
+| Open | A service is listening |
+| Closed | Reachable but no service listening |
+| Filtered | Filtering prevents determining the state |
+| Open\|Filtered | Cannot distinguish |
+| Closed\|Filtered | Cannot distinguish |
+
+### Memory
+
+> **Open = Service**
+
+> **Closed = No Service**
+
+> **Filtered = Filtering**
+
+---
+
+# 19. Common Ports
+
+| Port | Service |
+|---:|---|
+| 21 | FTP |
+| 22 | SSH |
+| 23 | Telnet |
+| 25 | SMTP |
+| 53 | DNS |
+| 80 | HTTP |
+| 110 | POP3 |
+| 143 | IMAP |
+| 443 | HTTPS |
+| 445 | SMB |
+| 3306 | MySQL |
+| 3389 | RDP |
+| 5432 | PostgreSQL |
+| 8080 | Alternate HTTP |
+
+### Exam Tip
+
+Do not assume:
+
+> "Port = guaranteed service."
+
+Port numbers are conventions. Always interpret actual scan/service information.
+
+---
+
+# 20. Nmap Does NOT Automatically Mean Vulnerability
+
+Suppose Nmap reports:
+
+```text
+80/tcp open http
+```
+
+This means:
+
+> A service appears to be accessible on TCP port 80.
+
+It does **not** automatically mean:
+
+> The service is vulnerable.
+
+### Correct workflow
+
+```text
+Open Port
+   ↓
+Identify Service
+   ↓
+Identify Version
+   ↓
+Assess Potential Vulnerabilities
+   ↓
+Validate
+```
+
+---
+
+# 21. OSINT Tool Building Revision
+
+Your Python OSINT tool follows:
+
+```text
+Input
+ ↓
+Validation
+ ↓
+Collection
+ ↓
+Extraction
+ ↓
+Verification
+ ↓
+Storage
+ ↓
+Reporting
+```
+
+### Important Python Libraries
+
+| Library | Purpose |
+|---|---|
+| `requests` | HTTP requests |
+| `BeautifulSoup` | HTML parsing |
+| `re` | Regular expressions |
+| `json` | JSON |
+| `csv` | CSV |
+| `socket` | Basic network/DNS functions |
+| `argparse` | Command-line arguments |
+| `logging` | Logging |
+
+---
+
+# 22. Social Engineering Revision
+
+**Social engineering = psychological manipulation of people.**
+
+Common psychological triggers:
+
+- Authority
+- Urgency
+- Fear
+- Curiosity
+- Trust
+- Scarcity
+- Reciprocity
+
+---
+
+# 23. Phishing Types
+
+| Type | Meaning |
+|---|---|
+| Phishing | General fraudulent communication |
+| Spear phishing | Targeted phishing |
+| Whaling | Executive/high-value target |
+| Vishing | Voice phishing |
+| Smishing | SMS phishing |
+
+### Memory
+
+> **Spear = Specific**
+
+> **Whale = Big Target**
+
+> **Vishing = Voice**
+
+> **Smishing = SMS**
+
+---
+
+# 24. Other Social Engineering Techniques
+
+| Technique | Meaning |
+|---|---|
+| Pretexting | Fake scenario/story |
+| Baiting | Attractive lure |
+| Quid Pro Quo | Something for something |
+| Tailgating | Following someone into restricted area |
+| Impersonation | Pretending to be someone else |
+| Scareware | Fear-based deception |
+
+---
+
+# 25. Information Gathering + Social Engineering
+
+These topics can connect.
+
+Example:
+
+```text
+Public Information
+       ↓
+OSINT
+       ↓
+Target Information
+       ↓
+Social Engineering
+       ↓
+Victim Manipulation
+```
+
+This is why organizations should protect both:
+
+```text
+Technical Attack Surface
++
+Human Attack Surface
+```
+
+---
+
+# 26. The Complete Recon Picture
+
+Think of reconnaissance as a funnel:
+
+```text
+                RECON
+                  ↓
+       ┌──────────┴──────────┐
+       ↓                     ↓
+    PASSIVE                 ACTIVE
+       ↓                     ↓
+     OSINT             DNS / Nmap
+       ↓                     ↓
+Public Information     Technical Information
+       └──────────┬──────────┘
+                  ↓
+             ENUMERATION
+                  ↓
+             ANALYSIS
+                  ↓
+       Vulnerability Assessment
+```
+
+---
+
+# 27. Scenario: Identify the Technique
+
+### Scenario 1
+
+A security analyst searches public websites and repositories for information about an authorized company.
+
+**Answer:** Passive OSINT.
+
+---
+
+### Scenario 2
+
+An authorized tester uses Nmap to identify open ports.
+
+**Answer:** Active reconnaissance / network scanning.
+
+---
+
+### Scenario 3
+
+A tester discovers an organization's MX records.
+
+**Answer:** DNS enumeration.
+
+---
+
+### Scenario 4
+
+A search engine displays information about Internet-connected services based on previously collected data.
+
+**Answer:** Shodan-style indexed exposure search.
+
+---
+
+### Scenario 5
+
+An employee receives a fake email asking for login information.
+
+**Answer:** Phishing.
+
+---
+
+### Scenario 6
+
+A fake email is customized specifically for the organization's finance manager.
+
+**Answer:** Spear phishing.
+
+---
+
+### Scenario 7
+
+A phone caller pretends to be IT support and asks for an OTP.
+
+**Answer:** Vishing + social engineering.
+
+---
+
+# 28. Scenario: Choose the Correct Tool
+
+### Question 1
+
+You want to visually map relationships between domains, people, and organizations.
+
+**Answer:** Maltego.
+
+---
+
+### Question 2
+
+You want a modular reconnaissance framework.
+
+**Answer:** Recon-ng.
+
+---
+
+### Question 3
+
+You want to search indexed information about Internet-connected services.
+
+**Answer:** Shodan.
+
+---
+
+### Question 4
+
+You want to actively scan an authorized network.
+
+**Answer:** Nmap.
+
+---
+
+### Question 5
+
+You want to automate basic web information collection using your own Python program.
+
+**Answer:** Python + `requests` / BeautifulSoup.
+
+---
+
+# 29. Information Gathering Comparison
+
+| Technique | Passive/Active | Main Goal |
+|---|---|---|
+| Search engines | Passive | Public information |
+| Public repositories | Passive | Public technical information |
+| Certificate information | Passive | Domain discovery |
+| Shodan | Primarily indexed/passive search | Internet exposure |
+| DNS queries | Active | DNS information |
+| Nmap | Active | Network discovery |
+| HTTP request | Active | Web information |
+| Social engineering | Human interaction | Manipulation |
+
+---
+
+# 30. Reconnaissance vs Enumeration
+
+### Reconnaissance
+
+Broad information gathering.
+
+Example:
+
+```text
+Company
+Domain
+Employees
+Technology
+Public IP information
+```
+
+### Enumeration
+
+More detailed identification of available resources/services.
+
+Example:
+
+```text
+Hosts
+Ports
+Services
+Versions
+DNS records
+```
+
+### Memory
+
+> **Recon = Discover the environment**
+
+> **Enumeration = Detail the environment**
+
+---
+
+# 31. Vulnerability Assessment vs Information Gathering
+
+| Information Gathering | Vulnerability Assessment |
+|---|---|
+| Collect information | Identify potential weaknesses |
+| Understand target | Assess security weaknesses |
+| Domains | Vulnerable versions |
+| IP addresses | Misconfigurations |
+| Ports | Known vulnerabilities |
+| Services | Security findings |
+
+### Key Point
+
+> **Information gathering provides context for later security assessment.**
+
+---
+
+# 32. Review Questions
+
+## Q1
+
+What is OSINT?
+
+**Answer:** Open-Source Intelligence.
+
+---
+
+## Q2
+
+What is the difference between passive and active reconnaissance?
+
+**Answer:** Passive recon gathers information without directly interacting with target infrastructure; active recon interacts with it.
+
+---
+
+## Q3
+
+What tool is commonly used for network scanning?
+
+**Answer:** Nmap.
+
+---
+
+## Q4
+
+What does `-sV` do in Nmap?
+
+**Answer:** Service/version detection.
+
+---
+
+## Q5
+
+What does `-O` attempt to identify?
+
+**Answer:** Operating system information.
+
+---
+
+## Q6
+
+What does AXFR mean?
+
+**Answer:** Full DNS zone transfer.
+
+---
+
+## Q7
+
+What does IXFR mean?
+
+**Answer:** Incremental DNS zone transfer.
+
+---
+
+## Q8
+
+What DNS record identifies mail servers?
+
+**Answer:** MX.
+
+---
+
+## Q9
+
+What DNS record is used for an IPv4 address?
+
+**Answer:** A.
+
+---
+
+## Q10
+
+What DNS record is used for IPv6?
+
+**Answer:** AAAA.
+
+---
+
+## Q11
+
+What is phishing?
+
+**Answer:** Fraudulent communication designed to manipulate a victim.
+
+---
+
+## Q12
+
+What is spear phishing?
+
+**Answer:** Targeted phishing against a specific person or organization.
+
+---
+
+## Q13
+
+What is vishing?
+
+**Answer:** Voice/phone phishing.
+
+---
+
+## Q14
+
+What is smishing?
+
+**Answer:** SMS/text phishing.
+
+---
+
+## Q15
+
+What is tailgating?
+
+**Answer:** Following an authorized person into a restricted physical area.
+
+---
+
+# 33. HARD SCENARIO-BASED MCQs
+
+## Q1
+
+A security analyst is investigating an authorized organization. They find a public repository containing an old document that mentions several internal hostnames.
+
+What technique is being used?
+
+A. Exploitation  
+B. Passive OSINT  
+C. Privilege escalation  
+D. Password cracking
+
+**Answer: B. Passive OSINT**
+
+---
+
+## Q2
+
+A tester performs a scan and receives:
+
+```text
+22/tcp open ssh
+80/tcp open http
+443/tcp open https
+```
+
+What can the tester conclude immediately?
+
+A. The system is compromised  
+B. All three services are vulnerable  
+C. Services appear accessible on those ports  
+D. The server is using Linux
+
+**Answer: C. Services appear accessible on those ports**
+
+---
+
+## Q3
+
+A tester wants to identify the software version associated with an accessible service.
+
+Which Nmap option is most relevant?
+
+A. `-O`  
+B. `-sV`  
+C. `-sn`  
+D. `-p-`
+
+**Answer: B. `-sV`**
+
+---
+
+## Q4
+
+A domain has:
+
+```text
+MX → mail.example.com
+```
+
+What does this information primarily indicate?
+
+A. Web server  
+B. Mail-related DNS information  
+C. DNS administrator password  
+D. Operating system
+
+**Answer: B. Mail-related DNS information**
+
+---
+
+## Q5
+
+An attacker sends a highly customized message to the finance manager requesting an urgent payment.
+
+Which combination is most appropriate?
+
+A. Spear phishing + social engineering  
+B. DNS enumeration + Nmap  
+C. Port scanning + hashing  
+D. Brute force + encryption
+
+**Answer: A. Spear phishing + social engineering**
+
+---
+
+## Q6
+
+A tester searches Shodan for information about a target organization's Internet-facing services.
+
+What is the key distinction from Nmap?
+
+A. Shodan is primarily an indexed search service; Nmap actively probes targets  
+B. Nmap only searches public documents  
+C. Shodan always exploits vulnerabilities  
+D. There is no difference
+
+**Answer: A**
+
+---
+
+## Q7
+
+A user receives an unexpected MFA approval request and did not attempt to log in.
+
+What is the safest response?
+
+A. Approve it  
+B. Deny/report it and investigate through trusted channels  
+C. Send the OTP to IT  
+D. Ignore all future MFA requests
+
+**Answer: B**
+
+---
+
+## Q8
+
+A DNS server improperly allows an unauthorized party to retrieve a complete DNS zone.
+
+Which DNS operation is associated with a full zone transfer?
+
+A. PTR  
+B. MX  
+C. AXFR  
+D. IXFR
+
+**Answer: C. AXFR**
+
+---
+
+## Q9
+
+An analyst discovers a public page containing outdated information.
+
+What should they do before treating it as a reliable finding?
+
+A. Immediately report it as fact  
+B. Verify it using additional reliable sources  
+C. Exploit the target  
+D. Delete the page
+
+**Answer: B. Verify it using additional reliable sources**
+
+---
+
+## Q10
+
+A security assessment starts with:
+
+```text
+Public websites
+↓
+DNS
+↓
+Network scanning
+↓
+Service identification
+```
+
+What overall activity does this represent?
+
+A. Information gathering/reconnaissance  
+B. Data destruction  
+C. Incident recovery  
+D. Malware analysis
+
+**Answer: A. Information gathering/reconnaissance**
+
+---
+
+# 34. Mini Practical Revision Lab
+
+Use **only your own systems or an intentionally provided lab environment**.
+
+Example architecture:
+
+```text
+Kali Linux
+    |
+    | Host-only/Internal Network
+    |
+Lab Target
+```
+
+### Exercise 1 – Passive Recon
+
+Collect publicly available information about a safe example domain.
+
+Record:
+
+```text
+Domain
+Public IP information
+DNS records
+Public technologies
+```
+
+---
+
+### Exercise 2 – DNS
+
+Identify:
+
+```text
+A
+AAAA
+MX
+NS
+TXT
+CNAME
+```
+
+where publicly available and appropriate.
+
+---
+
+### Exercise 3 – Nmap
+
+Against your authorized lab target, identify:
+
+```text
+Host availability
+Open ports
+Services
+Versions
+```
+
+---
+
+### Exercise 4 – Analysis
+
+Create a table:
+
+| Finding | Source | Confidence | Meaning |
+|---|---|---|---|
+| IP | DNS | High | Public address |
+| Port | Nmap | High | Accessible service |
+| Technology | HTTP | Medium | Technology clue |
+| Subdomain | Public source | Medium | Potentially active |
+
+---
+
+# 35. Information-Gathering Checklist
+
+Before considering reconnaissance complete:
+
+```text
+☐ Authorization confirmed
+☐ Scope confirmed
+☐ Passive sources checked
+☐ DNS information reviewed
+☐ Subdomains reviewed
+☐ Hosts identified
+☐ Ports identified
+☐ Services identified
+☐ Versions identified where appropriate
+☐ Findings verified
+☐ Evidence recorded
+☐ Sensitive information handled securely
+☐ Results documented
+```
+
+---
+
+# 36. Golden Rules
+
+### Rule 1
+
+> **Always obtain authorization.**
+
+### Rule 2
+
+> **Stay within scope.**
+
+### Rule 3
+
+> **Collect only what is necessary.**
+
+### Rule 4
+
+> **Verify important findings.**
+
+### Rule 5
+
+> **Do not confuse information with vulnerability.**
+
+### Rule 6
+
+> **Do not confuse public information with permission to bypass controls.**
+
+### Rule 7
+
+> **Document your findings.**
+
+---
+
+# 37. MASTER MEMORY MAP
+
+Remember the complete sequence:
+
+```text
+RECON
+ ↓
+OSINT
+ ↓
+DNS
+ ↓
+NMAP
+ ↓
+ENUMERATION
+ ↓
+ANALYSIS
+ ↓
+VULNERABILITY ASSESSMENT
+ ↓
+REPORTING
+```
+
+And for social engineering:
+
+```text
+OSINT
+ ↓
+Target Information
+ ↓
+Psychological Manipulation
+ ↓
+Phishing / Vishing / Smishing
+ ↓
+Victim Action
+```
+
+---
+
+# 38. SUPER-QUICK REVISION TABLE
+
+| Topic | Remember |
+|---|---|
+| Reconnaissance | Gather information |
+| OSINT | Public information |
+| Passive | Observe |
+| Active | Interact |
+| DNS | Domain information |
+| A | IPv4 |
+| AAAA | IPv6 |
+| MX | Mail |
+| NS | Name server |
+| PTR | Reverse DNS |
+| AXFR | Full zone transfer |
+| IXFR | Incremental zone transfer |
+| Nmap | Network scanning |
+| `-sV` | Version detection |
+| `-O` | OS detection |
+| `-sS` | SYN scan |
+| `-sU` | UDP scan |
+| `-p` | Port selection |
+| `-p-` | All TCP ports |
+| Maltego | Relationship mapping |
+| Recon-ng | Recon framework |
+| Shodan | Indexed exposure search |
+| Phishing | Fraudulent message |
+| Spear phishing | Targeted phishing |
+| Whaling | Executive target |
+| Vishing | Voice |
+| Smishing | SMS |
+| Pretexting | Fake story |
+| Baiting | Lure |
+| Tailgating | Physical following |
+
+---
+
+# ⭐ DAY 14 EXAM TAKEAWAYS
+
+1. **Reconnaissance = information gathering.**
+2. **OSINT = publicly available information.**
+3. Passive recon does not directly interact with target infrastructure.
+4. Active recon interacts with target infrastructure.
+5. DNS provides domain-related information.
+6. **A = IPv4.**
+7. **AAAA = IPv6.**
+8. **MX = Mail.**
+9. **NS = Name Server.**
+10. **PTR = Reverse DNS.**
+11. **AXFR = Full zone transfer.**
+12. **IXFR = Incremental zone transfer.**
+13. Nmap performs active network scanning.
+14. `-sV` = service/version detection.
+15. `-O` = OS detection.
+16. `-sS` = SYN scan.
+17. `-sU` = UDP scan.
+18. `-p-` = all TCP ports.
+19. An open port does **not** automatically mean a vulnerability.
+20. Maltego maps relationships.
+21. Recon-ng is a reconnaissance framework.
+22. Shodan searches indexed information about Internet-connected services/devices.
+23. Python can automate OSINT collection.
+24. Phishing is a social engineering technique.
+25. Spear phishing is targeted phishing.
+26. Whaling targets senior/high-value personnel.
+27. Vishing uses voice.
+28. Smishing uses SMS.
+29. Social engineering exploits human psychology.
+30. **Always verify findings and stay within authorized scope.**
+
+# ONE-LINE REVISION
+
+> **Information gathering combines reconnaissance, OSINT, DNS enumeration, and authorized network scanning to understand a target before vulnerability assessment—while verification, authorization, and scope remain essential.**

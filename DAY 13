@@ -1,0 +1,1046 @@
+# DAY 13 – SOCIAL ENGINEERING BASICS
+## Phishing • Psychological Manipulation • Human-Based Attacks • Defense
+
+---
+
+# 1. What is Social Engineering?
+
+**Social Engineering** is the use of **psychological manipulation and deception** to influence people into revealing information, performing an action, or providing access.
+
+### Simple Definition
+
+> **Social engineering attacks people instead of directly attacking technology.**
+
+Example:
+
+An attacker pretends to be an IT administrator and asks an employee for a verification code.
+
+The weakness is not necessarily the computer—it is **human trust**.
+
+---
+
+# 2. Why Social Engineering Works
+
+Humans naturally respond to:
+
+- Trust
+- Authority
+- Fear
+- Urgency
+- Curiosity
+- Helpfulness
+- Reward
+- Familiarity
+
+Attackers exploit these normal behaviors.
+
+### Example
+
+```text
+"Your account will be disabled in 10 minutes.
+Verify your account immediately."
+```
+
+The attacker is creating:
+
+**Fear + Urgency → Impulsive Action**
+
+---
+
+# 3. Social Engineering Attack Chain
+
+A typical social engineering attack can be understood as:
+
+```text
+Information Gathering
+        ↓
+Target Selection
+        ↓
+Building Trust / Creating Pressure
+        ↓
+Manipulation
+        ↓
+Victim Action
+        ↓
+Information / Access Obtained
+```
+
+### Memory Trick
+
+> **G-T-M-A**
+
+**G** → Gather information  
+**T** → Target  
+**M** → Manipulate  
+**A** → Action
+
+---
+
+# 4. Common Social Engineering Techniques
+
+| Technique | Basic Idea |
+|---|---|
+| Phishing | Fraudulent messages |
+| Spear Phishing | Targeted phishing |
+| Whaling | Targeting senior executives |
+| Vishing | Voice/phone phishing |
+| Smishing | SMS/text phishing |
+| Pretexting | Creating a fake situation |
+| Baiting | Offering something attractive |
+| Quid Pro Quo | Offering something in exchange |
+| Tailgating | Following someone into a restricted area |
+| Impersonation | Pretending to be another person |
+| Scareware | Using fear to make victims act |
+| Watering Hole | Compromising a site frequented by targets |
+
+---
+
+# 5. Phishing
+
+**Phishing** is a fraudulent attempt to trick a person into:
+
+- Revealing information
+- Clicking a malicious link
+- Opening a malicious attachment
+- Visiting a fake website
+- Making an unauthorized transaction
+
+Phishing commonly occurs through:
+
+- Email
+- Messaging platforms
+- Websites
+- Social media
+
+---
+
+# 6. Typical Phishing Structure
+
+A phishing message often contains:
+
+```text
+Impersonation
+     +
+Urgency/Fear
+     +
+Request for Action
+     +
+Link/Attachment
+     ↓
+Victim Interaction
+```
+
+Example:
+
+```text
+Subject: Urgent Account Verification
+
+Your account requires immediate verification.
+Please review your account using the official
+company website.
+```
+
+### Warning Signs
+
+- Unexpected request
+- Urgent language
+- Suspicious sender
+- Unusual link
+- Unexpected attachment
+- Request for credentials
+- Request for MFA/OTP code
+- Financial request
+
+---
+
+# 7. Spear Phishing
+
+**Spear phishing** is phishing directed at a **specific individual or organization**.
+
+### Regular Phishing
+
+```text
+Large number of targets
+        ↓
+Generic message
+```
+
+### Spear Phishing
+
+```text
+Specific target
+        ↓
+Customized message
+```
+
+Example:
+
+A message specifically referencing someone's department, project, or role.
+
+### Memory
+
+> **Spear = Specific**
+
+---
+
+# 8. Whaling
+
+**Whaling** targets high-value individuals such as:
+
+- CEOs
+- Directors
+- Senior managers
+- Financial officers
+- Senior administrators
+
+Example:
+
+A fraudulent payment request appears to come from a senior executive.
+
+### Memory
+
+> **Whale = Big Target**
+
+---
+
+# 9. Vishing
+
+**Vishing = Voice Phishing**
+
+The attacker uses a phone or voice communication to manipulate the victim.
+
+Example:
+
+> "This is the bank security department. Please confirm the verification code."
+
+### Red Flags
+
+- Unexpected call
+- Pressure to act immediately
+- Request for OTP
+- Request for password
+- Request for remote access
+- Threat of account suspension
+
+---
+
+# 10. Smishing
+
+**Smishing = SMS Phishing**
+
+Phishing performed through text messages.
+
+Example:
+
+```text
+Your delivery requires address confirmation.
+Please verify through the official delivery service.
+```
+
+Possible warning signs:
+
+- Unknown sender
+- Suspicious URL
+- Urgent request
+- Unexpected delivery/payment message
+
+---
+
+# 11. Pretexting
+
+**Pretexting** means creating a believable false story to obtain information or cooperation.
+
+Example:
+
+An attacker pretends to be:
+
+- IT support
+- Bank employee
+- Delivery employee
+- Manager
+- Technician
+
+and creates a fake reason for requesting information.
+
+### Memory
+
+> **Pretext = Fake Story**
+
+---
+
+# 12. Baiting
+
+**Baiting** uses something attractive to tempt the victim.
+
+Examples:
+
+- Free software
+- Free download
+- Fake reward
+- Interesting file
+- Promotional offer
+- Unknown USB device
+
+The victim is encouraged to interact with the bait.
+
+### Memory
+
+> **Baiting = Temptation**
+
+---
+
+# 13. Quid Pro Quo
+
+**Quid Pro Quo** means:
+
+> **Something is offered in exchange for something else.**
+
+Example:
+
+```text
+Attacker:
+"I can fix your computer.
+Please provide your login information."
+```
+
+The attacker offers a supposed benefit in exchange for information/action.
+
+### Memory
+
+> **Quid Pro Quo = Something for Something**
+
+---
+
+# 14. Tailgating
+
+**Tailgating** is gaining physical access to a restricted area by following an authorized person.
+
+Example:
+
+```text
+Employee enters secure door
+        ↓
+Attacker follows behind
+        ↓
+Restricted area entered
+```
+
+The attacker may exploit politeness:
+
+> "Could you hold the door for me?"
+
+---
+
+# 15. Impersonation
+
+The attacker pretends to be someone trusted.
+
+Possible identities:
+
+- IT administrator
+- Manager
+- Security officer
+- Vendor
+- Customer
+- Government official
+
+### Defense
+
+Verify the person's identity through an **independent channel**.
+
+---
+
+# 16. Scareware
+
+**Scareware** uses fear to make the victim act quickly.
+
+Example:
+
+```text
+"YOUR COMPUTER IS INFECTED!"
+
+"CALL SUPPORT IMMEDIATELY!"
+```
+
+The goal is to create panic rather than allow the victim to think carefully.
+
+### Memory
+
+> **Scareware = Fear → Action**
+
+---
+
+# 17. Psychological Principles
+
+Social engineering commonly exploits psychological triggers.
+
+| Principle | Example |
+|---|---|
+| Authority | "Your manager instructed me." |
+| Urgency | "Do this immediately." |
+| Fear | "Your account will be closed." |
+| Curiosity | "Look at this confidential file." |
+| Trust | Pretending to be a colleague |
+| Reciprocity | Offering help/reward |
+| Scarcity | "Only available for 10 minutes." |
+| Social proof | "Everyone in the team has completed this." |
+| Familiarity | Using known names/brands |
+
+---
+
+# 18. Authority
+
+People often trust authority figures.
+
+Example:
+
+```text
+"I'm calling from the IT department."
+```
+
+The victim may comply without verifying the identity.
+
+### Defense
+
+Do not trust authority claims automatically.
+
+Verify through an official channel.
+
+---
+
+# 19. Urgency
+
+Attackers may create artificial deadlines.
+
+Examples:
+
+- "Act within 5 minutes."
+- "Your account expires today."
+- "Payment must be completed immediately."
+
+### Why it works
+
+Urgency reduces the time available for critical thinking.
+
+### Defense
+
+> **Stop → Verify → Act**
+
+---
+
+# 20. Fear
+
+Fear can cause people to make decisions without verification.
+
+Examples:
+
+- Account suspension
+- Legal consequences
+- Security warning
+- Financial loss
+- Job-related consequences
+
+### Defense
+
+Do not make security decisions based solely on threats.
+
+---
+
+# 21. Curiosity
+
+Attackers can exploit curiosity.
+
+Example:
+
+```text
+"Confidential salary information – Q4"
+```
+
+A curious employee may open the attachment.
+
+### Defense
+
+Treat unexpected files and links carefully.
+
+---
+
+# 22. Trust
+
+Attackers may build trust before making the actual request.
+
+Example:
+
+```text
+Conversation
+    ↓
+Friendly interaction
+    ↓
+Establish trust
+    ↓
+Sensitive request
+```
+
+This is why social engineering can involve multiple stages.
+
+---
+
+# 23. Phishing Red Flags
+
+Check for:
+
+### Sender
+
+- Unexpected sender
+- Look-alike domain
+- Unknown address
+- Display-name mismatch
+
+### Message
+
+- Urgency
+- Fear
+- Unusual wording
+- Unexpected request
+
+### Link
+
+- Suspicious domain
+- Unexpected redirect
+- URL does not match the claimed organization
+
+### Attachment
+
+- Unexpected file
+- Suspicious file type
+- Unusual request to enable content/macros
+
+### Request
+
+- Password
+- OTP/MFA code
+- Financial transfer
+- Sensitive information
+
+---
+
+# 24. Link Inspection
+
+Do not judge a link only by its displayed text.
+
+Example:
+
+```text
+Displayed text:
+Official Company Login
+```
+
+The actual destination may be different.
+
+### Safe practice
+
+Instead of clicking an unexpected login link:
+
+1. Open the organization's known official website manually.
+2. Navigate to the relevant service.
+3. Verify the request.
+
+---
+
+# 25. MFA and Social Engineering
+
+Multi-factor authentication improves security, but attackers may attempt to manipulate users into approving authentication requests.
+
+Example:
+
+```text
+Unexpected MFA prompt
+        ↓
+Attacker attempts login
+        ↓
+Victim receives approval request
+        ↓
+Victim may approve without checking
+```
+
+### Defense
+
+> **Never approve an unexpected authentication request.**
+
+If repeated unexpected prompts occur, report them.
+
+---
+
+# 26. OTP Security
+
+An OTP is sensitive authentication information.
+
+### Never give an OTP to someone simply because they claim to be:
+
+- Bank staff
+- IT support
+- Administrator
+- Customer support
+- Security personnel
+
+### Memory
+
+> **OTP = One-Time Password, still secret.**
+
+---
+
+# 27. Social Engineering vs Technical Attack
+
+| Social Engineering | Technical Attack |
+|---|---|
+| Targets people | Targets technology |
+| Uses manipulation | Uses technical weaknesses |
+| Exploits trust | Exploits vulnerabilities |
+| Phishing | SQL injection |
+| Pretexting | Buffer overflow |
+| Tailgating | Exploitation of software flaws |
+
+### Important
+
+Real attacks can combine both.
+
+Example:
+
+```text
+Social Engineering
+       ↓
+Victim clicks link
+       ↓
+Technical attack
+       ↓
+System compromise
+```
+
+---
+
+# 28. Information Gathering Before Social Engineering
+
+Attackers may research publicly available information.
+
+They may look for:
+
+- Organization names
+- Job roles
+- Public email addresses
+- Departments
+- Public projects
+- Organizational structure
+- Technology information
+
+This is one reason **OSINT and social engineering are closely related**.
+
+### Day 9 + Day 13 Connection
+
+```text
+OSINT
+ ↓
+Information Gathering
+ ↓
+Target Selection
+ ↓
+Social Engineering
+```
+
+---
+
+# 29. Human Attack Surface
+
+In cybersecurity, the **human attack surface** refers to people who can potentially be manipulated.
+
+Examples:
+
+```text
+Employees
+Administrators
+Managers
+Help-desk staff
+Contractors
+Vendors
+```
+
+Security therefore requires both:
+
+```text
+Technical Controls
+        +
+Human Awareness
+```
+
+---
+
+# 30. Security Awareness
+
+Organizations should train employees to recognize:
+
+- Phishing
+- Suspicious links
+- Fake login pages
+- Unexpected attachments
+- Social pressure
+- Impersonation
+- MFA abuse
+- Suspicious phone calls
+
+---
+
+# 31. Verification Techniques
+
+When receiving an unusual request:
+
+### Step 1 — Stop
+
+Do not immediately respond.
+
+### Step 2 — Check
+
+Examine sender, message, link, and request.
+
+### Step 3 — Verify
+
+Use an independent trusted channel.
+
+### Step 4 — Report
+
+Report suspicious activity according to organizational policy.
+
+### Step 5 — Act
+
+Only proceed after verification.
+
+### Memory
+
+> **STOP → CHECK → VERIFY → REPORT → ACT**
+
+---
+
+# 32. Independent Verification
+
+Suppose someone sends:
+
+> "Please transfer money immediately."
+
+Do not verify using the same communication channel.
+
+Instead:
+
+```text
+Suspicious Email
+       ↓
+Do NOT reply to email
+       ↓
+Call known official number
+       ↓
+Confirm request
+```
+
+This prevents an attacker from controlling both sides of the verification process.
+
+---
+
+# 33. Incident Response to Phishing
+
+If you clicked a suspicious link:
+
+1. Stop interacting with the page.
+2. Do not enter additional information.
+3. Report the incident.
+4. Follow organizational incident-response procedures.
+5. If credentials were entered, change them through the legitimate service.
+6. Notify the appropriate security/IT team.
+7. Follow any required device/security checks.
+
+Do not hide a mistake—**early reporting can reduce damage.**
+
+---
+
+# 34. Social Engineering Attack Lifecycle
+
+```text
+1. Reconnaissance
+       ↓
+2. Target Selection
+       ↓
+3. Pretext / Lure
+       ↓
+4. Establish Trust or Pressure
+       ↓
+5. Victim Interaction
+       ↓
+6. Information / Action
+       ↓
+7. Attacker Objective
+```
+
+### Exam Connection
+
+This is why reconnaissance can come **before** social engineering.
+
+---
+
+# 35. Phishing Types – Quick Table
+
+| Type | Meaning | Target |
+|---|---|---|
+| Phishing | General fraudulent message | Many users |
+| Spear phishing | Targeted phishing | Specific person |
+| Whaling | Executive targeting | Senior personnel |
+| Vishing | Voice phishing | Phone user |
+| Smishing | SMS phishing | Mobile user |
+
+### Memory Trick
+
+> **Spear = Specific**  
+> **Whale = Executive**  
+> **Vishing = Voice**  
+> **Smishing = SMS**
+
+---
+
+# 36. Social Engineering Techniques – Memory Trick
+
+Remember:
+
+> **P-S-W-V-S-P-B-Q-T-I-S**
+
+**P** → Phishing  
+**S** → Spear phishing  
+**W** → Whaling  
+**V** → Vishing  
+**S** → Smishing  
+**P** → Pretexting  
+**B** → Baiting  
+**Q** → Quid Pro Quo  
+**T** → Tailgating  
+**I** → Impersonation  
+**S** → Scareware
+
+---
+
+# 37. Scenario-Based Examples
+
+## Scenario 1
+
+You receive:
+
+> "Your company account will be deleted in 10 minutes. Click here."
+
+### What is the primary psychological technique?
+
+**Answer:** Urgency + fear.
+
+---
+
+## Scenario 2
+
+Someone calls claiming to be IT support and asks for your password.
+
+### What should you do?
+
+**Answer:** Do not provide it. Verify the caller through an official channel.
+
+---
+
+## Scenario 3
+
+An attacker targets the CEO with a customized fraudulent payment request.
+
+### What is this?
+
+**Answer:** Whaling / targeted social engineering.
+
+---
+
+## Scenario 4
+
+An SMS says your package cannot be delivered unless you verify immediately.
+
+### What is this?
+
+**Answer:** Smishing.
+
+---
+
+## Scenario 5
+
+Someone follows an employee through a secure door without authorization.
+
+### What is this?
+
+**Answer:** Tailgating.
+
+---
+
+# 38. Exam MCQs
+
+### Q1. Social engineering primarily exploits:
+
+A. CPU architecture  
+B. Human behavior  
+C. Encryption algorithms  
+D. File systems
+
+**Answer: B. Human behavior**
+
+---
+
+### Q2. Phishing generally involves:
+
+A. Fraudulent communication  
+B. Disk formatting  
+C. Network routing  
+D. Encryption
+
+**Answer: A. Fraudulent communication**
+
+---
+
+### Q3. Spear phishing is:
+
+A. Random phishing  
+B. Targeted phishing  
+C. Physical intrusion  
+D. Malware scanning
+
+**Answer: B. Targeted phishing**
+
+---
+
+### Q4. Vishing uses:
+
+A. USB devices  
+B. Voice/phone communication  
+C. DNS  
+D. Email only
+
+**Answer: B. Voice/phone communication**
+
+---
+
+### Q5. Smishing uses:
+
+A. SMS/text messages  
+B. Voice calls  
+C. DNS  
+D. USB
+
+**Answer: A. SMS/text messages**
+
+---
+
+### Q6. Whaling typically targets:
+
+A. Random users  
+B. Senior/high-value personnel  
+C. Routers  
+D. Servers
+
+**Answer: B. Senior/high-value personnel**
+
+---
+
+### Q7. "Your account will be deleted in 5 minutes" primarily uses:
+
+A. Curiosity  
+B. Urgency  
+C. Reciprocity  
+D. Scarcity only
+
+**Answer: B. Urgency**
+
+---
+
+### Q8. An attacker pretending to be an IT administrator is an example of:
+
+A. Impersonation  
+B. Encryption  
+C. Hashing  
+D. Enumeration
+
+**Answer: A. Impersonation**
+
+---
+
+### Q9. Following an authorized employee through a restricted door is:
+
+A. Phishing  
+B. Tailgating  
+C. Vishing  
+D. Baiting
+
+**Answer: B. Tailgating**
+
+---
+
+### Q10. The best response to an unexpected MFA approval request is:
+
+A. Approve it  
+B. Ignore the situation permanently  
+C. Deny it and report/verify it  
+D. Send your password
+
+**Answer: C. Deny it and report/verify it**
+
+---
+
+# 39. Day 13 Quick Revision
+
+```text
+SOCIAL ENGINEERING
+        ↓
+Psychological Manipulation
+        ↓
+Human Weakness
+        ↓
+Trust / Fear / Urgency / Curiosity
+        ↓
+Victim Action
+        ↓
+Information / Access / Transaction
+```
+
+### Important Terms
+
+```text
+Phishing       → Fraudulent message
+Spear Phishing → Targeted phishing
+Whaling        → Executive targeting
+Vishing        → Voice phishing
+Smishing       → SMS phishing
+Pretexting     → Fake story
+Baiting        → Attractive lure
+Quid Pro Quo   → Something for something
+Tailgating     → Physical following
+Impersonation  → Pretending to be someone
+Scareware      → Fear-based deception
+```
+
+# ⭐ MOST IMPORTANT EXAM POINTS
+
+1. **Social engineering targets human behavior.**
+2. Phishing is a common social engineering technique.
+3. **Spear phishing = targeted phishing.**
+4. **Whaling = targeting senior/high-value personnel.**
+5. **Vishing = voice phishing.**
+6. **Smishing = SMS phishing.**
+7. Pretexting uses a fabricated scenario/story.
+8. Baiting uses an attractive lure.
+9. Quid Pro Quo means something in exchange for something.
+10. Tailgating involves unauthorized physical following/access.
+11. Impersonation involves pretending to be a trusted person.
+12. Scareware uses fear to influence victims.
+13. Common psychological triggers include authority, urgency, fear, curiosity, trust, reciprocity, and scarcity.
+14. Unexpected OTP/MFA requests should not be approved or shared.
+15. Independent verification is an important defense.
+16. Public OSINT can help attackers prepare targeted social engineering.
+17. Technical controls alone are insufficient; user awareness is also important.
+18. Suspicious incidents should be reported quickly.
+19. **STOP → CHECK → VERIFY → REPORT → ACT** is a good defensive workflow.
+20. Social engineering and technical attacks can be combined.
+
+# ONE-LINE REVISION
+
+> **Social engineering is the manipulation of people through trust, authority, fear, urgency, curiosity, or other psychological triggers to make them reveal information or perform an action.**

@@ -1,0 +1,1938 @@
+# DAY 27 – DEVELOPING A WEB SCANNER
+
+## Python Web Scanner • Web Reconnaissance • Security Headers • Cookies • Forms • Detection • Reporting
+
+---
+
+# 1. WHAT IS A WEB SCANNER?
+
+A **web scanner** is a tool that automatically examines a web application or web server for potentially interesting security issues.
+
+A scanner can inspect things such as:
+
+- HTTP responses
+- Security headers
+- Cookies
+- Forms
+- Links
+- Server information
+- HTTP methods
+- TLS/HTTPS configuration
+- Common exposed resources
+- Basic application behavior
+
+### Simple Definition
+
+> **Web scanner = Automated tool that examines a web application and identifies potential security weaknesses.**
+
+---
+
+# 2. IMPORTANT: SCANNER ≠ EXPLOITATION TOOL
+
+A web scanner generally identifies **potential problems**.
+
+It does not automatically prove that a vulnerability can be exploited.
+
+```text
+Scanner
+   ↓
+Potential Finding
+   ↓
+Manual Validation
+   ↓
+Confirmed Vulnerability
+   ↓
+Report
+```
+
+### Example
+
+A scanner finds:
+
+```text
+Missing Content-Security-Policy
+```
+
+This is a security weakness/configuration issue, but it does **not automatically mean XSS exists**.
+
+---
+
+# 3. WEB SCANNER WORKFLOW
+
+A basic scanner can follow:
+
+```text
+Target
+  ↓
+Validate Target
+  ↓
+Connect
+  ↓
+Collect HTTP Information
+  ↓
+Analyze Response
+  ↓
+Extract Links/Forms
+  ↓
+Check Security Controls
+  ↓
+Identify Potential Findings
+  ↓
+Assign Severity
+  ↓
+Generate Report
+```
+
+### Memory
+
+> **V-C-A-F-R**
+
+**Validate → Collect → Analyze → Findings → Report**
+
+---
+
+# 4. WHAT CAN OUR PYTHON SCANNER CHECK?
+
+For an educational scanner, we can implement:
+
+### Information Gathering
+
+- HTTP status
+- Page title
+- Server header
+- Content type
+- Links
+- Forms
+
+### Security Checks
+
+- HTTPS usage
+- Security headers
+- Cookie security attributes
+- Missing security controls
+- Directory listing indicators
+- Potentially exposed common files
+- HTTP methods
+
+### Reporting
+
+- Finding
+- Severity
+- Evidence
+- Recommendation
+- Timestamp
+- Target
+
+---
+
+# 5. PYTHON LIBRARIES
+
+Useful standard and third-party libraries:
+
+| Library | Purpose |
+|---|---|
+| `requests` | HTTP requests |
+| `BeautifulSoup` | HTML parsing |
+| `urllib.parse` | URL parsing |
+| `json` | JSON reports |
+| `csv` | CSV reports |
+| `argparse` | Command-line arguments |
+| `datetime` | Timestamps |
+| `logging` | Logging |
+| `ssl` | TLS-related checks |
+| `socket` | Network information |
+
+Install the main libraries:
+
+```bash
+pip install requests beautifulsoup4
+```
+
+---
+
+# 6. BASIC WEB REQUEST
+
+Python:
+
+```python
+import requests
+
+url = "https://example.com"
+
+response = requests.get(
+    url,
+    timeout=10,
+    headers={
+        "User-Agent": "Educational-Web-Scanner/1.0"
+    }
+)
+
+print(response.status_code)
+print(response.headers)
+```
+
+This retrieves the HTTP response.
+
+---
+
+# 7. WHY USE A TIMEOUT?
+
+Without a timeout, a scanner may wait indefinitely for a server.
+
+Use:
+
+```python
+timeout=10
+```
+
+Good scanner design should always consider:
+
+- Connection timeout
+- Read timeout
+- Retry limits
+- Rate limiting
+
+---
+
+# 8. HTTP STATUS CHECK
+
+Common status codes:
+
+| Code | Meaning |
+|---|---|
+| 200 | OK |
+| 201 | Created |
+| 204 | No Content |
+| 301 | Permanent redirect |
+| 302 | Temporary redirect |
+| 400 | Bad Request |
+| 401 | Unauthorized |
+| 403 | Forbidden |
+| 404 | Not Found |
+| 405 | Method Not Allowed |
+| 429 | Too Many Requests |
+| 500 | Internal Server Error |
+| 502 | Bad Gateway |
+| 503 | Service Unavailable |
+
+### Important
+
+A status code alone does not prove a vulnerability.
+
+---
+
+# 9. EXTRACT PAGE TITLE
+
+Using BeautifulSoup:
+
+```python
+from bs4 import BeautifulSoup
+
+soup = BeautifulSoup(response.text, "html.parser")
+
+title = soup.title.get_text(strip=True) if soup.title else ""
+
+print("Title:", title)
+```
+
+This can help with basic web reconnaissance.
+
+---
+
+# 10. EXTRACT LINKS
+
+```python
+from urllib.parse import urljoin
+
+for link in soup.find_all("a", href=True):
+    absolute_url = urljoin(url, link["href"])
+    print(absolute_url)
+```
+
+Why?
+
+A scanner can build a basic map of the application.
+
+```text
+Homepage
+   ↓
+Login
+   ↓
+Profile
+   ↓
+Settings
+   ↓
+Help
+```
+
+---
+
+# 11. SAME-ORIGIN CRAWLING
+
+A scanner should avoid blindly crawling external websites.
+
+Example:
+
+```text
+target.example
+     ↓
+login.target.example
+     ↓
+external-site.example
+```
+
+The third site may not be within scope.
+
+Therefore, the scanner should normally restrict crawling to the authorized target/origin.
+
+---
+
+# 12. URL PARSING
+
+Python:
+
+```python
+from urllib.parse import urlparse
+
+parsed = urlparse(url)
+
+print("Scheme:", parsed.scheme)
+print("Host:", parsed.hostname)
+print("Port:", parsed.port)
+```
+
+Example:
+
+```text
+https://example.com:443/login
+```
+
+Produces:
+
+```text
+Scheme: https
+Host: example.com
+Port: 443
+```
+
+---
+
+# 13. CHECK HTTPS
+
+```python
+from urllib.parse import urlparse
+
+scheme = urlparse(url).scheme.lower()
+
+if scheme != "https":
+    print("[Potential Finding] Target is not using HTTPS")
+```
+
+### Important
+
+This is a basic check.
+
+A real TLS assessment requires additional analysis.
+
+---
+
+# 14. SECURITY HEADERS
+
+Important headers include:
+
+```text
+Content-Security-Policy
+Strict-Transport-Security
+X-Content-Type-Options
+Referrer-Policy
+Permissions-Policy
+```
+
+These can provide defense-in-depth.
+
+---
+
+# 15. CONTENT-SECURITY-POLICY
+
+Header:
+
+```text
+Content-Security-Policy
+```
+
+CSP helps control which content sources browsers are allowed to load or execute.
+
+It can reduce the impact of certain XSS scenarios.
+
+### Scanner logic
+
+```python
+if "Content-Security-Policy" not in response.headers:
+    print("Potential issue: CSP header missing")
+```
+
+### Important
+
+Missing CSP does **not** prove XSS.
+
+---
+
+# 16. HSTS
+
+Header:
+
+```text
+Strict-Transport-Security
+```
+
+HSTS tells compatible browsers to use HTTPS for the site for a specified period.
+
+Basic check:
+
+```python
+if url.startswith("https://"):
+    if "Strict-Transport-Security" not in response.headers:
+        print("Potential issue: HSTS missing")
+```
+
+### Important
+
+HSTS behavior and deployment requirements should be assessed in context.
+
+---
+
+# 17. X-CONTENT-TYPE-OPTIONS
+
+Common value:
+
+```text
+X-Content-Type-Options: nosniff
+```
+
+Basic scanner:
+
+```python
+value = response.headers.get("X-Content-Type-Options", "")
+
+if value.lower() != "nosniff":
+    print("Potential issue: X-Content-Type-Options missing or unexpected")
+```
+
+---
+
+# 18. REFERRER-POLICY
+
+Example:
+
+```text
+Referrer-Policy: strict-origin-when-cross-origin
+```
+
+A scanner can detect whether the header exists:
+
+```python
+if "Referrer-Policy" not in response.headers:
+    print("Potential issue: Referrer-Policy missing")
+```
+
+---
+
+# 19. PERMISSIONS-POLICY
+
+This header controls access to certain browser capabilities.
+
+Example:
+
+```text
+Permissions-Policy
+```
+
+Basic check:
+
+```python
+if "Permissions-Policy" not in response.headers:
+    print("Potential issue: Permissions-Policy missing")
+```
+
+---
+
+# 20. SECURITY HEADER SCANNER
+
+We can combine the checks:
+
+```python
+security_headers = {
+    "Content-Security-Policy": "CSP",
+    "Strict-Transport-Security": "HSTS",
+    "X-Content-Type-Options": "X-Content-Type-Options",
+    "Referrer-Policy": "Referrer-Policy",
+    "Permissions-Policy": "Permissions-Policy",
+}
+
+for header, name in security_headers.items():
+    if header not in response.headers:
+        print(f"[INFO] {name} header missing")
+```
+
+---
+
+# 21. COOKIE SECURITY
+
+Cookies can contain:
+
+- Session identifiers
+- Preferences
+- Authentication-related information
+
+Important attributes include:
+
+```text
+Secure
+HttpOnly
+SameSite
+```
+
+### Memory
+
+> **H-S-S**
+
+**H → HttpOnly**
+
+**S → Secure**
+
+**S → SameSite**
+
+---
+
+# 22. HTTPONLY
+
+```text
+HttpOnly
+```
+
+helps prevent JavaScript from directly reading the cookie.
+
+Example:
+
+```text
+Set-Cookie: session=...; HttpOnly
+```
+
+### Scanner idea
+
+```python
+for cookie in response.cookies:
+    print(cookie.name)
+```
+
+For complete attribute analysis, inspecting the raw `Set-Cookie` header can be more appropriate because cookie parsing behavior can vary.
+
+---
+
+# 23. SECURE COOKIE
+
+```text
+Secure
+```
+
+indicates that the cookie should be sent over HTTPS.
+
+A scanner can flag sensitive cookies that lack appropriate Secure configuration.
+
+---
+
+# 24. SAMESITE COOKIE
+
+Possible values:
+
+```text
+SameSite=Strict
+SameSite=Lax
+SameSite=None
+```
+
+SameSite controls cross-site cookie behavior and can help mitigate traditional CSRF scenarios.
+
+---
+
+# 25. COOKIE CHECK
+
+Conceptually:
+
+```text
+Set-Cookie
+     ↓
+Does it contain:
+     ↓
+Secure?
+HttpOnly?
+SameSite?
+     ↓
+Report missing attributes
+```
+
+### Important
+
+Do not blindly mark every cookie missing every attribute as a critical vulnerability.
+
+Risk depends on:
+
+- Cookie purpose
+- Authentication role
+- Application behavior
+- Transport
+- Browser context
+
+---
+
+# 26. FIND HTML FORMS
+
+Forms are important attack surfaces.
+
+Python:
+
+```python
+forms = soup.find_all("form")
+
+print("Forms:", len(forms))
+
+for form in forms:
+    print("Action:", form.get("action"))
+    print("Method:", form.get("method", "GET").upper())
+```
+
+A scanner can identify:
+
+- Login forms
+- Search forms
+- Profile forms
+- Upload forms
+- State-changing forms
+
+---
+
+# 27. CSRF CHECK – BASIC INDICATOR
+
+A scanner can flag forms that appear to change state but do not contain an obvious CSRF token.
+
+Example conceptual logic:
+
+```python
+for form in soup.find_all("form"):
+    method = form.get("method", "GET").upper()
+
+    if method in {"POST", "PUT", "PATCH", "DELETE"}:
+        inputs = form.find_all("input")
+
+        names = {
+            inp.get("name", "").lower()
+            for inp in inputs
+        }
+
+        token_found = any(
+            "csrf" in name or "token" in name
+            for name in names
+        )
+
+        if not token_found:
+            print("Potential CSRF protection issue")
+```
+
+### VERY IMPORTANT
+
+This is only a **heuristic**.
+
+The absence of a field containing `"csrf"` does **not prove CSRF**.
+
+The application may use:
+
+- Header-based tokens
+- Framework-specific tokens
+- SameSite protection
+- Origin validation
+- Other mechanisms
+
+---
+
+# 28. DIRECTORY LISTING
+
+A web server may expose directory contents.
+
+Example concept:
+
+```text
+Index of /files
+```
+
+A scanner can look for indicators such as:
+
+```python
+if "Index of /" in response.text:
+    print("Potential directory listing")
+```
+
+Again:
+
+> This is an indicator that requires validation.
+
+---
+
+# 29. SERVER INFORMATION DISCLOSURE
+
+Check:
+
+```python
+server = response.headers.get("Server")
+
+if server:
+    print("Server:", server)
+```
+
+Example:
+
+```text
+Server: ExampleServer/1.2
+```
+
+Excessive version disclosure can help attackers fingerprint technologies.
+
+### Important
+
+Server disclosure alone does not mean the server is vulnerable.
+
+---
+
+# 30. HTTP METHODS
+
+A scanner can inspect supported methods using an appropriate request where authorized.
+
+For example, the HTTP `OPTIONS` method may reveal information about supported methods.
+
+```python
+response = requests.options(url, timeout=10)
+
+print(response.headers.get("Allow"))
+```
+
+Example:
+
+```text
+Allow: GET, POST, OPTIONS
+```
+
+### Important
+
+Do not assume every method shown is exploitable.
+
+---
+
+# 31. COMMON EXPOSED RESOURCE CHECKS
+
+A scanner may check a **small, carefully selected** list of known resource names within an authorized lab.
+
+Examples:
+
+```text
+robots.txt
+sitemap.xml
+security.txt
+```
+
+The scanner can record:
+
+```text
+Status
+Content-Type
+Length
+```
+
+Avoid turning the scanner into an uncontrolled wordlist attack.
+
+---
+
+# 32. DO NOT CONFUSE ROBOTS.TXT WITH SECURITY
+
+`robots.txt` tells compliant crawlers what site owners prefer not to crawl.
+
+It is **not an access-control mechanism**.
+
+Therefore:
+
+```text
+robots.txt
+≠
+Authentication
+≠
+Authorization
+```
+
+---
+
+# 33. FINDING SEVERITY
+
+A scanner should classify findings.
+
+Example:
+
+| Severity | Example |
+|---|---|
+| Informational | Server banner exposed |
+| Low | Missing non-critical security header |
+| Medium | Weak security configuration |
+| High | Confirmed serious security weakness |
+| Critical | Severe validated vulnerability with major impact |
+
+### Important
+
+Do not automatically label every scanner finding as High/Critical.
+
+---
+
+# 34. FINDING DATA STRUCTURE
+
+Use structured findings:
+
+```python
+finding = {
+    "title": "Missing Content-Security-Policy",
+    "severity": "Low",
+    "evidence": "Header not present",
+    "recommendation": "Review and implement an appropriate CSP",
+}
+```
+
+This makes reporting easier.
+
+---
+
+# 35. COMPLETE EDUCATIONAL WEB SCANNER
+
+Below is a **safe baseline scanner** intended for systems you own or are explicitly authorized to test.
+
+```python
+import argparse
+import json
+from datetime import datetime
+from urllib.parse import urlparse, urljoin
+
+import requests
+from bs4 import BeautifulSoup
+
+
+SECURITY_HEADERS = {
+    "Content-Security-Policy": "CSP",
+    "Strict-Transport-Security": "HSTS",
+    "X-Content-Type-Options": "X-Content-Type-Options",
+    "Referrer-Policy": "Referrer-Policy",
+    "Permissions-Policy": "Permissions-Policy",
+}
+
+
+def add_finding(findings, title, severity, evidence, recommendation):
+    findings.append({
+        "title": title,
+        "severity": severity,
+        "evidence": evidence,
+        "recommendation": recommendation,
+    })
+
+
+def scan(url):
+    findings = []
+
+    parsed = urlparse(url)
+
+    if parsed.scheme not in {"http", "https"}:
+        raise ValueError("Only HTTP/HTTPS URLs are supported")
+
+    response = requests.get(
+        url,
+        timeout=10,
+        allow_redirects=True,
+        headers={
+            "User-Agent": "Educational-Web-Scanner/1.0"
+        },
+    )
+
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    result = {
+        "target": url,
+        "final_url": response.url,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "status_code": response.status_code,
+        "content_type": response.headers.get("Content-Type"),
+        "server": response.headers.get("Server"),
+        "title": soup.title.get_text(strip=True)
+                 if soup.title else "",
+        "links": [],
+        "forms": [],
+        "findings": findings,
+    }
+
+    # HTTPS check
+    final_scheme = urlparse(response.url).scheme
+
+    if final_scheme != "https":
+        add_finding(
+            findings,
+            "Target is not using HTTPS",
+            "Medium",
+            f"Final URL: {response.url}",
+            "Use HTTPS for sensitive applications and review TLS configuration."
+        )
+
+    # Security headers
+    for header, name in SECURITY_HEADERS.items():
+        if header not in response.headers:
+            add_finding(
+                findings,
+                f"Missing {name} header",
+                "Low",
+                f"{header} was not present",
+                f"Review whether an appropriate {header} policy should be deployed."
+            )
+
+    # Links
+    for link in soup.find_all("a", href=True):
+        absolute = urljoin(response.url, link["href"])
+
+        if urlparse(absolute).netloc == urlparse(response.url).netloc:
+            result["links"].append(absolute)
+
+    # Forms
+    for form in soup.find_all("form"):
+        method = form.get("method", "GET").upper()
+        action = urljoin(response.url, form.get("action", ""))
+
+        result["forms"].append({
+            "method": method,
+            "action": action,
+        })
+
+        if method in {"POST", "PUT", "PATCH", "DELETE"}:
+            add_finding(
+                findings,
+                "State-changing form requires CSRF review",
+                "Informational",
+                f"{method} {action}",
+                "Verify server-side CSRF protection, SameSite policy, and origin validation."
+            )
+
+    # Directory listing indicator
+    if "Index of /" in response.text:
+        add_finding(
+            findings,
+            "Possible directory listing",
+            "Medium",
+            "Response contains an 'Index of /' indicator",
+            "Disable directory listing where it is not required."
+        )
+
+    return result
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Educational Web Security Scanner"
+    )
+
+    parser.add_argument("url", help="Authorized HTTP/HTTPS target")
+    parser.add_argument(
+        "--output",
+        default="web_scan.json",
+        help="JSON output file"
+    )
+
+    args = parser.parse_args()
+
+    result = scan(args.url)
+
+    with open(args.output, "w", encoding="utf-8") as f:
+        json.dump(result, f, indent=2)
+
+    print(f"Scan completed: {result['target']}")
+    print(f"HTTP status: {result['status_code']}")
+    print(f"Findings: {len(result['findings'])}")
+    print(f"Report: {args.output}")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+---
+
+# 36. RUNNING THE SCANNER
+
+For an authorized lab:
+
+```bash
+python web_scanner.py https://your-lab-target.example
+```
+
+Save to a custom file:
+
+```bash
+python web_scanner.py https://your-lab-target.example --output report.json
+```
+
+The scanner produces structured JSON.
+
+---
+
+# 37. EXAMPLE REPORT
+
+Conceptually:
+
+```json
+{
+  "target": "https://lab.example",
+  "status_code": 200,
+  "title": "Training Application",
+  "findings": [
+    {
+      "title": "Missing Content-Security-Policy header",
+      "severity": "Low",
+      "evidence": "Header not present",
+      "recommendation": "Review and implement an appropriate CSP"
+    }
+  ]
+}
+```
+
+---
+
+# 38. WHY JSON?
+
+JSON is useful because it can be:
+
+- Parsed by Python
+- Imported into dashboards
+- Compared between scans
+- Converted to CSV
+- Stored in databases
+- Used by CI/CD systems
+
+---
+
+# 39. ADD LOGGING
+
+A professional scanner should log its activity.
+
+```python
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s"
+)
+
+logging.info("Starting scan")
+```
+
+Example:
+
+```text
+2026-10-06 17:00:00 INFO Starting scan
+2026-10-06 17:00:01 INFO HTTP request completed
+2026-10-06 17:00:01 INFO Findings generated
+```
+
+---
+
+# 40. ERROR HANDLING
+
+Network requests can fail.
+
+Use:
+
+```python
+try:
+    response = requests.get(url, timeout=10)
+
+except requests.Timeout:
+    print("Request timed out")
+
+except requests.RequestException as e:
+    print(f"Request failed: {e}")
+```
+
+A scanner should not crash simply because one target is unavailable.
+
+---
+
+# 41. RATE LIMITING
+
+A scanner should not generate unnecessary traffic.
+
+Example concept:
+
+```python
+import time
+
+time.sleep(1)
+```
+
+For larger authorized assessments, use a controlled rate limiter rather than sending requests as quickly as possible.
+
+### Why?
+
+- Prevents accidental DoS
+- Reduces server load
+- Avoids unnecessary traffic
+- Makes testing safer
+
+---
+
+# 42. SCOPE CONTROL
+
+A professional scanner should know what it is allowed to scan.
+
+Example:
+
+```text
+Allowed:
+lab.example
+
+Not allowed:
+google.com
+facebook.com
+other.example
+```
+
+### Best practice
+
+Use:
+
+```text
+Allowlist
++
+Target validation
++
+Scope restrictions
+```
+
+---
+
+# 43. CRAWLER SAFETY
+
+A crawler should control:
+
+```text
+Maximum pages
+Maximum depth
+Allowed domain
+Request rate
+Timeout
+Content size
+```
+
+Example:
+
+```text
+Max pages = 100
+Max depth = 3
+Allowed host = lab.example
+Delay = 1 second
+```
+
+This prevents uncontrolled crawling.
+
+---
+
+# 44. DO NOT AUTOMATICALLY SUBMIT FORMS
+
+A basic educational scanner should generally **inspect forms rather than automatically submit them**.
+
+Why?
+
+Forms may:
+
+- Change data
+- Delete records
+- Send messages
+- Create accounts
+- Trigger transactions
+- Modify settings
+
+Therefore:
+
+> **Discovery is safer than automatic state-changing actions.**
+
+---
+
+# 45. SCANNER LIMITATIONS
+
+Our scanner cannot reliably prove:
+
+- SQL Injection
+- XSS
+- Authentication bypass
+- Authorization bypass
+- Business logic vulnerabilities
+- SSRF
+- Command injection
+- Complex CSRF vulnerabilities
+- Race conditions
+
+These require deeper analysis and manual validation.
+
+---
+
+# 46. FALSE POSITIVES
+
+### False Positive
+
+Scanner says:
+
+```text
+Potential CSRF vulnerability
+```
+
+but the application actually uses:
+
+```text
+SameSite cookies
++
+Origin validation
++
+Header-based CSRF protection
+```
+
+Therefore, the finding may not be a real vulnerability.
+
+---
+
+# 47. FALSE NEGATIVES
+
+### False Negative
+
+The application has an authorization vulnerability, but the scanner does not detect it.
+
+```text
+Vulnerability exists
+        ↓
+Scanner misses it
+        ↓
+False Negative
+```
+
+### Important
+
+> Automated scanning cannot guarantee that an application is secure.
+
+---
+
+# 48. WEB SCANNER VS NMAP VS NIKTO
+
+| Tool | Primary Purpose |
+|---|---|
+| Nmap | Network/service discovery |
+| Wappalyzer | Technology fingerprinting |
+| Nikto | Web-server checks |
+| Custom Web Scanner | Application-specific checks |
+| Burp Suite | Web traffic/application testing |
+| OWASP ZAP | Web application security testing |
+| Nessus/OpenVAS | Broader vulnerability assessment |
+
+### Memory
+
+```text
+Nmap      → Network
+Wappalyzer → Technology
+Nikto     → Web Server
+Burp/ZAP  → Web Application
+Nessus    → Vulnerabilities
+Custom    → Your Checks
+```
+
+---
+
+# 49. IMPROVING THE SCANNER
+
+After building the basic scanner, add features progressively.
+
+### Level 1
+
+```text
+HTTP status
+Title
+Headers
+Server
+Links
+Forms
+```
+
+### Level 2
+
+```text
+Cookies
+HTTPS
+Security headers
+Directory listing indicators
+```
+
+### Level 3
+
+```text
+Crawler
+Scope control
+Rate limiting
+Logging
+JSON/CSV
+```
+
+### Level 4
+
+```text
+Authentication-aware testing
+Technology fingerprinting
+Historical comparison
+Risk scoring
+Dashboard
+```
+
+### Level 5
+
+```text
+CI/CD integration
+Scheduled scanning
+Central reporting
+Alerting
+Regression testing
+```
+
+---
+
+# 50. PROFESSIONAL SCANNER ARCHITECTURE
+
+```text
+                 ┌───────────────┐
+                 │ Target Input  │
+                 └───────┬───────┘
+                         ↓
+                 ┌───────────────┐
+                 │ Scope Manager │
+                 └───────┬───────┘
+                         ↓
+                 ┌───────────────┐
+                 │ HTTP Client   │
+                 └───────┬───────┘
+                         ↓
+                 ┌───────────────┐
+                 │ Crawler       │
+                 └───────┬───────┘
+                         ↓
+            ┌────────────┴────────────┐
+            ↓                         ↓
+     ┌─────────────┐           ┌─────────────┐
+     │ Header      │           │ Form/Input  │
+     │ Analyzer    │           │ Analyzer    │
+     └──────┬──────┘           └──────┬──────┘
+            │                         │
+            └────────────┬────────────┘
+                         ↓
+                 ┌───────────────┐
+                 │ Finding Engine│
+                 └───────┬───────┘
+                         ↓
+                 ┌───────────────┐
+                 │ Risk/Priority │
+                 └───────┬───────┘
+                         ↓
+                 ┌───────────────┐
+                 │ Report Engine │
+                 └───────────────┘
+```
+
+---
+
+# 51. PRACTICAL LAB
+
+## Objective
+
+Build and test your scanner against an intentionally vulnerable or deliberately configured training application.
+
+### Step 1
+
+Set up:
+
+```text
+Kali Linux
+      +
+Training Web Application
+```
+
+Use an isolated:
+
+```text
+Host-Only
+```
+
+or:
+
+```text
+Internal Network
+```
+
+---
+
+### Step 2
+
+Run:
+
+```bash
+python web_scanner.py http://LAB-IP
+```
+
+---
+
+### Step 3
+
+Record:
+
+```text
+HTTP status
+Page title
+Server header
+Security headers
+Forms
+Links
+Potential findings
+```
+
+---
+
+### Step 4
+
+Compare results with a trusted web-security testing tool such as:
+
+```text
+OWASP ZAP
+```
+
+or another authorized assessment tool.
+
+---
+
+### Step 5
+
+Manually validate findings.
+
+For example:
+
+```text
+Scanner:
+Missing CSP
+
+↓
+
+Manual validation:
+Check response headers
+
+↓
+
+Determine:
+Is CSP actually absent?
+
+↓
+
+Assess:
+Does the absence create meaningful risk?
+
+↓
+
+Report
+```
+
+---
+
+# 52. SCANNER DEVELOPMENT BEST PRACTICES
+
+```text
+✓ Explicit authorization
+✓ Scope validation
+✓ Safe defaults
+✓ Timeouts
+✓ Rate limiting
+✓ Logging
+✓ Error handling
+✓ Structured output
+✓ Finding evidence
+✓ Manual validation
+✓ Avoid destructive actions
+✓ Protect scan results
+```
+
+---
+
+# 53. COMMON DEVELOPMENT MISTAKES
+
+### Mistake 1
+
+No timeout.
+
+**Problem:** scanner may hang.
+
+### Mistake 2
+
+No scope restriction.
+
+**Problem:** scanner may crawl outside authorization.
+
+### Mistake 3
+
+Automatic form submission.
+
+**Problem:** can modify data.
+
+### Mistake 4
+
+Treating every missing header as a critical vulnerability.
+
+**Problem:** poor risk assessment.
+
+### Mistake 5
+
+No evidence.
+
+**Problem:** findings cannot be verified easily.
+
+### Mistake 6
+
+No error handling.
+
+**Problem:** one failed request can stop the scanner.
+
+### Mistake 7
+
+No rate limiting.
+
+**Problem:** unnecessary load.
+
+---
+
+# 54. SCENARIO-BASED MCQs
+
+## Q1
+
+What is the primary purpose of a web scanner?
+
+A. Automatically exploit every vulnerability  
+B. Identify potential web security issues  
+C. Replace a firewall  
+D. Replace an operating system
+
+**Answer: B**
+
+---
+
+## Q2
+
+A scanner finds that CSP is missing.
+
+What can you conclude?
+
+A. XSS definitely exists  
+B. CSP is missing and the configuration should be reviewed  
+C. SQL Injection definitely exists  
+D. The server is compromised
+
+**Answer: B**
+
+---
+
+## Q3
+
+Why should a scanner use timeouts?
+
+A. To make passwords stronger  
+B. To prevent indefinite waiting on network operations  
+C. To enable SQL Injection  
+D. To disable HTTPS
+
+**Answer: B**
+
+---
+
+## Q4
+
+Which Python library is commonly used for HTTP requests?
+
+A. requests  
+B. hashlib  
+C. tkinter  
+D. sqlite3
+
+**Answer: A**
+
+---
+
+## Q5
+
+Which library is useful for parsing HTML?
+
+A. BeautifulSoup  
+B. socket  
+C. os  
+D. csv
+
+**Answer: A**
+
+---
+
+## Q6
+
+What does `urlparse()` help with?
+
+A. Parsing URL components  
+B. Encrypting passwords  
+C. Scanning memory  
+D. Installing certificates
+
+**Answer: A**
+
+---
+
+## Q7
+
+A scanner identifies a POST form without an obvious CSRF token. What should it report?
+
+A. Confirmed CSRF  
+B. A potential CSRF issue requiring validation  
+C. Confirmed SQL Injection  
+D. Confirmed XSS
+
+**Answer: B**
+
+---
+
+## Q8
+
+Why should GET generally not change account state?
+
+A. GET is intended for safe retrieval and can be triggered in many contexts  
+B. GET cannot use HTTP  
+C. GET is encrypted  
+D. GET is only for DNS
+
+**Answer: A**
+
+---
+
+## Q9
+
+Which attribute helps control cross-site cookie behavior?
+
+A. SameSite  
+B. Server  
+C. Content-Type  
+D. Accept-Encoding
+
+**Answer: A**
+
+---
+
+## Q10
+
+What does HttpOnly primarily help prevent?
+
+A. JavaScript directly reading the cookie  
+B. All CSRF attacks  
+C. DNS spoofing  
+D. Port scanning
+
+**Answer: A**
+
+---
+
+# 55. HARD SCENARIO MCQs
+
+## Q11
+
+Your scanner reports:
+
+```text
+Missing CSP
+```
+
+The application contains no XSS vulnerability after manual testing.
+
+What is the correct conclusion?
+
+A. The scanner is useless  
+B. The missing CSP may still be a defense-in-depth weakness, but it is not proof of XSS  
+C. SQL Injection exists  
+D. CSRF is confirmed
+
+**Answer: B**
+
+---
+
+## Q12
+
+Your crawler follows an external link and starts scanning another company's website.
+
+What scanner design failure occurred?
+
+A. No scope control  
+B. No HTML parsing  
+C. No JSON  
+D. No CSP
+
+**Answer: A**
+
+---
+
+## Q13
+
+A scanner automatically submits every discovered form.
+
+Why is this dangerous?
+
+A. Forms can perform destructive or state-changing operations  
+B. HTML cannot contain forms  
+C. HTTPS stops working  
+D. DNS stops working
+
+**Answer: A**
+
+---
+
+## Q14
+
+A scanner reports a possible CSRF issue because it cannot find an input containing the word `csrf`.
+
+The application uses a custom header token instead.
+
+What is the result?
+
+A. False positive  
+B. Confirmed SQL Injection  
+C. Confirmed XSS  
+D. Confirmed RCE
+
+**Answer: A**
+
+---
+
+## Q15
+
+A scanner finds:
+
+```text
+Server: ExampleServer/1.2
+```
+
+What is the correct conclusion?
+
+A. The server is definitely vulnerable  
+B. The server exposes technology information that may assist fingerprinting  
+C. The server is compromised  
+D. CSRF is confirmed
+
+**Answer: B**
+
+---
+
+## Q16
+
+A scanner sends thousands of requests per second against a production application.
+
+What is the major problem?
+
+A. It may cause excessive load or service disruption  
+B. It guarantees accurate results  
+C. It improves authorization  
+D. It prevents XSS
+
+**Answer: A**
+
+---
+
+## Q17
+
+A scanner reports no vulnerabilities.
+
+Can you conclude that the application is secure?
+
+A. Yes  
+B. No; automated scanners can have false negatives and cannot fully assess business logic and authorization  
+C. Yes, if HTTP 200 is returned  
+D. Yes, if HTTPS is enabled
+
+**Answer: B**
+
+---
+
+## Q18
+
+Which design provides the safest default for a custom scanner?
+
+A. Scan every IP found on the Internet  
+B. Accept only explicitly authorized targets and enforce scope  
+C. Automatically exploit findings  
+D. Submit every form discovered
+
+**Answer: B**
+
+---
+
+# 56. DAY 27 QUICK REVISION
+
+```text
+WEB SCANNER
+=
+Automated tool for identifying potential web security issues.
+
+Workflow:
+
+TARGET
+  ↓
+VALIDATE SCOPE
+  ↓
+HTTP REQUEST
+  ↓
+COLLECT
+  ↓
+PARSE
+  ↓
+ANALYZE
+  ↓
+FINDINGS
+  ↓
+VALIDATE
+  ↓
+REPORT
+```
+
+### Important Python libraries
+
+```text
+requests       → HTTP
+BeautifulSoup  → HTML
+urllib.parse   → URLs
+argparse       → CLI
+json           → Reports
+logging        → Logs
+datetime       → Timestamp
+```
+
+### Security checks
+
+```text
+HTTPS
+Security Headers
+Cookies
+Forms
+Links
+Directory Listing
+Server Disclosure
+HTTP Methods
+```
+
+### Core principle
+
+> **Scanner finding ≠ confirmed vulnerability.**
+
+---
+
+# 🧠 MEMORY TRICKS
+
+## Web Scanner Workflow
+
+### **V-C-P-A-F-R**
+
+**V** → Validate  
+**C** → Collect  
+**P** → Parse  
+**A** → Analyze  
+**F** → Findings  
+**R** → Report
+
+---
+
+## Important Headers
+
+### **C-H-X-R-P**
+
+**C** → CSP  
+**H** → HSTS  
+**X** → X-Content-Type-Options  
+**R** → Referrer-Policy  
+**P** → Permissions-Policy
+
+---
+
+## Cookie Security
+
+### **H-S-S**
+
+**H** → HttpOnly  
+**S** → Secure  
+**S** → SameSite
+
+---
+
+# ⭐ MOST IMPORTANT EXAM POINTS
+
+1. A web scanner automates detection of potential web security issues.
+2. A scanner does not automatically prove exploitability.
+3. `requests` is commonly used for HTTP communication.
+4. BeautifulSoup is useful for HTML parsing.
+5. `urlparse()` helps parse URL components.
+6. Security headers provide defense-in-depth.
+7. CSP can reduce the impact of certain XSS scenarios.
+8. HSTS helps enforce HTTPS usage in supported browsers.
+9. `X-Content-Type-Options: nosniff` helps prevent MIME-type sniffing.
+10. `HttpOnly` helps prevent JavaScript from directly accessing cookies.
+11. `Secure` restricts cookie transmission to HTTPS connections.
+12. `SameSite` controls cross-site cookie behavior.
+13. Forms are important web application attack surfaces.
+14. A missing CSRF token field is only an indicator, not proof of CSRF.
+15. GET should generally not perform state-changing operations.
+16. Directory listing can expose files and information.
+17. Server banners can disclose technology information.
+18. Rate limiting prevents unnecessary load.
+19. Scope control prevents unauthorized scanning.
+20. Timeouts prevent scanners from hanging indefinitely.
+21. JSON provides structured scan results.
+22. False positives require manual validation.
+23. False negatives mean the scanner missed an existing issue.
+24. Automated scanning cannot completely test business logic or authorization.
+25. Scanner results should be documented, validated, remediated, and retested.
+
+---
+
+# 🎯 ONE-LINE EXAM ANSWER
+
+> **A web scanner is a Python-based or automated security tool that systematically examines authorized web applications for potential weaknesses in HTTP responses, security headers, cookies, forms, configurations, and exposed resources, then records findings for manual validation, risk assessment, remediation, and retesting.**
+
+# 🔥 DAY 27 MASTER FORMULA
+
+```text
+AUTHORIZED TARGET
+       ↓
+SCOPE
+       ↓
+HTTP
+       ↓
+CRAWL
+       ↓
+PARSE
+       ↓
+SECURITY CHECKS
+       ↓
+POTENTIAL FINDINGS
+       ↓
+MANUAL VALIDATION
+       ↓
+RISK
+       ↓
+REPORT
+       ↓
+REMEDIATE
+       ↓
+RESCAN
+```

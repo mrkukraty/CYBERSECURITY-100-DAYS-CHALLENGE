@@ -1,0 +1,975 @@
+# DAY 6 – BASICS OF CRYPTOGRAPHY
+## Hashing • Encryption • Decryption • Keys • Digital Signatures
+
+---
+
+# 1. What is Cryptography?
+
+**Cryptography** is the science of protecting information by transforming it so that only authorized parties can access or verify it.
+
+It is used to provide:
+
+- **Confidentiality**
+- **Integrity**
+- **Authentication**
+- **Non-repudiation**
+
+### Simple Example
+
+```text
+Original Data
+     ↓
+Cryptographic Algorithm
+     ↓
+Protected Data
+```
+
+---
+
+# 2. Why Cryptography is Important in Cybersecurity
+
+Cryptography protects:
+
+- Passwords
+- Banking transactions
+- Emails
+- Files
+- Network communications
+- Authentication credentials
+- Digital documents
+- Sensitive organizational information
+
+Examples:
+
+- HTTPS uses cryptography.
+- SSH uses cryptography.
+- Password systems commonly use password hashing.
+- Digital signatures use cryptographic techniques.
+
+---
+
+# 3. Important Cryptography Terms
+
+| Term | Meaning |
+|---|---|
+| Plaintext | Original readable data |
+| Ciphertext | Encrypted/unreadable data |
+| Encryption | Converting plaintext into ciphertext |
+| Decryption | Converting ciphertext back to plaintext |
+| Key | Secret/public value used by a cryptographic algorithm |
+| Hash | Fixed-length digest produced from data |
+| Algorithm | Mathematical procedure used for cryptographic operations |
+
+---
+
+# 4. Encryption
+
+**Encryption** converts readable data (**plaintext**) into protected data (**ciphertext**) using an algorithm and a key.
+
+```text
+Plaintext
+   +
+Encryption Key
+   ↓
+Encryption
+   ↓
+Ciphertext
+```
+
+Example:
+
+```text
+"HELLO"
+   ↓ Encryption
+"X7@91..."
+```
+
+The actual ciphertext depends on the algorithm and key.
+
+---
+
+# 5. Decryption
+
+**Decryption** converts ciphertext back into the original plaintext.
+
+```text
+Ciphertext
+     +
+Decryption Key
+     ↓
+ Decryption
+     ↓
+ Plaintext
+```
+
+### Simple Memory Trick
+
+**Encryption → Protect**
+
+**Decryption → Recover**
+
+---
+
+# 6. Symmetric Encryption
+
+In **symmetric cryptography**, the same secret key is used for encryption and decryption.
+
+```text
+            Same Secret Key
+                 ↓
+Plaintext → Encryption → Ciphertext
+                              ↓
+                         Decryption
+                              ↓
+                           Plaintext
+```
+
+### Examples
+
+- AES
+- ChaCha20
+
+### Advantages
+
+- Fast
+- Efficient for large amounts of data
+- Suitable for bulk encryption
+
+### Disadvantage
+
+The communicating parties need a secure way to establish/share the secret key.
+
+---
+
+# 7. AES
+
+**AES = Advanced Encryption Standard**
+
+AES is a widely used symmetric encryption algorithm.
+
+Common AES key sizes:
+
+- **128 bits**
+- **192 bits**
+- **256 bits**
+
+### Important
+
+**AES is encryption, not hashing.**
+
+---
+
+# 8. Asymmetric Cryptography
+
+**Asymmetric cryptography** uses a pair of mathematically related keys:
+
+### Public Key
+Can generally be shared.
+
+### Private Key
+Must be kept secret.
+
+```text
+Public Key  → Can be shared
+Private Key → Must remain secret
+```
+
+Examples of public-key cryptography include:
+
+- RSA
+- ECC-based systems
+
+---
+
+# 9. Public Key and Private Key
+
+### For Encryption
+
+A simplified model:
+
+```text
+Sender
+  |
+  | Encrypt using Receiver's Public Key
+  ↓
+Ciphertext
+  |
+  ↓
+Receiver
+  |
+  | Decrypt using Receiver's Private Key
+  ↓
+Plaintext
+```
+
+### Key Rule
+
+> **Public key can be shared; private key must be protected.**
+
+---
+
+# 10. Symmetric vs Asymmetric Encryption
+
+| Symmetric | Asymmetric |
+|---|---|
+| Uses a shared secret key | Uses public/private key pair |
+| Generally faster | Generally slower |
+| Good for bulk data | Useful for key exchange, authentication, signatures |
+| Key sharing is a challenge | Public key can be distributed |
+| Example: AES | Examples: RSA, ECC |
+
+---
+
+# 11. Hybrid Encryption
+
+Modern secure systems often combine symmetric and asymmetric cryptography.
+
+### Why?
+
+Symmetric encryption is efficient for large amounts of data, while asymmetric cryptography helps establish keys or authenticate parties.
+
+Simplified:
+
+```text
+Asymmetric Cryptography
+        ↓
+Securely establish/protect session key
+        ↓
+Symmetric Cryptography
+        ↓
+Encrypt actual data
+```
+
+This general concept is used in secure communication protocols such as TLS.
+
+---
+
+# 12. Hashing
+
+A **cryptographic hash function** converts input data into a fixed-length digest.
+
+```text
+Input Data
+    ↓
+Hash Function
+    ↓
+Hash/Digest
+```
+
+Example:
+
+```text
+"Hello"
+   ↓
+SHA-256
+   ↓
+Fixed-length hash
+```
+
+### Important Properties
+
+A secure cryptographic hash function should make it computationally difficult to:
+
+- Recover the original input from the hash.
+- Find another input with the same hash.
+- Find two different inputs producing the same hash.
+
+---
+
+# 13. Hashing vs Encryption
+
+This is **very important for exams**.
+
+| Hashing | Encryption |
+|---|---|
+| Produces a digest | Produces ciphertext |
+| Designed as one-way | Designed to be reversible with the correct key |
+| No decryption step | Can be decrypted |
+| Used for integrity/password verification | Used for confidentiality |
+| Example: SHA-256 | Example: AES |
+
+### Easy Trick
+
+> **Hashing = One-way**
+
+> **Encryption = Reversible with the correct key**
+
+---
+
+# 14. Common Hash Algorithms
+
+### MD5
+
+- Produces a 128-bit digest.
+- Considered cryptographically broken.
+- **Should not be used for modern security purposes.**
+
+### SHA-1
+
+- Produces a 160-bit digest.
+- Considered weak for collision resistance.
+- Not recommended for new security applications.
+
+### SHA-256
+
+Part of the SHA-2 family.
+
+- Produces a 256-bit digest.
+- Widely used for integrity and other cryptographic applications.
+
+### SHA-3
+
+A newer hash-function family standardized by NIST.
+
+---
+
+# 15. Hash Example
+
+Suppose we have:
+
+```text
+Hello
+```
+
+A hash function generates a digest:
+
+```text
+Hello
+ ↓
+SHA-256
+ ↓
+Hash value
+```
+
+If the input changes:
+
+```text
+Hello
+```
+
+to:
+
+```text
+hello
+```
+
+the resulting hash changes significantly.
+
+This property is called the **avalanche effect**.
+
+---
+
+# 16. Password Hashing
+
+Passwords should generally **not be stored as plaintext**.
+
+Instead:
+
+```text
+Password
+   ↓
+Password Hashing Function
+   ↓
+Stored Password Hash
+```
+
+When the user logs in:
+
+```text
+Entered Password
+       ↓
+Same Password-Hashing Process
+       ↓
+Compare with Stored Value
+```
+
+### Important
+
+For password storage, use password-specific functions such as:
+
+- Argon2
+- bcrypt
+- scrypt
+- PBKDF2
+
+Simple fast hashes such as SHA-256 are generally **not sufficient by themselves** for password storage.
+
+---
+
+# 17. Salt
+
+A **salt** is a random value added to a password before password hashing.
+
+```text
+Password + Salt
+      ↓
+Password Hashing Function
+      ↓
+Password Hash
+```
+
+### Why use a salt?
+
+It helps defend against:
+
+- Precomputed hash attacks
+- Rainbow tables
+- Identical passwords producing identical stored hashes
+
+### Important
+
+A salt does **not** need to be secret, but it should be unique and unpredictable.
+
+---
+
+# 18. Hashing, Salt and Password
+
+Example:
+
+```text
+User Password
+      +
+Random Salt
+      ↓
+Password Hashing Function
+      ↓
+Stored Hash + Salt
+```
+
+When logging in:
+
+```text
+Entered Password
+      +
+Stored Salt
+      ↓
+Password Hashing Function
+      ↓
+Compare Result
+```
+
+---
+
+# 19. Digital Signature
+
+A **digital signature** is a cryptographic mechanism used to provide:
+
+- Authentication
+- Integrity
+- Non-repudiation
+
+A simplified signing process:
+
+```text
+Message
+   ↓
+Hash
+   ↓
+Message Digest
+   ↓
+Sign using Sender's Private Key
+   ↓
+Digital Signature
+```
+
+The receiver can use the sender's **public key** to verify the signature.
+
+---
+
+# 20. Digital Signature vs Encryption
+
+This is a common exam question.
+
+### Encryption
+
+Main purpose:
+
+> **Confidentiality**
+
+### Digital Signature
+
+Main purposes:
+
+> **Integrity + Authentication + Non-repudiation**
+
+### Easy Memory
+
+**Encryption → Keep secret**
+
+**Signature → Prove authenticity/integrity**
+
+---
+
+# 21. Digital Signature Process
+
+Simplified:
+
+### Sender
+
+```text
+Message
+   ↓
+Hash
+   ↓
+Digest
+   ↓
+Sign with Private Key
+   ↓
+Digital Signature
+```
+
+Sender sends:
+
+```text
+Message + Digital Signature
+```
+
+### Receiver
+
+```text
+Message
+   ↓
+Calculate Hash
+```
+
+and verifies the signature using the sender's **public key**.
+
+If verification succeeds, the receiver gains confidence that the message was signed by the holder of the corresponding private key and that the signed data has not been altered.
+
+---
+
+# 22. Public Key vs Private Key in Signatures
+
+### Private Key
+
+Used by the **signer** to create the signature.
+
+### Public Key
+
+Used by others to **verify** the signature.
+
+### Remember
+
+> **Private Key → Sign**
+
+> **Public Key → Verify**
+
+This is different from the simplified encryption use case:
+
+> **Public Key → Encrypt**
+
+> **Private Key → Decrypt**
+
+---
+
+# 23. Digital Certificate
+
+A **digital certificate** binds an identity to a public key.
+
+Certificates are commonly used in TLS/HTTPS.
+
+A certificate typically contains information such as:
+
+- Subject/identity
+- Public key
+- Issuer
+- Validity period
+- Digital signature of the issuer
+- Other certificate extensions
+
+---
+
+# 24. Certificate Authority (CA)
+
+A **Certificate Authority (CA)** is a trusted entity that issues and signs digital certificates.
+
+Simplified:
+
+```text
+Website
+   ↓
+Requests Certificate
+   ↓
+Certificate Authority
+   ↓
+Issues Certificate
+```
+
+When you connect to an HTTPS website, your browser can validate the site's certificate chain against trusted CA certificates.
+
+---
+
+# 25. TLS and HTTPS
+
+**TLS = Transport Layer Security**
+
+TLS provides security for protocols such as HTTPS.
+
+It helps provide:
+
+- Confidentiality
+- Integrity
+- Server authentication
+
+### Simplified HTTPS
+
+```text
+Browser
+   ↓
+TLS Handshake
+   ↓
+Secure Session
+   ↓
+Encrypted HTTP Communication
+```
+
+---
+
+# 26. Cryptographic Keys
+
+A **key** is a value used by a cryptographic algorithm.
+
+Types include:
+
+- Symmetric secret keys
+- Public keys
+- Private keys
+- Session keys
+
+### Key Security
+
+Private and secret keys should be:
+
+- Protected from unauthorized access
+- Stored securely
+- Rotated/replaced when appropriate
+- Never unnecessarily exposed
+
+---
+
+# 27. Key Exchange
+
+Two parties communicating securely need a way to establish cryptographic keys.
+
+One widely known mechanism is:
+
+**Diffie-Hellman key exchange**
+
+Modern systems commonly use variants such as:
+
+**ECDH / ECDHE**
+
+### Important
+
+Diffie-Hellman is primarily a **key-agreement mechanism**, not a direct data-encryption algorithm.
+
+---
+
+# 28. Non-Repudiation
+
+**Non-repudiation** is the property that provides evidence supporting the origin of an action or message, making it difficult for the signer to credibly deny having signed it.
+
+Digital signatures can provide this property when implemented and managed appropriately.
+
+---
+
+# 29. Integrity
+
+**Integrity** means data has not been improperly modified.
+
+Hashing can help detect changes.
+
+Example:
+
+```text
+Original File
+    ↓
+SHA-256
+    ↓
+Hash A
+```
+
+Later:
+
+```text
+Downloaded File
+    ↓
+SHA-256
+    ↓
+Hash B
+```
+
+If:
+
+```text
+Hash A = Hash B
+```
+
+the contents are consistent with the original data, assuming the comparison hash itself is trusted.
+
+If:
+
+```text
+Hash A ≠ Hash B
+```
+
+the file has changed or the comparison is otherwise invalid.
+
+---
+
+# 30. Confidentiality
+
+**Confidentiality** means preventing unauthorized people from accessing information.
+
+Encryption is a major mechanism for achieving confidentiality.
+
+Example:
+
+```text
+Plaintext
+   ↓
+Encryption
+   ↓
+Ciphertext
+```
+
+---
+
+# 31. Authentication
+
+**Authentication** verifies identity.
+
+Cryptography can support authentication through:
+
+- Password hashing
+- Digital certificates
+- Digital signatures
+- Cryptographic keys
+- Multi-factor authentication mechanisms
+
+---
+
+# 32. Important Attacks Related to Cryptography
+
+### Brute-Force Attack
+
+Trying many possible passwords or keys until the correct one is found.
+
+### Dictionary Attack
+
+Trying passwords from a list of common words/passwords.
+
+### Rainbow Table Attack
+
+Using precomputed tables of password hashes.
+
+**Salted password hashing** helps defend against this approach.
+
+### Collision Attack
+
+Trying to find two different inputs with the same cryptographic hash.
+
+### Man-in-the-Middle (MITM)
+
+An attacker attempts to position themselves between communicating parties.
+
+Proper authentication and secure protocols such as TLS help defend against MITM attacks.
+
+---
+
+# 33. Encoding vs Encryption vs Hashing
+
+Another important exam topic.
+
+### Encoding
+
+Converts data into another representation.
+
+Example:
+
+**Base64**
+
+It is **not encryption**.
+
+### Encryption
+
+Protects confidentiality and can be reversed with the appropriate key.
+
+### Hashing
+
+Produces a fixed-length digest designed for one-way cryptographic use.
+
+| Encoding | Encryption | Hashing |
+|---|---|---|
+| Representation | Confidentiality | Integrity/verification |
+| Reversible | Reversible with key | Designed to be one-way |
+| No secret required | Key required | No decryption |
+| Base64 | AES | SHA-256 |
+
+### Remember:
+
+> **Base64 is NOT encryption.**
+
+---
+
+# 34. Cryptography and CIA Triad
+
+| CIA Principle | Cryptographic Mechanism |
+|---|---|
+| Confidentiality | Encryption |
+| Integrity | Hashes / MACs / Signatures |
+| Authentication | Signatures / Certificates / Keys |
+| Non-repudiation | Digital signatures |
+
+---
+
+# 35. Important Algorithms – Quick Table
+
+| Algorithm | Type | Main Use |
+|---|---|---|
+| AES | Symmetric | Encryption |
+| ChaCha20 | Symmetric | Encryption |
+| RSA | Asymmetric | Encryption/signatures in appropriate applications |
+| ECC | Asymmetric family | Key agreement/signatures |
+| SHA-256 | Hash | Integrity/digest |
+| SHA-3 | Hash | Integrity/digest |
+| MD5 | Hash | Legacy/non-security uses; broken for collision resistance |
+| SHA-1 | Hash | Legacy; weak collision resistance |
+| Argon2 | Password hashing | Password storage |
+| bcrypt | Password hashing | Password storage |
+| scrypt | Password hashing | Password storage |
+
+---
+
+# 36. Most Important Differences
+
+### Hashing vs Encryption
+
+**Hashing**
+→ One-way digest
+
+**Encryption**
+→ Reversible using the appropriate key
+
+---
+
+### Symmetric vs Asymmetric
+
+**Symmetric**
+→ Same secret key
+
+**Asymmetric**
+→ Public + private key
+
+---
+
+### Encryption vs Digital Signature
+
+**Encryption**
+→ Confidentiality
+
+**Digital Signature**
+→ Authentication + Integrity + Non-repudiation
+
+---
+
+### Public vs Private Key
+
+**Public key**
+→ Can be shared
+
+**Private key**
+→ Must remain secret
+
+---
+
+# QUICK REVISION
+
+### Cryptography
+> Science of protecting information using mathematical techniques.
+
+### Plaintext
+> Original readable information.
+
+### Ciphertext
+> Encrypted information.
+
+### Encryption
+> Plaintext → Ciphertext.
+
+### Decryption
+> Ciphertext → Plaintext.
+
+### Hashing
+> Data → Fixed-length digest.
+
+### Symmetric Encryption
+> Same secret key for encryption and decryption.
+
+### Asymmetric Cryptography
+> Public key + private key.
+
+### AES
+> Symmetric encryption algorithm.
+
+### SHA-256
+> Cryptographic hash function.
+
+### Salt
+> Random value added during password hashing.
+
+### Digital Signature
+> Private key signs; public key verifies.
+
+### Digital Certificate
+> Binds an identity to a public key.
+
+### CA
+> Trusted authority that issues/signs certificates.
+
+### TLS
+> Protocol providing secure communication, commonly used by HTTPS.
+
+---
+
+# 🔥 DAY 6 MEMORY TRICKS
+
+### 1. Encryption
+
+**E = Encrypt = Hide**
+
+### 2. Hashing
+
+**H = Hash = One-way**
+
+### 3. Symmetric
+
+**S = Same key**
+
+### 4. Asymmetric
+
+**A = A pair of keys**
+
+### 5. Digital Signature
+
+**Private → Sign**
+
+**Public → Verify**
+
+### 6. Encryption with Public/Private Keys
+
+**Public → Encrypt**
+
+**Private → Decrypt**
+
+### 7. CIA
+
+**C → Encryption**
+
+**I → Hash/Signature**
+
+**A → Availability is not primarily provided by cryptography**
+
+### One-line exam memory:
+
+> **Hashing verifies, encryption hides, digital signatures prove authenticity/integrity, symmetric uses one secret key, and asymmetric uses a public/private key pair.**

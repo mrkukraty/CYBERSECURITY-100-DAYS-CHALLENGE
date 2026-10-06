@@ -1,0 +1,1204 @@
+# DAY 23 – SQL INJECTION BASICS
+
+## SQL Injection • Database Security • Detection • Prevention • Safe Lab Practice
+
+---
+
+# 1. WHAT IS SQL INJECTION?
+
+**SQL Injection (SQLi)** is a vulnerability that occurs when an application improperly incorporates untrusted user input into a SQL query.
+
+### Simple Definition
+
+> **SQL Injection = Untrusted input changes the intended meaning of a database query.**
+
+It can potentially affect:
+
+- Confidentiality
+- Integrity
+- Availability
+- Authentication
+- Authorization
+
+---
+
+# 2. BASIC DATABASE CONCEPT
+
+A web application commonly works like this:
+
+```text
+User
+  ↓
+Web Application
+  ↓
+SQL Query
+  ↓
+Database
+  ↓
+Result
+  ↓
+Web Application
+  ↓
+User
+```
+
+Example:
+
+```text
+User enters username
+        ↓
+Application creates query
+        ↓
+Database processes query
+        ↓
+Application returns result
+```
+
+The security problem occurs when the application treats **user-controlled input as part of SQL syntax instead of only as data**.
+
+---
+
+# 3. WHAT IS SQL?
+
+**SQL = Structured Query Language**
+
+It is used to interact with relational databases.
+
+Common database systems include:
+
+- MySQL
+- PostgreSQL
+- Microsoft SQL Server
+- Oracle Database
+- SQLite
+
+---
+
+# 4. BASIC SQL COMMANDS
+
+### SELECT
+
+Retrieves data.
+
+```sql
+SELECT username FROM users;
+```
+
+### INSERT
+
+Adds data.
+
+```sql
+INSERT INTO users (username) VALUES ('alice');
+```
+
+### UPDATE
+
+Changes data.
+
+```sql
+UPDATE users SET username = 'bob';
+```
+
+### DELETE
+
+Removes data.
+
+```sql
+DELETE FROM users WHERE id = 5;
+```
+
+### Important
+
+These commands become dangerous when an application allows untrusted input to alter the intended query structure.
+
+---
+
+# 5. VULNERABLE QUERY CONCEPT
+
+Imagine an application internally creates:
+
+```sql
+SELECT * FROM users
+WHERE username = '<USER_INPUT>';
+```
+
+The programmer intended:
+
+```text
+USER_INPUT = alice
+```
+
+so the query represents:
+
+```sql
+SELECT * FROM users
+WHERE username = 'alice';
+```
+
+The problem is that the application is constructing SQL by combining query syntax and user input.
+
+### Security principle
+
+> **User input should be treated as data, not executable SQL syntax.**
+
+---
+
+# 6. WHY SQL INJECTION HAPPENS
+
+Common causes:
+
+- String concatenation
+- Dynamic SQL construction
+- Missing parameterization
+- Unsafe database APIs
+- Poor input handling
+- Lack of secure coding practices
+
+### Dangerous Design
+
+```text
+SQL Query
+    +
+User Input
+    ↓
+One combined SQL statement
+```
+
+### Safer Design
+
+```text
+SQL Query
+    +
+Parameterized Value
+    ↓
+Database
+```
+
+---
+
+# 7. SQL INJECTION EXAMPLE – CONCEPTUAL
+
+Suppose a login application expects:
+
+```text
+Username: alice
+Password: password123
+```
+
+The application might conceptually create:
+
+```sql
+SELECT * FROM users
+WHERE username = '<username>'
+AND password = '<password>';
+```
+
+If the application incorrectly treats input as SQL syntax, specially crafted input can potentially alter the query's logic.
+
+### Important
+
+The vulnerability is **not simply the presence of special characters**.
+
+The real problem is:
+
+> **Untrusted input is interpreted as part of the SQL command.**
+
+---
+
+# 8. MAIN TYPES OF SQL INJECTION
+
+## 1. In-band SQL Injection
+
+The attacker receives results through the same application channel used to send the request.
+
+Two common forms:
+
+- Error-based
+- Union-based
+
+---
+
+## 2. Blind SQL Injection
+
+The application does not directly return database information.
+
+The tester infers behavior from differences in responses.
+
+Common categories:
+
+- Boolean-based
+- Time-based
+
+---
+
+## 3. Out-of-band SQL Injection
+
+The application causes data or results to be sent through a separate communication channel.
+
+This depends heavily on the database and environment.
+
+---
+
+# 9. ERROR-BASED SQL INJECTION
+
+An application may expose database errors when unexpected input reaches the database.
+
+Example response:
+
+```text
+Database syntax error
+SQLSTATE...
+Database driver...
+```
+
+This can reveal:
+
+- Database type
+- Query structure clues
+- Table/column information
+- Software details
+
+### Security problem
+
+Detailed database errors should generally not be exposed to normal users.
+
+---
+
+# 10. UNION-BASED SQL INJECTION
+
+SQL `UNION` combines compatible query results.
+
+Conceptually:
+
+```sql
+SELECT column1 FROM table1
+UNION
+SELECT column2 FROM table2;
+```
+
+If an application is vulnerable to unsafe query manipulation, UNION-based techniques may potentially cause unintended data to be included in results.
+
+### Defensive lesson
+
+> **Use parameterized queries rather than trying to filter individual SQL keywords.**
+
+---
+
+# 11. BOOLEAN-BASED BLIND SQL INJECTION
+
+In blind SQL injection, the application may not display database errors or data.
+
+Instead, a tester observes differences such as:
+
+```text
+Condition A → Page behaves one way
+Condition B → Page behaves differently
+```
+
+The behavior can reveal information about the backend query.
+
+---
+
+# 12. TIME-BASED BLIND SQL INJECTION
+
+The application may behave differently depending on whether a database condition causes a delay.
+
+Conceptually:
+
+```text
+Condition true
+    ↓
+Response delayed
+
+Condition false
+    ↓
+Normal response
+```
+
+### Important
+
+Timing behavior alone is not proof of SQL injection.
+
+Network latency and application performance can also cause delays.
+
+---
+
+# 13. SQL INJECTION VS XSS
+
+| SQL Injection | XSS |
+|---|---|
+| Targets database/query processing | Targets browser/client-side execution |
+| Usually server-side/backend issue | Usually affects client/browser |
+| SQL is involved | HTML/JavaScript is involved |
+| Can expose/modify database information | Can affect browser-side behavior |
+| Prevention includes parameterized queries | Prevention includes output encoding/CSP |
+
+### Memory
+
+> **SQLi → Database**
+
+> **XSS → Browser**
+
+---
+
+# 14. SQL INJECTION VS COMMAND INJECTION
+
+| SQL Injection | Command Injection |
+|---|---|
+| Targets SQL/database interpreter | Targets operating-system command interpreter |
+| Example target: database | Example target: OS command execution |
+| Parameterized queries are a key defense | Avoid shell interpretation / use safe APIs |
+
+### Memory
+
+> **SQLi → SQL**
+
+> **Command Injection → OS commands**
+
+---
+
+# 15. IMPACT OF SQL INJECTION
+
+Depending on the application and database permissions, SQL injection can potentially lead to:
+
+### Confidentiality Impact
+
+Unauthorized reading of data.
+
+### Integrity Impact
+
+Unauthorized modification of data.
+
+### Availability Impact
+
+Potential disruption of database operations.
+
+### Authentication Impact
+
+Potential bypass of poorly designed authentication logic.
+
+### Business Impact
+
+- Data exposure
+- Account compromise
+- Regulatory consequences
+- Financial loss
+- Reputation damage
+
+---
+
+# 16. SQL INJECTION IS NOT JUST A LOGIN PROBLEM
+
+SQLi can occur in many places:
+
+```text
+Login
+Search
+Product filters
+URL parameters
+Forms
+API parameters
+Report generation
+Sorting/filtering
+Administrative interfaces
+```
+
+### Example
+
+```text
+/products?id=<input>
+```
+
+The important question is:
+
+> **Does the application safely handle the input before using it in a database query?**
+
+---
+
+# 17. SAFE SQL INJECTION LAB
+
+For practical learning, use an intentionally vulnerable application in an **isolated lab**.
+
+Recommended architecture:
+
+```text
+┌───────────────┐
+│ Kali Linux    │
+│ Tester        │
+└───────┬───────┘
+        │
+   Host-only/
+   Internal Network
+        │
+        ▼
+┌───────────────┐
+│ Vulnerable    │
+│ Web App       │
+└───────┬───────┘
+        │
+        ▼
+┌───────────────┐
+│ Lab Database  │
+└───────────────┘
+```
+
+Only use applications specifically intended for security training.
+
+---
+
+# 18. WHAT TO OBSERVE IN A SQLi LAB
+
+Rather than attacking real systems, observe:
+
+### Step 1 – Normal Input
+
+Submit an ordinary value.
+
+Record:
+
+- HTTP status
+- Response length
+- Page behavior
+- Error messages
+- Database behavior
+
+### Step 2 – Unexpected Input
+
+Use harmless test input in your deliberately vulnerable lab.
+
+Observe whether:
+
+- The response changes
+- An error appears
+- The query behaves unexpectedly
+- The application returns different content
+
+### Step 3 – Compare
+
+```text
+Normal Request
+      ↓
+Response A
+
+Test Request
+      ↓
+Response B
+
+Compare A vs B
+```
+
+---
+
+# 19. IMPORTANT SQLi TESTING PRINCIPLE
+
+Never conclude:
+
+> "The application is vulnerable because the page changed."
+
+Instead:
+
+```text
+Observed Behavior
+      ↓
+Collect Evidence
+      ↓
+Rule Out Normal Errors
+      ↓
+Validate
+      ↓
+Document
+```
+
+---
+
+# 20. PARAMETERIZED QUERIES
+
+The most important SQL injection defense is **parameterized queries / prepared statements**.
+
+### Unsafe Concept
+
+```text
+Query String
++
+User Input
+=
+SQL Statement
+```
+
+### Safe Concept
+
+```text
+SQL Template
++
+Parameter Value
+=
+Database
+```
+
+The database driver treats the parameter as data rather than allowing it to redefine the SQL structure.
+
+---
+
+# 21. PYTHON EXAMPLE – SQLITE
+
+### Unsafe pattern
+
+```python
+query = "SELECT * FROM users WHERE username = '" + username + "'"
+cursor.execute(query)
+```
+
+The user-controlled value is directly concatenated into the SQL statement.
+
+### Safer pattern
+
+```python
+query = "SELECT * FROM users WHERE username = ?"
+cursor.execute(query, (username,))
+```
+
+Here the value is passed separately as a parameter.
+
+### Key Exam Point
+
+> **Parameterized queries are preferred over manually escaping input.**
+
+---
+
+# 22. INPUT VALIDATION
+
+Input validation is useful as an additional defense.
+
+For example:
+
+```text
+Age
+→ Integer
+→ 1–120
+
+Country
+→ Allowed list
+
+Username
+→ Expected character/length rules
+```
+
+But:
+
+> **Input validation alone is not a complete SQL injection defense.**
+
+The database query should still use parameterization.
+
+---
+
+# 23. LEAST PRIVILEGE
+
+The application's database account should have only the permissions it actually needs.
+
+Example:
+
+```text
+Web Application
+      ↓
+Database Account
+      ↓
+Only required permissions
+```
+
+Avoid giving the application unnecessary administrative database privileges.
+
+### Why?
+
+If an application is compromised, least privilege limits potential damage.
+
+---
+
+# 24. SAFE ERROR HANDLING
+
+### Bad
+
+```text
+User sees:
+SQL Server error
+Database name
+Internal table
+File path
+Stack trace
+```
+
+### Better
+
+```text
+User sees:
+"Something went wrong. Please try again."
+```
+
+Security team logs appropriate diagnostic information securely on the server.
+
+---
+
+# 25. SQL INJECTION DEFENSE-IN-DEPTH
+
+Use multiple controls:
+
+```text
+Parameterized Queries
+        +
+Input Validation
+        +
+Least Privilege
+        +
+Safe Error Handling
+        +
+Secure ORM Usage
+        +
+Security Testing
+        +
+Monitoring
+```
+
+### Memory
+
+> **No single control should be your only defense.**
+
+---
+
+# 26. ORM DOES NOT AUTOMATICALLY MEAN SECURE
+
+ORMs can reduce SQL injection risk when used correctly.
+
+But developers can still create unsafe queries through:
+
+- Raw SQL
+- Unsafe dynamic queries
+- Incorrect APIs
+- String concatenation
+
+### Exam Point
+
+> **Using an ORM does not automatically eliminate SQL injection.**
+
+---
+
+# 27. SQL INJECTION TESTING WORKFLOW
+
+For an authorized lab:
+
+```text
+1. Define Scope
+       ↓
+2. Identify Input
+       ↓
+3. Send Normal Request
+       ↓
+4. Establish Baseline
+       ↓
+5. Use Safe Test Input
+       ↓
+6. Compare Responses
+       ↓
+7. Investigate Errors
+       ↓
+8. Validate Finding
+       ↓
+9. Document Evidence
+       ↓
+10. Recommend Remediation
+       ↓
+11. Retest
+```
+
+---
+
+# 28. SQLi FINDING REPORT
+
+A professional finding should contain:
+
+```text
+Title:
+Potential SQL Injection
+
+Target:
+Authorized Lab Application
+
+Affected Endpoint:
+[Lab endpoint]
+
+Parameter:
+[Lab parameter]
+
+Evidence:
+Observed unexpected database-related behavior.
+
+Impact:
+Potential unauthorized database interaction.
+
+Severity:
+Based on validated impact and context.
+
+Recommendation:
+Use parameterized queries/prepared statements.
+
+Status:
+Open / Remediated / Retested
+```
+
+---
+
+# 29. COMMON SQLi MISTAKES
+
+### Mistake 1
+
+Filtering a few SQL keywords and assuming the application is secure.
+
+**Better:** Use parameterized queries.
+
+### Mistake 2
+
+Relying only on client-side validation.
+
+**Better:** Validate server-side and parameterize database queries.
+
+### Mistake 3
+
+Giving the web application database administrator privileges.
+
+**Better:** Least privilege.
+
+### Mistake 4
+
+Showing database errors to users.
+
+**Better:** Generic user-facing errors + secure server logs.
+
+### Mistake 5
+
+Assuming an ORM automatically prevents SQLi.
+
+**Better:** Review how queries are actually constructed.
+
+---
+
+# 30. SQL INJECTION AND OWASP TOP 10
+
+SQL Injection belongs to:
+
+> **OWASP A05 – Injection**
+
+The Injection category can include different injection types, such as:
+
+- SQL injection
+- Command injection
+- LDAP injection
+- NoSQL injection
+- Other interpreter-related injection problems
+
+### Memory
+
+> **A05 = Input becomes something the interpreter didn't intend.**
+
+---
+
+# 31. SQL INJECTION PREVENTION TABLE
+
+| Problem | Recommended Defense |
+|---|---|
+| SQL concatenation | Parameterized queries |
+| Dynamic SQL | Safe query APIs |
+| Excessive DB privileges | Least privilege |
+| Detailed DB errors | Safe error handling |
+| Poor input handling | Server-side validation |
+| Vulnerable dependencies | Dependency management |
+| Unknown SQLi bugs | Security testing |
+| Repeated attacks | Monitoring/logging |
+
+---
+
+# 32. SCENARIO-BASED MCQs
+
+## Q1
+
+A developer constructs SQL by concatenating a username directly into a query.
+
+What is the primary concern?
+
+A. SQL Injection  
+B. CSRF  
+C. DNS poisoning  
+D. Clickjacking
+
+**Answer: A**
+
+---
+
+## Q2
+
+What is the strongest general defense against SQL injection?
+
+A. Hide the login button  
+B. Parameterized queries/prepared statements  
+C. Change the website color  
+D. Disable JavaScript
+
+**Answer: B**
+
+---
+
+## Q3
+
+A web application displays detailed database errors to users.
+
+What is a security concern?
+
+A. Information disclosure  
+B. Strong authentication  
+C. Secure configuration  
+D. Encryption
+
+**Answer: A**
+
+---
+
+## Q4
+
+An application uses parameterized queries but gives its database account excessive administrative privileges.
+
+What security principle is missing?
+
+A. Least privilege  
+B. DNS resolution  
+C. Compression  
+D. Load balancing
+
+**Answer: A**
+
+---
+
+## Q5
+
+A SQL injection vulnerability allows unauthorized database information to be retrieved.
+
+Which security property is primarily affected?
+
+A. Confidentiality  
+B. Availability only  
+C. Physical security  
+D. Non-repudiation only
+
+**Answer: A**
+
+---
+
+## Q6
+
+A tester observes that two requests produce different response behavior.
+
+Can the tester immediately declare SQL injection?
+
+A. Yes  
+B. No; the behavior must be validated  
+C. Only if HTTPS is enabled  
+D. Only if the server is Linux
+
+**Answer: B**
+
+---
+
+## Q7
+
+Which OWASP Top 10 category includes SQL Injection?
+
+A. A01  
+B. A04  
+C. A05  
+D. A09
+
+**Answer: C**
+
+---
+
+## Q8
+
+Which is safer?
+
+A. `"SELECT ... " + user_input`  
+B. Parameterized query  
+C. Trusting browser validation  
+D. Filtering only the word SELECT
+
+**Answer: B**
+
+---
+
+## Q9
+
+A developer says, "Our application uses an ORM, so SQL injection is impossible."
+
+What is the correct response?
+
+A. Correct  
+B. Incorrect; unsafe raw/dynamic queries can still introduce SQLi  
+C. Only true for PostgreSQL  
+D. Only true for MySQL
+
+**Answer: B**
+
+---
+
+## Q10
+
+A database account used by the web application has only the permissions it needs.
+
+Which principle is this?
+
+A. Least privilege  
+B. Defense evasion  
+C. Enumeration  
+D. Reconnaissance
+
+**Answer: A**
+
+---
+
+# 33. HARD SCENARIO MCQs
+
+## Q11
+
+A search function produces an unusual database error when certain unexpected input is submitted.
+
+What should the tester do first?
+
+A. Immediately attempt to extract the database  
+B. Record the evidence and safely validate the behavior in the authorized environment  
+C. Delete the application  
+D. Publish the error
+
+**Answer: B**
+
+---
+
+## Q12
+
+An application validates that a username contains only expected characters, but still constructs SQL using string concatenation.
+
+Is the application necessarily protected from SQL injection?
+
+A. Yes  
+B. No  
+C. Only if the database is offline  
+D. Only if HTTPS is used
+
+**Answer: B**
+
+### Why?
+
+Input validation can help, but parameterized queries are the primary defense.
+
+---
+
+## Q13
+
+A developer changes:
+
+```text
+String concatenation
+```
+
+to:
+
+```text
+Parameterized query
+```
+
+but continues to give the database account full administrative privileges.
+
+What improved?
+
+A. SQL injection resistance  
+B. Least privilege  
+C. Both equally  
+D. Neither
+
+**Answer: A**
+
+The SQL construction is safer, but excessive database privileges remain a separate risk.
+
+---
+
+## Q14
+
+A web application uses a vulnerable SQL library. The developer says, "We don't have SQL injection because the input fields are validated."
+
+What is the best assessment?
+
+A. Validation eliminates every database security problem  
+B. Validation is only one defense; query construction and dependencies must also be assessed  
+C. SQL libraries cannot have vulnerabilities  
+D. HTTPS solves the issue
+
+**Answer: B**
+
+---
+
+## Q15
+
+A tester finds an input parameter that appears to influence database errors, but the behavior disappears when the application is under normal network conditions.
+
+What should happen?
+
+A. Report confirmed SQL injection immediately  
+B. Investigate whether the behavior is actually caused by SQL processing  
+C. Assume compromise  
+D. Ignore all testing
+
+**Answer: B**
+
+### Lesson
+
+> **Evidence must be reproducible and validated.**
+
+---
+
+# 34. SQL INJECTION MASTER MEMORY
+
+## **SQLi = INPUT → SQL**
+
+Remember:
+
+```text
+User Input
+    ↓
+Application
+    ↓
+SQL Query
+    ↓
+Database
+```
+
+If untrusted input can alter the intended SQL structure:
+
+> **Potential SQL Injection**
+
+---
+
+# 35. SQLi DEFENSE MEMORY
+
+Remember:
+
+## **P-V-L-E-T**
+
+**P → Parameterized Queries**
+
+**V → Validate Input**
+
+**L → Least Privilege**
+
+**E → Error Handling**
+
+**T → Testing**
+
+---
+
+# 36. SQLi TYPES MEMORY
+
+### **I-B-O**
+
+**I → In-band**
+
+**B → Blind**
+
+**O → Out-of-band**
+
+---
+
+# 37. 30-SECOND REVISION
+
+```text
+SQL Injection
+= Untrusted input changes intended SQL behavior.
+
+A05
+= Injection
+
+Main Defense
+= Parameterized Queries
+
+Additional Defenses
+= Validation + Least Privilege + Safe Errors + Testing
+
+SQLi Targets
+= Database/query processing
+
+XSS Targets
+= Browser/client-side behavior
+
+False assumption
+= "Special character = SQLi"
+
+Correct approach
+= Observe → Validate → Confirm
+
+Credential principle
+= Database account should have least privilege.
+
+Error principle
+= Don't expose database internals to users.
+```
+
+---
+
+# ⭐ MOST IMPORTANT EXAM POINTS
+
+1. SQL Injection is an **injection vulnerability**.
+2. SQLi occurs when untrusted input can alter the intended SQL query.
+3. SQL Injection belongs to **OWASP A05 – Injection**.
+4. SQLi can affect confidentiality, integrity, and availability.
+5. SQLi is not limited to login forms.
+6. Search fields, URL parameters, APIs, filters, and other inputs can potentially be affected.
+7. **Parameterized queries/prepared statements are the primary defense.**
+8. Input validation is an additional defense, not a replacement for parameterization.
+9. Database accounts should follow least privilege.
+10. Detailed database errors should not normally be exposed to users.
+11. ORM use does not automatically eliminate SQL injection.
+12. Error-based SQLi uses database errors as potential information.
+13. Blind SQLi relies on indirect behavioral differences.
+14. Time-based testing observes response timing differences.
+15. In-band SQLi uses the same application channel for results.
+16. Out-of-band SQLi uses another communication channel.
+17. SQL Injection ≠ XSS.
+18. SQL Injection ≠ Command Injection.
+19. A changed response does not automatically prove SQLi.
+20. Findings must be validated and documented.
+21. Security testing must be performed only against authorized systems.
+22. Retesting is necessary after remediation.
+
+---
+
+# 🔥 FINAL EXAM FORMULA
+
+```text
+UNTRUSTED INPUT
+       ↓
+UNSAFE QUERY CONSTRUCTION
+       ↓
+SQL INTERPRETER
+       ↓
+UNEXPECTED QUERY BEHAVIOR
+       ↓
+POTENTIAL SQL INJECTION
+       ↓
+VALIDATE
+       ↓
+REPORT
+       ↓
+PARAMETERIZE
+       ↓
+LEAST PRIVILEGE
+       ↓
+RETEST
+```
+
+# 🎯 ONE-LINE EXAM ANSWER
+
+> **SQL Injection is a vulnerability in which improperly handled untrusted input alters the intended behavior of a SQL query; the primary defense is parameterized queries or prepared statements, supported by input validation, least privilege, secure error handling, and security testing.**

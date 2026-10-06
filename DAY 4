@@ -1,0 +1,668 @@
+# DAY 4 – VIRTUALIZATION AND CYBERSECURITY LAB SETUP
+
+## 1. What is Virtualization?
+
+**Virtualization** is the process of creating a virtual version of a computer system, operating system, server, storage, or network using software.
+
+A **Virtual Machine (VM)** behaves like a separate computer while running on a physical computer.
+
+### Example
+
+Your Windows PC can run:
+
+```text
+Physical Computer
+       ↓
+   VirtualBox
+   ↙       ↘
+Kali Linux  Metasploitable
+```
+
+This allows you to practice cybersecurity in an isolated environment.
+
+---
+
+# 2. Virtual Machine (VM)
+
+A **Virtual Machine** is a software-based computer that runs an operating system inside another computer.
+
+A VM has virtual:
+
+- CPU
+- RAM
+- Storage
+- Network adapter
+- Operating system
+
+### Host vs Guest
+
+**Host OS** → Operating system installed on the physical computer.
+
+**Guest OS** → Operating system running inside the VM.
+
+### Example
+
+```text
+Physical PC
+Windows 11 → Host OS
+
+VirtualBox
+├── Kali Linux → Guest OS
+└── Metasploitable → Guest OS
+```
+
+---
+
+# 3. Hypervisor
+
+A **hypervisor** is software that creates and manages virtual machines.
+
+### Type 1 – Bare-Metal Hypervisor
+
+Runs directly on physical hardware.
+
+Examples:
+
+- VMware ESXi
+- Microsoft Hyper-V
+- Xen
+
+### Type 2 – Hosted Hypervisor
+
+Runs as an application on an existing operating system.
+
+Examples:
+
+- Oracle VirtualBox
+- VMware Workstation
+
+### Easy Difference
+
+**Type 1 → Hardware → Hypervisor → VMs**
+
+**Type 2 → OS → Hypervisor/Application → VMs**
+
+---
+
+# 4. Oracle VirtualBox
+
+**VirtualBox** is a Type 2 virtualization platform that allows you to create and run virtual machines.
+
+### Uses in Cybersecurity
+
+VirtualBox can be used to create an isolated lab containing:
+
+- Kali Linux
+- Metasploitable
+- Windows evaluation VMs
+- Linux servers
+- Other intentionally vulnerable systems
+
+---
+
+# 5. Why Use a Virtual Cybersecurity Lab?
+
+A virtual lab allows you to practice security concepts without testing unauthorized real-world systems.
+
+### Benefits
+
+- Safe environment
+- Isolated from production systems
+- Easy to reset
+- Multiple operating systems on one PC
+- Snapshots
+- Network experimentation
+- Repeatable testing
+- Useful for learning penetration testing
+
+### Important Rule
+
+> **Only attack systems that you own or have explicit permission to test.**
+
+For this course, use intentionally vulnerable machines such as Metasploitable.
+
+---
+
+# 6. Kali Linux
+
+**Kali Linux** is a Debian-based Linux distribution designed for security testing, digital forensics, security research, and related tasks.
+
+It includes many security tools.
+
+### Common Tool Categories
+
+- Network analysis
+- Vulnerability assessment
+- Web security testing
+- Password auditing
+- Digital forensics
+- Wireless security testing
+- Exploitation
+- Information gathering
+
+### Important
+
+Kali Linux is a **toolset**, not a hacking button.
+
+Understanding networking, operating systems, and security concepts is essential to using it effectively.
+
+---
+
+# 7. Metasploitable
+
+**Metasploitable** is an intentionally vulnerable virtual machine designed for security training and penetration-testing practice.
+
+It contains deliberately insecure services and configurations.
+
+### Purpose
+
+It provides a legal target for practicing:
+
+- Network scanning
+- Service enumeration
+- Vulnerability identification
+- Exploitation in a controlled environment
+- Post-exploitation concepts
+
+### Important
+
+**Metasploitable should never be exposed directly to the public Internet.**
+
+Keep it inside your controlled lab network.
+
+---
+
+# 8. Recommended Lab Architecture
+
+A simple cybersecurity lab:
+
+```text
+                PHYSICAL PC
+                Windows Host
+                     |
+                 VirtualBox
+                 /        \
+                /          \
+        Kali Linux      Metasploitable
+        Attacker VM       Target VM
+```
+
+### Communication
+
+```text
+Kali Linux
+    |
+    |  Lab Network
+    |
+Metasploitable
+```
+
+The goal is to allow Kali to communicate with Metasploitable **without exposing the vulnerable VM unnecessarily to your normal network or the Internet**.
+
+---
+
+# 9. VirtualBox Network Modes
+
+VirtualBox provides different networking modes.
+
+### 1. NAT
+
+The VM accesses external networks through the host.
+
+**Use:** General Internet access.
+
+---
+
+### 2. Bridged Adapter
+
+The VM appears as another device on the physical network.
+
+```text
+Router/Switch
+   |
+   ├── Physical PC
+   └── VM
+```
+
+**Security consideration:** A vulnerable VM using bridged networking can become reachable from the physical network.
+
+Avoid this for Metasploitable unless you have a specific, controlled reason.
+
+---
+
+### 3. Host-Only Adapter
+
+Creates a private network between the host and VMs.
+
+```text
+Host
+ |
+Host-Only Network
+ /             \
+Kali       Metasploitable
+```
+
+Useful for isolated labs.
+
+---
+
+### 4. Internal Network
+
+Allows VMs connected to the same VirtualBox internal network to communicate with each other.
+
+```text
+Kali
+  |
+Internal Network
+  |
+Metasploitable
+```
+
+This is particularly useful for creating an isolated attacker/target lab.
+
+---
+
+# 10. Recommended Network for This Lab
+
+For a basic Kali + Metasploitable practice environment:
+
+```text
+Kali Linux
+     |
+     | Internal Network
+     |
+Metasploitable
+```
+
+This keeps the vulnerable target isolated from the normal LAN.
+
+You can give Kali an additional NAT adapter when Internet access is required for legitimate updates:
+
+```text
+                VirtualBox
+               /          \
+          NAT Adapter    Internal Adapter
+               |               |
+           Internet          Lab
+                               |
+                        Metasploitable
+```
+
+**Do not give Metasploitable unnecessary Internet access.**
+
+---
+
+# 11. Virtual Machine Resources
+
+A VM needs physical resources from the host.
+
+### Main resources
+
+- CPU
+- RAM
+- Storage
+- Network adapter
+
+Example learning setup:
+
+**Kali Linux**
+- 2+ CPU cores
+- 4 GB+ RAM recommended depending on workload
+- Sufficient disk space
+
+**Metasploitable**
+- Relatively lightweight
+- Usually requires fewer resources than Kali
+
+The exact requirements depend on the VM version and your physical PC.
+
+---
+
+# 12. VM Snapshots
+
+A **snapshot** saves the state of a virtual machine at a particular point in time.
+
+### Example
+
+Before practicing:
+
+```text
+Clean VM
+   ↓
+Take Snapshot
+   ↓
+Practice
+   ↓
+Something goes wrong
+   ↓
+Restore Snapshot
+```
+
+### Benefits
+
+- Quickly return to a clean state
+- Experiment safely
+- Recover from configuration mistakes
+- Repeat exercises
+
+---
+
+# 13. Isolation
+
+**Isolation** is one of the most important concepts in a cybersecurity lab.
+
+The vulnerable machine should be separated from:
+
+- Your normal home/office network
+- Sensitive computers
+- Important files
+- Production systems
+- The public Internet
+
+### Golden Rule
+
+> **Never expose an intentionally vulnerable machine to a network you do not control.**
+
+---
+
+# 14. Lab Safety Rules
+
+### Rule 1 – Use Authorized Targets
+
+Only test:
+
+- Your own VMs
+- Intentionally vulnerable machines
+- Systems for which you have explicit authorization
+
+### Rule 2 – Keep Vulnerable VMs Isolated
+
+Use:
+
+- Internal Network
+- Host-Only Network
+
+when appropriate.
+
+### Rule 3 – Take Snapshots
+
+Create a clean snapshot before exercises.
+
+### Rule 4 – Don't Store Sensitive Data
+
+Do not place personal or confidential information inside vulnerable VMs.
+
+### Rule 5 – Don't Bridge Vulnerable Machines Unnecessarily
+
+Bridged networking can expose the VM to your physical LAN.
+
+---
+
+# 15. Basic Lab Setup Workflow
+
+### Step 1 – Install VirtualBox
+
+Install VirtualBox on your host computer.
+
+### Step 2 – Prepare Kali Linux
+
+Obtain the official Kali VM image or installation media.
+
+### Step 3 – Import/Create Kali VM
+
+Configure:
+
+- CPU
+- RAM
+- Storage
+- Network
+
+### Step 4 – Prepare Metasploitable
+
+Import/create the Metasploitable VM.
+
+### Step 5 – Configure the Lab Network
+
+Create an isolated:
+
+**Internal Network**
+
+or appropriate **Host-Only Network**.
+
+### Step 6 – Connect Both VMs
+
+```text
+Kali ───── Lab Network ───── Metasploitable
+```
+
+### Step 7 – Start Both VMs
+
+Boot Kali and Metasploitable.
+
+### Step 8 – Check IP Addresses
+
+On Kali:
+
+```bash
+ip addr
+```
+
+On Linux-based Metasploitable:
+
+```bash
+ifconfig
+```
+
+or:
+
+```bash
+ip addr
+```
+
+### Step 9 – Test Connectivity
+
+From Kali, test the target's lab IP:
+
+```bash
+ping <target-ip>
+```
+
+Only use the IP address of your own lab target.
+
+### Step 10 – Take a Snapshot
+
+Once everything works:
+
+**VirtualBox → Snapshot → Take**
+
+Name it:
+
+```text
+Clean Lab
+```
+
+---
+
+# 16. Important Linux Networking Commands for the Lab
+
+### Show IP address
+
+```bash
+ip addr
+```
+
+### Show routing information
+
+```bash
+ip route
+```
+
+### Test connectivity
+
+```bash
+ping <IP>
+```
+
+### Show listening/network sockets
+
+```bash
+ss -tuln
+```
+
+### Check DNS configuration
+
+```bash
+cat /etc/resolv.conf
+```
+
+---
+
+# 17. Important VirtualBox Concepts
+
+| Concept | Meaning |
+|---|---|
+| VM | Virtual computer |
+| Host | Physical computer/OS running the VM |
+| Guest | OS running inside VM |
+| Hypervisor | Software that manages VMs |
+| Snapshot | Saved VM state |
+| NAT | VM accesses external network through host |
+| Bridged | VM appears on physical network |
+| Host-Only | Private host/VM network |
+| Internal Network | Private VM-to-VM network |
+
+---
+
+# 18. Kali Linux vs Metasploitable
+
+| Kali Linux | Metasploitable |
+|---|---|
+| Security testing platform | Intentionally vulnerable target |
+| Used by security professionals/students | Designed for security training |
+| Contains security tools | Contains vulnerable services/configurations |
+| Acts as attacker/test machine in this lab | Acts as target machine |
+| Should be used responsibly | Should remain isolated |
+
+### Simple Memory Trick
+
+**Kali = Tester**
+
+**Metasploitable = Target**
+
+**VirtualBox = Lab**
+
+---
+
+# 19. Example Cybersecurity Lab
+
+```text
+             YOUR COMPUTER
+              Windows Host
+                   |
+              VirtualBox
+                   |
+        ┌──────────┴──────────┐
+        │                     │
+   Kali Linux           Metasploitable
+   Test Machine          Vulnerable VM
+        │                     │
+        └──── Internal ───────┘
+              Network
+```
+
+Your exercises can then follow:
+
+```text
+Understand Network
+       ↓
+Discover Lab Target
+       ↓
+Identify Services
+       ↓
+Study Vulnerabilities
+       ↓
+Safely Test in Lab
+       ↓
+Document Findings
+       ↓
+Restore Snapshot
+```
+
+---
+
+# 20. What You Should Learn From This Lab
+
+By the end of Day 4, you should understand:
+
+- What virtualization is
+- What a virtual machine is
+- Host vs guest OS
+- What a hypervisor does
+- What VirtualBox does
+- What Kali Linux is
+- What Metasploitable is
+- How to create an isolated lab
+- NAT vs Bridged vs Host-Only vs Internal Network
+- How to check VM IP addresses
+- How to test connectivity
+- How to use snapshots
+- Why vulnerable machines must be isolated
+
+---
+
+# QUICK REVISION
+
+### Virtualization
+> Running virtual computer systems using software on physical hardware.
+
+### VM
+> A software-based computer running an operating system.
+
+### Hypervisor
+> Software that creates and manages virtual machines.
+
+### VirtualBox
+> A Type 2 hypervisor used to run VMs.
+
+### Kali Linux
+> Linux distribution designed for security testing and related security tasks.
+
+### Metasploitable
+> Intentionally vulnerable VM used for security training.
+
+### Host
+> Physical computer running the VM.
+
+### Guest
+> Operating system running inside the VM.
+
+### Snapshot
+> Saved state of a VM that can be restored later.
+
+### NAT
+> VM accesses external networks through the host.
+
+### Bridged
+> VM connects to the physical network like another device.
+
+### Host-Only
+> Private network between host and VMs.
+
+### Internal Network
+> Isolated network for communication between VMs.
+
+### Most Important Rule
+
+> **Keep vulnerable machines isolated and test only systems you own or are explicitly authorized to test.**
+
+### Day 4 Memory Trick
+
+**VirtualBox = Lab**
+
+**Kali = Attacker/Tester**
+
+**Metasploitable = Vulnerable Target**
+
+**Internal Network = Safe Communication**
+
+**Snapshot = Reset Point**

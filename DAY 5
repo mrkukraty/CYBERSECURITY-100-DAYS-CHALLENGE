@@ -1,0 +1,1484 @@
+# DAY 5 – BASIC COMMANDS FOR LINUX & WINDOWS
+## Navigation • Networking • Services • System Administration • File System
+
+---
+
+# 1. Introduction
+
+Command-line interfaces (CLI) allow you to interact with an operating system by typing commands instead of using a graphical interface.
+
+### Linux
+Common shells:
+- Bash
+- Zsh
+
+### Windows
+Common command-line environments:
+- Command Prompt (CMD)
+- PowerShell
+
+### Why CLI is Important in Cybersecurity
+
+Security professionals use command-line tools for:
+
+- System administration
+- Network troubleshooting
+- Log analysis
+- Process investigation
+- File analysis
+- Service management
+- Security testing
+- Automation
+
+---
+
+# 2. LINUX – NAVIGATION COMMANDS
+
+## `pwd`
+
+Shows the current working directory.
+
+```bash
+pwd
+```
+
+Example output:
+
+```text
+/home/student
+```
+
+**Remember:** `pwd` = **Print Working Directory**
+
+---
+
+## `ls`
+
+Lists files and directories.
+
+```bash
+ls
+```
+
+Useful options:
+
+```bash
+ls -l
+ls -a
+ls -la
+```
+
+- `-l` → Detailed listing
+- `-a` → Shows hidden files
+- `-la` → Detailed + hidden files
+
+---
+
+## `cd`
+
+Changes directory.
+
+```bash
+cd /home/student
+```
+
+Go to parent directory:
+
+```bash
+cd ..
+```
+
+Go to home directory:
+
+```bash
+cd ~
+```
+
+---
+
+## `clear`
+
+Clears the terminal screen.
+
+```bash
+clear
+```
+
+---
+
+## `history`
+
+Shows previously executed commands.
+
+```bash
+history
+```
+
+### Cybersecurity importance
+
+Command history can sometimes help investigators understand what commands were executed by a user.
+
+---
+
+# 3. WINDOWS – NAVIGATION COMMANDS
+
+## `cd`
+
+Shows or changes the current directory.
+
+```cmd
+cd
+```
+
+Change directory:
+
+```cmd
+cd C:\Users
+```
+
+Go up one level:
+
+```cmd
+cd ..
+```
+
+---
+
+## `dir`
+
+Lists files and folders.
+
+```cmd
+dir
+```
+
+---
+
+## `cls`
+
+Clears the CMD screen.
+
+```cmd
+cls
+```
+
+---
+
+## PowerShell `Get-ChildItem`
+
+Lists files and directories.
+
+```powershell
+Get-ChildItem
+```
+
+Aliases include:
+
+```powershell
+ls
+dir
+```
+
+---
+
+# 4. LINUX FILE-SYSTEM COMMANDS
+
+## Create a directory
+
+```bash
+mkdir test
+```
+
+---
+
+## Create a file
+
+```bash
+touch file.txt
+```
+
+---
+
+## Copy a file
+
+```bash
+cp file.txt backup.txt
+```
+
+---
+
+## Move or rename a file
+
+```bash
+mv file.txt newfile.txt
+```
+
+---
+
+## Delete a file
+
+```bash
+rm file.txt
+```
+
+**Be careful with `rm`.**
+
+---
+
+## Delete an empty directory
+
+```bash
+rmdir test
+```
+
+---
+
+## View file contents
+
+```bash
+cat file.txt
+```
+
+---
+
+## Search for files
+
+```bash
+find /home -name "file.txt"
+```
+
+---
+
+## Search text inside files
+
+```bash
+grep "password" file.txt
+```
+
+In cybersecurity, `grep` is very useful for searching logs and configuration files.
+
+---
+
+# 5. WINDOWS FILE-SYSTEM COMMANDS
+
+## Create directory
+
+```cmd
+mkdir test
+```
+
+---
+
+## Create file
+
+```cmd
+echo. > file.txt
+```
+
+---
+
+## Copy file
+
+```cmd
+copy file.txt backup.txt
+```
+
+---
+
+## Move file
+
+```cmd
+move file.txt C:\Temp
+```
+
+---
+
+## Rename file
+
+```cmd
+ren old.txt new.txt
+```
+
+---
+
+## Delete file
+
+```cmd
+del file.txt
+```
+
+---
+
+## Delete directory
+
+```cmd
+rmdir test
+```
+
+---
+
+## Display file contents
+
+```cmd
+type file.txt
+```
+
+---
+
+# 6. POWERSHELL FILE COMMANDS
+
+PowerShell provides object-based commands called **cmdlets**.
+
+### List files
+
+```powershell
+Get-ChildItem
+```
+
+### Copy
+
+```powershell
+Copy-Item file.txt backup.txt
+```
+
+### Move
+
+```powershell
+Move-Item file.txt C:\Temp
+```
+
+### Rename
+
+```powershell
+Rename-Item old.txt new.txt
+```
+
+### Delete
+
+```powershell
+Remove-Item file.txt
+```
+
+### Read file
+
+```powershell
+Get-Content file.txt
+```
+
+---
+
+# 7. LINUX FILE PERMISSIONS
+
+Linux uses:
+
+```text
+r = Read
+w = Write
+x = Execute
+```
+
+Example:
+
+```text
+-rwxr-xr--
+```
+
+Breakdown:
+
+```text
+User     Group    Others
+rwx      r-x      r--
+```
+
+---
+
+## `chmod`
+
+Changes file permissions.
+
+Example:
+
+```bash
+chmod +x script.sh
+```
+
+Gives the file execute permission for the relevant class.
+
+---
+
+## `chown`
+
+Changes ownership.
+
+```bash
+chown user file.txt
+```
+
+---
+
+# 8. WINDOWS FILE PERMISSIONS
+
+Windows commonly uses **NTFS permissions and ACLs**.
+
+Useful command:
+
+```cmd
+icacls file.txt
+```
+
+It displays the file's access-control information.
+
+PowerShell can also work with Windows security descriptors.
+
+---
+
+# 9. LINUX USER COMMANDS
+
+## `whoami`
+
+Shows current user.
+
+```bash
+whoami
+```
+
+---
+
+## `id`
+
+Shows user and group information.
+
+```bash
+id
+```
+
+---
+
+## `who`
+
+Shows logged-in users.
+
+```bash
+who
+```
+
+---
+
+## `w`
+
+Shows logged-in users and activity.
+
+```bash
+w
+```
+
+---
+
+## `sudo`
+
+Runs a command with elevated privileges when the account is permitted.
+
+```bash
+sudo command
+```
+
+**Important:** Do not use elevated privileges unnecessarily.
+
+---
+
+# 10. WINDOWS USER COMMANDS
+
+### `whoami`
+
+```cmd
+whoami
+```
+
+Shows current user.
+
+### `whoami /groups`
+
+```cmd
+whoami /groups
+```
+
+Shows group memberships.
+
+### `net user`
+
+```cmd
+net user
+```
+
+Lists local user accounts.
+
+### `net user username`
+
+```cmd
+net user username
+```
+
+Displays information about a local user.
+
+---
+
+# 11. LINUX PROCESS MANAGEMENT
+
+## `ps`
+
+Shows running processes.
+
+```bash
+ps
+```
+
+More detailed:
+
+```bash
+ps aux
+```
+
+---
+
+## `top`
+
+Displays running processes and resource usage.
+
+```bash
+top
+```
+
+---
+
+## `htop`
+
+Interactive process viewer, if installed.
+
+```bash
+htop
+```
+
+---
+
+## `kill`
+
+Sends a signal to a process.
+
+```bash
+kill <PID>
+```
+
+### Important
+
+`PID` = **Process ID**
+
+Example:
+
+```text
+PID 1234
+```
+
+---
+
+# 12. WINDOWS PROCESS MANAGEMENT
+
+## `tasklist`
+
+Displays running processes.
+
+```cmd
+tasklist
+```
+
+---
+
+## `taskkill`
+
+Terminates a process.
+
+```cmd
+taskkill /PID 1234
+```
+
+Force termination:
+
+```cmd
+taskkill /PID 1234 /F
+```
+
+Use process termination carefully.
+
+---
+
+## PowerShell
+
+```powershell
+Get-Process
+```
+
+Find a specific process:
+
+```powershell
+Get-Process chrome
+```
+
+---
+
+# 13. LINUX NETWORKING COMMANDS
+
+## `ip addr`
+
+Displays network interfaces and IP addresses.
+
+```bash
+ip addr
+```
+
+---
+
+## `ip route`
+
+Displays routing information.
+
+```bash
+ip route
+```
+
+---
+
+## `ping`
+
+Tests network reachability.
+
+```bash
+ping 192.168.1.1
+```
+
+---
+
+## `ss`
+
+Displays network sockets.
+
+```bash
+ss
+```
+
+Show listening TCP/UDP sockets:
+
+```bash
+ss -tuln
+```
+
+---
+
+## `ip neigh`
+
+Shows the local IP neighbor table.
+
+```bash
+ip neigh
+```
+
+---
+
+## `dig`
+
+Queries DNS information.
+
+```bash
+dig example.com
+```
+
+---
+
+## `curl`
+
+Makes network requests.
+
+```bash
+curl https://example.com
+```
+
+Useful for testing web services and APIs you are authorized to access.
+
+---
+
+# 14. WINDOWS NETWORKING COMMANDS
+
+## `ipconfig`
+
+Displays IP configuration.
+
+```cmd
+ipconfig
+```
+
+Detailed information:
+
+```cmd
+ipconfig /all
+```
+
+---
+
+## `ping`
+
+Tests network connectivity.
+
+```cmd
+ping 192.168.1.1
+```
+
+---
+
+## `tracert`
+
+Shows the path packets take toward a destination.
+
+```cmd
+tracert example.com
+```
+
+---
+
+## `nslookup`
+
+Performs DNS queries.
+
+```cmd
+nslookup example.com
+```
+
+---
+
+## `netstat`
+
+Displays network connections and listening ports.
+
+```cmd
+netstat -ano
+```
+
+`-o` displays the PID associated with a connection.
+
+---
+
+## PowerShell `Test-NetConnection`
+
+Tests connectivity to a host/port.
+
+```powershell
+Test-NetConnection example.com -Port 443
+```
+
+---
+
+# 15. LINUX SERVICES
+
+Modern Linux systems commonly use **systemd**.
+
+## Check service status
+
+```bash
+systemctl status ssh
+```
+
+---
+
+## Start a service
+
+```bash
+sudo systemctl start ssh
+```
+
+---
+
+## Stop a service
+
+```bash
+sudo systemctl stop ssh
+```
+
+---
+
+## Restart a service
+
+```bash
+sudo systemctl restart ssh
+```
+
+---
+
+## Enable service at boot
+
+```bash
+sudo systemctl enable ssh
+```
+
+---
+
+## Disable service at boot
+
+```bash
+sudo systemctl disable ssh
+```
+
+---
+
+# 16. WINDOWS SERVICES
+
+## PowerShell
+
+List services:
+
+```powershell
+Get-Service
+```
+
+Check a particular service:
+
+```powershell
+Get-Service Spooler
+```
+
+Start:
+
+```powershell
+Start-Service Spooler
+```
+
+Stop:
+
+```powershell
+Stop-Service Spooler
+```
+
+---
+
+## CMD
+
+Windows also provides:
+
+```cmd
+sc query
+```
+
+to query services.
+
+---
+
+# 17. SYSTEM ADMINISTRATION – LINUX
+
+## Check system information
+
+```bash
+uname -a
+```
+
+---
+
+## Check OS information
+
+```bash
+cat /etc/os-release
+```
+
+---
+
+## Check disk usage
+
+```bash
+df -h
+```
+
+---
+
+## Check directory size
+
+```bash
+du -sh /path
+```
+
+---
+
+## Check memory
+
+```bash
+free -h
+```
+
+---
+
+## Check uptime
+
+```bash
+uptime
+```
+
+---
+
+# 18. SYSTEM ADMINISTRATION – WINDOWS
+
+## System information
+
+```cmd
+systeminfo
+```
+
+---
+
+## Hostname
+
+```cmd
+hostname
+```
+
+---
+
+## Current user
+
+```cmd
+whoami
+```
+
+---
+
+## Network configuration
+
+```cmd
+ipconfig /all
+```
+
+---
+
+## PowerShell system information
+
+```powershell
+Get-ComputerInfo
+```
+
+---
+
+## Memory/process information
+
+```powershell
+Get-Process
+```
+
+---
+
+# 19. LINUX LOGS
+
+Common log location:
+
+```text
+/var/log/
+```
+
+List logs:
+
+```bash
+ls /var/log
+```
+
+On systems using systemd:
+
+```bash
+journalctl
+```
+
+View recent logs:
+
+```bash
+journalctl -n 50
+```
+
+### Security importance
+
+Logs can help identify:
+
+- Failed login attempts
+- Successful logins
+- Service activity
+- System errors
+- Suspicious behavior
+
+---
+
+# 20. WINDOWS LOGS
+
+Windows stores events in **Windows Event Logs**.
+
+You can view them through:
+
+**Event Viewer**
+
+PowerShell:
+
+```powershell
+Get-WinEvent -LogName Security
+```
+
+Security logs can help investigate:
+
+- Authentication
+- Account activity
+- Policy changes
+- Other security events
+
+---
+
+# 21. FILE SEARCHING
+
+### Linux
+
+```bash
+find /home -name "*.txt"
+```
+
+Search text:
+
+```bash
+grep "error" logfile.txt
+```
+
+Combine commands:
+
+```bash
+grep "failed" /var/log/*.log
+```
+
+---
+
+### Windows CMD
+
+```cmd
+dir /s *.txt
+```
+
+Search text:
+
+```cmd
+findstr /s /i "error" *.log
+```
+
+---
+
+### PowerShell
+
+```powershell
+Get-ChildItem -Recurse -Filter *.txt
+```
+
+Search inside files:
+
+```powershell
+Select-String -Path *.log -Pattern "error"
+```
+
+---
+
+# 22. Environment Variables
+
+### Linux
+
+View:
+
+```bash
+env
+```
+
+View PATH:
+
+```bash
+echo $PATH
+```
+
+---
+
+### Windows CMD
+
+```cmd
+set
+```
+
+View PATH:
+
+```cmd
+echo %PATH%
+```
+
+---
+
+### PowerShell
+
+```powershell
+Get-ChildItem Env:
+```
+
+PATH:
+
+```powershell
+$env:PATH
+```
+
+---
+
+# 23. Useful Command-Line Shortcuts
+
+### Linux
+
+| Command | Purpose |
+|---|---|
+| `pwd` | Current directory |
+| `ls` | List files |
+| `cd` | Change directory |
+| `mkdir` | Create directory |
+| `touch` | Create file |
+| `cp` | Copy |
+| `mv` | Move/rename |
+| `rm` | Delete |
+| `cat` | Read file |
+| `find` | Find files |
+| `grep` | Search text |
+| `whoami` | Current user |
+| `ps` | Processes |
+| `ip` | Network configuration |
+| `ss` | Network sockets |
+| `systemctl` | Services |
+| `journalctl` | Logs |
+
+---
+
+# 24. Useful Windows CMD Commands
+
+| Command | Purpose |
+|---|---|
+| `dir` | List files |
+| `cd` | Change directory |
+| `mkdir` | Create directory |
+| `copy` | Copy files |
+| `move` | Move files |
+| `del` | Delete files |
+| `type` | Read file |
+| `whoami` | Current user |
+| `tasklist` | Processes |
+| `taskkill` | Stop process |
+| `ipconfig` | Network configuration |
+| `ping` | Connectivity |
+| `tracert` | Network path |
+| `nslookup` | DNS query |
+| `netstat` | Network connections |
+| `systeminfo` | System information |
+| `sc` | Service management |
+
+---
+
+# 25. Useful PowerShell Commands
+
+| Command | Purpose |
+|---|---|
+| `Get-ChildItem` | Files/directories |
+| `Get-Content` | Read file |
+| `Copy-Item` | Copy |
+| `Move-Item` | Move |
+| `Remove-Item` | Delete |
+| `Get-Process` | Processes |
+| `Stop-Process` | Stop process |
+| `Get-Service` | Services |
+| `Start-Service` | Start service |
+| `Stop-Service` | Stop service |
+| `Get-NetIPConfiguration` | Network configuration |
+| `Test-NetConnection` | Network connectivity |
+| `Get-WinEvent` | Event logs |
+| `Get-ComputerInfo` | System information |
+
+---
+
+# 26. Linux vs Windows Command Comparison
+
+| Task | Linux | Windows CMD | PowerShell |
+|---|---|---|---|
+| Current directory | `pwd` | `cd` | `Get-Location` |
+| List files | `ls` | `dir` | `Get-ChildItem` |
+| Change directory | `cd` | `cd` | `Set-Location` |
+| Create directory | `mkdir` | `mkdir` | `New-Item -Type Directory` |
+| Copy | `cp` | `copy` | `Copy-Item` |
+| Move | `mv` | `move` | `Move-Item` |
+| Delete | `rm` | `del` | `Remove-Item` |
+| Read file | `cat` | `type` | `Get-Content` |
+| Current user | `whoami` | `whoami` | `whoami` |
+| Processes | `ps` | `tasklist` | `Get-Process` |
+| Network config | `ip addr` | `ipconfig` | `Get-NetIPConfiguration` |
+| Network connections | `ss` | `netstat` | `Get-NetTCPConnection` |
+| DNS query | `dig` | `nslookup` | `Resolve-DnsName` |
+| Services | `systemctl` | `sc` | `Get-Service` |
+| Logs | `journalctl` | Event Viewer | `Get-WinEvent` |
+
+---
+
+# 27. Cybersecurity Use of Basic Commands
+
+### Scenario 1 – Identify Your Machine
+
+Linux:
+
+```bash
+hostname
+ip addr
+whoami
+```
+
+Windows:
+
+```cmd
+hostname
+ipconfig
+whoami
+```
+
+---
+
+### Scenario 2 – Check Running Processes
+
+Linux:
+
+```bash
+ps aux
+```
+
+Windows:
+
+```cmd
+tasklist
+```
+
+PowerShell:
+
+```powershell
+Get-Process
+```
+
+---
+
+### Scenario 3 – Check Network Connections
+
+Linux:
+
+```bash
+ss -tuln
+```
+
+Windows:
+
+```cmd
+netstat -ano
+```
+
+---
+
+### Scenario 4 – Check Services
+
+Linux:
+
+```bash
+systemctl --type=service
+```
+
+Windows:
+
+```powershell
+Get-Service
+```
+
+---
+
+### Scenario 5 – Investigate Logs
+
+Linux:
+
+```bash
+journalctl
+```
+
+Windows:
+
+```powershell
+Get-WinEvent -LogName Security
+```
+
+---
+
+# 28. Important Cybersecurity Concepts
+
+### Enumeration
+
+Collecting information about available systems, services, users, or resources.
+
+### Process
+
+A running program.
+
+### Service
+
+A background program providing a system/application function.
+
+### Port
+
+A logical endpoint used by network services.
+
+### PID
+
+**Process ID** — a number identifying a running process.
+
+### Permissions
+
+Rules determining what users/processes can do with resources.
+
+### Privilege
+
+The level of access granted to a user or process.
+
+---
+
+# 29. DAY 5 PRACTICAL LAB
+
+Use your **Kali Linux VM** and **Metasploitable VM** from Day 4.
+
+### On Kali
+
+Run:
+
+```bash
+whoami
+hostname
+ip addr
+ip route
+ps
+ss -tuln
+```
+
+Then navigate:
+
+```bash
+pwd
+ls
+cd /tmp
+pwd
+```
+
+Create a practice directory:
+
+```bash
+mkdir day5
+cd day5
+touch test.txt
+ls -l
+```
+
+Write and read a file:
+
+```bash
+echo "Cybersecurity Day 5" > test.txt
+cat test.txt
+```
+
+Search for it:
+
+```bash
+find . -name "test.txt"
+```
+
+---
+
+### On Windows
+
+Open CMD or PowerShell and run:
+
+```cmd
+whoami
+hostname
+ipconfig
+tasklist
+netstat -ano
+systeminfo
+```
+
+Then:
+
+```cmd
+mkdir Day5
+cd Day5
+echo Cybersecurity Day 5 > test.txt
+type test.txt
+dir
+```
+
+In PowerShell:
+
+```powershell
+Get-Process
+Get-Service
+Get-NetIPConfiguration
+```
+
+---
+
+# QUICK REVISION
+
+### Navigation
+
+**Linux:** `pwd`, `ls`, `cd`
+
+**Windows:** `cd`, `dir`
+
+### File System
+
+**Linux:** `mkdir`, `touch`, `cp`, `mv`, `rm`, `cat`
+
+**Windows:** `mkdir`, `copy`, `move`, `del`, `type`
+
+### Networking
+
+**Linux:** `ip`, `ss`, `ping`, `dig`, `curl`
+
+**Windows:** `ipconfig`, `netstat`, `ping`, `tracert`, `nslookup`
+
+### Processes
+
+**Linux:** `ps`, `top`
+
+**Windows:** `tasklist`, `Get-Process`
+
+### Services
+
+**Linux:** `systemctl`
+
+**Windows:** `sc`, `Get-Service`
+
+### Users
+
+**Linux:** `whoami`, `id`, `who`
+
+**Windows:** `whoami`, `net user`
+
+### Logs
+
+**Linux:** `journalctl`, `/var/log/`
+
+**Windows:** Event Viewer, `Get-WinEvent`
+
+---
+
+## 🔥 DAY 5 MEMORY TRICK
+
+Remember these **10 essential commands first**:
+
+### Linux
+**`ls` → `cd` → `pwd` → `cat` → `ip` → `ss` → `ps` → `systemctl` → `grep` → `find`**
+
+### Windows
+**`dir` → `cd` → `type` → `ipconfig` → `netstat` → `tasklist` → `systeminfo` → `sc` → `findstr` → `whoami`**
+
+> **Day 5 Goal:** You should be comfortable opening a terminal, navigating the filesystem, checking users/processes/services, examining network configuration, and reading basic system information on both Linux and Windows.

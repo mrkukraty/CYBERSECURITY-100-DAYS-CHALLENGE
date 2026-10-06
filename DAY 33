@@ -1,0 +1,2075 @@
+# DAY 33 – DEVELOPING A PACKET SNIFFER
+
+## Python • Raw Packets • Ethernet • IPv4 • TCP/UDP • Packet Parsing • Filtering • Logging
+
+---
+
+# 1. DAY 33 OBJECTIVE
+
+Today you will learn:
+
+- What a packet sniffer does internally
+- How Python can capture packets
+- Raw packet structure
+- Ethernet frame parsing
+- IPv4 parsing
+- TCP and UDP parsing
+- Packet filtering
+- Logging packet information
+- Building a simple Python packet sniffer
+- Comparing your sniffer with Wireshark
+- Limitations and security considerations
+
+> **Lab rule:** Run packet capture only on systems/interfaces you own or are explicitly authorized to monitor.
+
+---
+
+# 2. WHAT IS A PACKET SNIFFER?
+
+A **packet sniffer** is a program that captures network packets and extracts useful information from them.
+
+Basic workflow:
+
+```text
+Network Interface
+       ↓
+Packet Capture
+       ↓
+Raw Packet
+       ↓
+Protocol Parsing
+       ↓
+Extract Information
+       ↓
+Display / Log
+```
+
+Example:
+
+```text
+Raw packet
+    ↓
+Ethernet
+    ↓
+IPv4
+    ↓
+TCP
+    ↓
+Source IP / Destination IP / Port
+```
+
+---
+
+# 3. EXAM DEFINITION
+
+> **A packet sniffer is a software tool that captures network packets and analyzes their headers and, when permitted and available, their payloads.**
+
+Examples:
+
+- Wireshark
+- tcpdump
+- tshark
+- Custom Python sniffers
+
+---
+
+# 4. WHY DEVELOP A PACKET SNIFFER?
+
+Building one helps you understand:
+
+- Network protocols
+- Packet structure
+- Headers
+- IP addresses
+- MAC addresses
+- TCP/UDP
+- Network monitoring
+- Security analysis
+- PCAP investigation
+
+It also shows what tools such as Wireshark are doing at a conceptual level.
+
+---
+
+# 5. PACKET SNIFFER ARCHITECTURE
+
+```text
+┌──────────────────────────┐
+│ Network Interface        │
+└────────────┬─────────────┘
+             ↓
+┌──────────────────────────┐
+│ Packet Capture Layer     │
+└────────────┬─────────────┘
+             ↓
+┌──────────────────────────┐
+│ Ethernet Parser          │
+└────────────┬─────────────┘
+             ↓
+┌──────────────────────────┐
+│ IP Parser                │
+└────────────┬─────────────┘
+             ↓
+┌──────────────────────────┐
+│ TCP / UDP Parser         │
+└────────────┬─────────────┘
+             ↓
+┌──────────────────────────┐
+│ Filter / Analyzer        │
+└────────────┬─────────────┘
+             ↓
+┌──────────────────────────┐
+│ Display / Log / Report   │
+└──────────────────────────┘
+```
+
+---
+
+# 6. RAW PACKET STRUCTURE
+
+A simplified Ethernet + IPv4 + TCP packet:
+
+```text
+┌────────────────────────────┐
+│ Ethernet Header            │
+├────────────────────────────┤
+│ IPv4 Header                │
+├────────────────────────────┤
+│ TCP Header                 │
+├────────────────────────────┤
+│ Application Data           │
+└────────────────────────────┘
+```
+
+For UDP:
+
+```text
+┌────────────────────────────┐
+│ Ethernet Header            │
+├────────────────────────────┤
+│ IPv4 Header                │
+├────────────────────────────┤
+│ UDP Header                 │
+├────────────────────────────┤
+│ Application Data           │
+└────────────────────────────┘
+```
+
+---
+
+# 7. IMPORTANT PYTHON LIBRARIES
+
+For educational packet sniffing, useful libraries include:
+
+| Library | Purpose |
+|---|---|
+| Scapy | Packet capture/construction/analysis |
+| socket | Network communication |
+| struct | Binary packet parsing |
+| binascii | Binary/hex handling |
+| datetime | Timestamps |
+| argparse | Command-line arguments |
+| json | Structured output |
+| logging | Logging |
+
+For today's implementation, we will primarily use:
+
+> **Scapy**
+
+---
+
+# 8. WHAT IS SCAPY?
+
+**Scapy** is a Python networking library used for:
+
+- Packet creation
+- Packet parsing
+- Packet capture
+- Protocol analysis
+- Network testing in authorized environments
+
+It provides a convenient abstraction over raw packet structures.
+
+---
+
+# 9. INSTALL SCAPY
+
+On your authorized lab machine:
+
+```bash
+pip install scapy
+```
+
+Verify:
+
+```bash
+python -c "import scapy; print(scapy.__version__)"
+```
+
+If you use a virtual environment:
+
+```bash
+python -m pip install scapy
+```
+
+---
+
+# 10. SIMPLEST PACKET SNIFFER
+
+A minimal educational example:
+
+```python
+from scapy.all import sniff
+
+def packet_callback(packet):
+    print(packet.summary())
+
+sniff(prn=packet_callback, count=20)
+```
+
+This captures 20 packets and prints a summary for each.
+
+---
+
+# 11. UNDERSTANDING THE CODE
+
+### Import
+
+```python
+from scapy.all import sniff
+```
+
+Imports Scapy's sniffing functionality.
+
+### Callback
+
+```python
+def packet_callback(packet):
+```
+
+This function receives each captured packet.
+
+### Summary
+
+```python
+packet.summary()
+```
+
+Produces a compact packet description.
+
+### Sniff
+
+```python
+sniff(prn=packet_callback, count=20)
+```
+
+Means:
+
+> Capture packets and send each packet to the callback.
+
+---
+
+# 12. CONTINUOUS SNIFFER
+
+Instead of capturing 20 packets:
+
+```python
+from scapy.all import sniff
+
+def packet_callback(packet):
+    print(packet.summary())
+
+sniff(prn=packet_callback)
+```
+
+This continues until stopped.
+
+Use it only on your authorized lab interface.
+
+---
+
+# 13. ADD TIMESTAMPS
+
+```python
+from scapy.all import sniff
+from datetime import datetime
+
+def packet_callback(packet):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(timestamp, packet.summary())
+
+sniff(prn=packet_callback, count=20)
+```
+
+Output might look like:
+
+```text
+2026-10-06 17:10:01 IP 192.168.1.10 > 192.168.1.1
+2026-10-06 17:10:02 ARP who-has 192.168.1.1
+```
+
+---
+
+# 14. GET PACKET LENGTH
+
+```python
+def packet_callback(packet):
+    print("Length:", len(packet))
+```
+
+This tells you the captured packet's size in bytes.
+
+---
+
+# 15. CHECK FOR ETHERNET
+
+```python
+from scapy.all import Ether
+
+def packet_callback(packet):
+    if packet.haslayer(Ether):
+        print(packet[Ether].summary())
+```
+
+---
+
+# 16. EXTRACT MAC ADDRESSES
+
+```python
+from scapy.all import sniff, Ether
+
+def packet_callback(packet):
+    if packet.haslayer(Ether):
+        eth = packet[Ether]
+
+        print("Source MAC:", eth.src)
+        print("Destination MAC:", eth.dst)
+
+sniff(prn=packet_callback, count=20)
+```
+
+Output:
+
+```text
+Source MAC: 00:11:22:33:44:55
+Destination MAC: AA:BB:CC:DD:EE:FF
+```
+
+---
+
+# 17. EXTRACT IPv4
+
+```python
+from scapy.all import sniff, IP
+
+def packet_callback(packet):
+    if packet.haslayer(IP):
+        ip = packet[IP]
+
+        print("Source:", ip.src)
+        print("Destination:", ip.dst)
+
+sniff(prn=packet_callback, count=20)
+```
+
+---
+
+# 18. EXTRACT IP PROTOCOL
+
+The IPv4 header contains a protocol field.
+
+For example:
+
+```text
+TCP = 6
+UDP = 17
+ICMP = 1
+```
+
+Scapy handles this for you through protocol layers.
+
+---
+
+# 19. TCP PACKET
+
+```python
+from scapy.all import sniff, IP, TCP
+
+def packet_callback(packet):
+    if packet.haslayer(IP) and packet.haslayer(TCP):
+        ip = packet[IP]
+        tcp = packet[TCP]
+
+        print(
+            ip.src,
+            ":", tcp.sport,
+            "→",
+            ip.dst,
+            ":",
+            tcp.dport
+        )
+
+sniff(prn=packet_callback, count=20)
+```
+
+Example:
+
+```text
+192.168.1.10:51542 → 192.168.1.1:443
+```
+
+---
+
+# 20. UDP PACKET
+
+```python
+from scapy.all import sniff, IP, UDP
+
+def packet_callback(packet):
+    if packet.haslayer(IP) and packet.haslayer(UDP):
+        ip = packet[IP]
+        udp = packet[UDP]
+
+        print(
+            ip.src,
+            ":", udp.sport,
+            "→",
+            ip.dst,
+            ":",
+            udp.dport
+        )
+
+sniff(prn=packet_callback, count=20)
+```
+
+---
+
+# 21. TCP FLAGS
+
+TCP contains flags such as:
+
+```text
+SYN
+ACK
+FIN
+RST
+PSH
+URG
+```
+
+You can inspect them:
+
+```python
+from scapy.all import sniff, TCP
+
+def packet_callback(packet):
+    if packet.haslayer(TCP):
+        tcp = packet[TCP]
+        print("TCP flags:", tcp.flags)
+
+sniff(prn=packet_callback, count=20)
+```
+
+---
+
+# 22. IDENTIFY TCP SYN
+
+```python
+from scapy.all import sniff, TCP
+
+def packet_callback(packet):
+    if packet.haslayer(TCP):
+        tcp = packet[TCP]
+
+        if tcp.flags & 0x02:
+            print("TCP SYN detected")
+
+sniff(prn=packet_callback, count=20)
+```
+
+Here `0x02` corresponds to the SYN flag.
+
+For a learning tool, this can help identify connection attempts.
+
+---
+
+# 23. IMPORTANT: SYN ≠ ATTACK
+
+If your program prints:
+
+```text
+TCP SYN detected
+```
+
+that does **not** mean:
+
+> "An attack is occurring."
+
+SYN is a normal part of TCP connection establishment.
+
+You need context such as:
+
+- Number of attempts
+- Destination ports
+- Source host
+- Timing
+- Response
+- Application behavior
+
+---
+
+# 24. DETECT TCP HANDSHAKE
+
+A normal connection can look like:
+
+```text
+Client
+  │
+  │ SYN
+  ↓
+Server
+  │
+  │ SYN/ACK
+  ↓
+Client
+  │
+  │ ACK
+  ↓
+Server
+```
+
+Your sniffer can display TCP flags so you can observe this process.
+
+---
+
+# 25. ICMP PACKETS
+
+```python
+from scapy.all import sniff, IP, ICMP
+
+def packet_callback(packet):
+    if packet.haslayer(IP) and packet.haslayer(ICMP):
+        ip = packet[IP]
+
+        print("ICMP:")
+        print(" ", ip.src, "→", ip.dst)
+
+sniff(prn=packet_callback, count=20)
+```
+
+Generate authorized lab traffic with:
+
+```bash
+ping <your-lab-host>
+```
+
+Then observe the ICMP packets.
+
+---
+
+# 26. DNS PACKETS
+
+Scapy can inspect DNS packets.
+
+```python
+from scapy.all import sniff, DNS
+
+def packet_callback(packet):
+    if packet.haslayer(DNS):
+        print("DNS packet detected")
+
+sniff(prn=packet_callback, count=20)
+```
+
+You can expand this later to inspect DNS questions and answers.
+
+---
+
+# 27. BUILDING A BETTER SNIFFER
+
+A useful educational sniffer should extract:
+
+```text
+Timestamp
+Source MAC
+Destination MAC
+Source IP
+Destination IP
+Protocol
+Source Port
+Destination Port
+Packet Length
+TCP Flags
+```
+
+---
+
+# 28. COMPLETE EDUCATIONAL SNIFFER
+
+```python
+from scapy.all import sniff, Ether, IP, TCP, UDP, ICMP
+from datetime import datetime
+
+
+def analyze_packet(packet):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    print("\n" + "=" * 60)
+    print("Time:", timestamp)
+    print("Length:", len(packet))
+
+    # Ethernet
+    if packet.haslayer(Ether):
+        eth = packet[Ether]
+
+        print("Source MAC:", eth.src)
+        print("Destination MAC:", eth.dst)
+
+    # IPv4
+    if packet.haslayer(IP):
+        ip = packet[IP]
+
+        print("Source IP:", ip.src)
+        print("Destination IP:", ip.dst)
+
+        # TCP
+        if packet.haslayer(TCP):
+            tcp = packet[TCP]
+
+            print("Protocol: TCP")
+            print("Source Port:", tcp.sport)
+            print("Destination Port:", tcp.dport)
+            print("Flags:", tcp.flags)
+
+        # UDP
+        elif packet.haslayer(UDP):
+            udp = packet[UDP]
+
+            print("Protocol: UDP")
+            print("Source Port:", udp.sport)
+            print("Destination Port:", udp.dport)
+
+        # ICMP
+        elif packet.haslayer(ICMP):
+            print("Protocol: ICMP")
+
+        else:
+            print("Protocol: Other IP")
+
+
+print("Starting packet sniffer...")
+print("Press Ctrl+C to stop.")
+
+sniff(prn=analyze_packet)
+```
+
+---
+
+# 29. WHAT THIS SNIFFER DOES
+
+It captures packets and attempts to extract:
+
+```text
+Ethernet
+    ↓
+MAC addresses
+
+IPv4
+    ↓
+IP addresses
+
+TCP
+    ↓
+Ports + flags
+
+UDP
+    ↓
+Ports
+
+ICMP
+    ↓
+Protocol identification
+```
+
+It does **not** automatically identify attacks.
+
+---
+
+# 30. ADD PROTOCOL FILTERING
+
+Instead of printing every packet, create a filter.
+
+Example:
+
+```python
+def analyze_packet(packet):
+
+    if packet.haslayer(TCP):
+        ip = packet[IP]
+        tcp = packet[TCP]
+
+        print(
+            f"TCP {ip.src}:{tcp.sport}"
+            f" -> {ip.dst}:{tcp.dport}"
+        )
+```
+
+Now only TCP packets are displayed.
+
+---
+
+# 31. FILTER BY PORT
+
+Example:
+
+```python
+def analyze_packet(packet):
+
+    if packet.haslayer(TCP):
+        tcp = packet[TCP]
+
+        if tcp.dport == 443 or tcp.sport == 443:
+            print("HTTPS-related TCP traffic detected")
+```
+
+This is useful for learning traffic classification.
+
+---
+
+# 32. FILTER BY IP
+
+```python
+TARGET_IP = "192.168.1.10"
+
+def analyze_packet(packet):
+
+    if packet.haslayer(IP):
+        ip = packet[IP]
+
+        if ip.src == TARGET_IP or ip.dst == TARGET_IP:
+            print(ip.src, "→", ip.dst)
+```
+
+Replace the address with a host in your own lab.
+
+---
+
+# 33. PACKET COUNTER
+
+You can count packets:
+
+```python
+packet_count = 0
+
+def analyze_packet(packet):
+    global packet_count
+
+    packet_count += 1
+
+    print("Packet:", packet_count)
+```
+
+---
+
+# 34. PROTOCOL COUNTER
+
+You can maintain statistics:
+
+```python
+protocol_counts = {
+    "TCP": 0,
+    "UDP": 0,
+    "ICMP": 0,
+    "OTHER": 0
+}
+```
+
+Then increment the appropriate counter.
+
+Example:
+
+```python
+if packet.haslayer(TCP):
+    protocol_counts["TCP"] += 1
+elif packet.haslayer(UDP):
+    protocol_counts["UDP"] += 1
+elif packet.haslayer(ICMP):
+    protocol_counts["ICMP"] += 1
+else:
+    protocol_counts["OTHER"] += 1
+```
+
+---
+
+# 35. WHY STATISTICS ARE USEFUL
+
+Suppose your capture produces:
+
+```text
+TCP     850
+UDP     230
+ICMP     20
+Other    15
+```
+
+You immediately know:
+
+> TCP dominates the observed traffic.
+
+This is useful for initial traffic profiling.
+
+---
+
+# 36. LOGGING TO FILE
+
+Instead of only printing to the terminal:
+
+```python
+with open("packets.log", "a", encoding="utf-8") as log:
+    log.write("Packet captured\n")
+```
+
+For a real application, Python's `logging` module is preferable.
+
+---
+
+# 37. USING PYTHON LOGGING
+
+```python
+import logging
+
+logging.basicConfig(
+    filename="sniffer.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(message)s"
+)
+
+logging.info("Packet captured")
+```
+
+---
+
+# 38. JSON OUTPUT
+
+Structured data is useful for later analysis.
+
+Example:
+
+```python
+import json
+
+record = {
+    "source": "192.168.1.10",
+    "destination": "192.168.1.1",
+    "protocol": "TCP",
+    "source_port": 51542,
+    "destination_port": 443
+}
+
+print(json.dumps(record, indent=2))
+```
+
+Output:
+
+```json
+{
+  "source": "192.168.1.10",
+  "destination": "192.168.1.1",
+  "protocol": "TCP",
+  "source_port": 51542,
+  "destination_port": 443
+}
+```
+
+---
+
+# 39. CSV OUTPUT
+
+CSV is useful for spreadsheet analysis.
+
+Conceptually:
+
+```text
+timestamp,source,destination,protocol,src_port,dst_port
+```
+
+You can use Python's `csv` module to write records.
+
+---
+
+# 40. SAVE PCAP FILES
+
+A major advantage of Scapy is that packets can be saved for later analysis.
+
+```python
+from scapy.all import sniff, wrpcap
+
+packets = sniff(count=50)
+
+wrpcap("lab_capture.pcap", packets)
+```
+
+You can then open:
+
+```text
+lab_capture.pcap
+```
+
+in Wireshark.
+
+---
+
+# 41. THIS CREATES A POWERFUL WORKFLOW
+
+```text
+Python Sniffer
+      ↓
+Capture
+      ↓
+Save PCAP
+      ↓
+Wireshark
+      ↓
+Deep Analysis
+```
+
+Your Python program can perform lightweight collection while Wireshark provides detailed manual analysis.
+
+---
+
+# 42. SCAPY VS WIRESHARK
+
+| Scapy | Wireshark |
+|---|---|
+| Python library/tool | GUI protocol analyzer |
+| Programmable | Interactive |
+| Easy automation | Deep protocol inspection |
+| Packet creation/parsing | Extensive protocol dissection |
+| Custom analysis | Rich filtering |
+| Scriptable | Powerful visualization |
+
+Memory:
+
+> **Scapy = Build/Script packets; Wireshark = Analyze packets deeply.**
+
+---
+
+# 43. RAW SOCKET APPROACH
+
+You can also build a lower-level sniffer using raw sockets.
+
+Conceptually:
+
+```text
+Raw Socket
+    ↓
+Receive Bytes
+    ↓
+Ethernet Header
+    ↓
+IP Header
+    ↓
+TCP/UDP Header
+    ↓
+Interpret Fields
+```
+
+This is useful for understanding packet structures.
+
+However, raw-socket behavior differs by operating system and generally requires elevated privileges.
+
+---
+
+# 44. WHY USE STRUCT?
+
+Network packets are binary data.
+
+Python's `struct` module can convert binary bytes into usable fields.
+
+Concept:
+
+```python
+import struct
+
+field1, field2 = struct.unpack(
+    "!HH",
+    raw_data[:4]
+)
+```
+
+The exact structure depends on the protocol header being parsed.
+
+---
+
+# 45. BYTE ORDER
+
+Networking commonly uses:
+
+> **Network byte order = Big Endian**
+
+Python's `struct` format:
+
+```text
+!
+```
+
+means network/big-endian byte order.
+
+Example:
+
+```python
+struct.unpack("!H", data)
+```
+
+`H` represents an unsigned short.
+
+---
+
+# 46. ETHERNET HEADER
+
+A simplified Ethernet II header:
+
+```text
+┌─────────────────────────┐
+│ Destination MAC  6 B    │
+├─────────────────────────┤
+│ Source MAC       6 B    │
+├─────────────────────────┤
+│ EtherType         2 B   │
+└─────────────────────────┘
+```
+
+Total:
+
+> **14 bytes**
+
+---
+
+# 47. COMMON ETHERTYPES
+
+Examples:
+
+| EtherType | Meaning |
+|---|---|
+| `0x0800` | IPv4 |
+| `0x0806` | ARP |
+| `0x86DD` | IPv6 |
+
+These values help identify the payload protocol.
+
+---
+
+# 48. IPv4 HEADER
+
+Minimum IPv4 header:
+
+> **20 bytes**
+
+Important fields:
+
+```text
+Version
+IHL
+Total Length
+Identification
+Flags
+Fragment Offset
+TTL
+Protocol
+Header Checksum
+Source IP
+Destination IP
+```
+
+---
+
+# 49. IPv4 PROTOCOL FIELD
+
+Common values:
+
+| Value | Protocol |
+|---:|---|
+| 1 | ICMP |
+| 6 | TCP |
+| 17 | UDP |
+
+This field tells the receiver what protocol follows the IP header.
+
+---
+
+# 50. TCP HEADER
+
+Important TCP fields:
+
+```text
+Source Port
+Destination Port
+Sequence Number
+Acknowledgment Number
+Flags
+Window
+Checksum
+Urgent Pointer
+```
+
+The TCP header is normally at least:
+
+> **20 bytes**
+
+---
+
+# 51. UDP HEADER
+
+UDP has a simple header:
+
+```text
+Source Port
+Destination Port
+Length
+Checksum
+```
+
+UDP header:
+
+> **8 bytes**
+
+---
+
+# 52. PACKET PARSING
+
+The basic parsing process is:
+
+```text
+Raw Bytes
+   ↓
+Ethernet
+   ↓
+Check EtherType
+   ↓
+IPv4?
+   ↓
+Read IP Header
+   ↓
+Check Protocol
+   ↓
+TCP / UDP / ICMP
+   ↓
+Extract fields
+```
+
+This is the key concept behind today's topic.
+
+---
+
+# 53. SIMPLE CUSTOM PARSER LOGIC
+
+```text
+if EtherType == IPv4:
+    parse IPv4
+
+    if Protocol == TCP:
+        parse TCP
+
+    elif Protocol == UDP:
+        parse UDP
+
+    elif Protocol == ICMP:
+        parse ICMP
+```
+
+---
+
+# 54. PACKET SNIFFER LIMITATIONS
+
+A simple sniffer may not correctly handle:
+
+- IPv6
+- VLAN tags
+- Fragmentation
+- Tunneling
+- Encapsulation
+- Complex protocols
+- Encrypted payloads
+- Reassembled application streams
+
+Therefore:
+
+> A small educational sniffer is not a replacement for Wireshark.
+
+---
+
+# 55. ENCRYPTION
+
+Suppose your sniffer sees:
+
+```text
+192.168.1.10 → 203.0.113.20
+TCP 51542 → 443
+```
+
+It can identify:
+
+- IPs
+- Ports
+- Packet sizes
+- Timing
+- TCP information
+
+But it normally cannot simply read the HTTPS application content.
+
+Why?
+
+> TLS encryption.
+
+---
+
+# 56. PACKET SNIFFING AND PRIVACY
+
+Captured traffic may contain sensitive information.
+
+Examples:
+
+- IP addresses
+- Internal hostnames
+- URLs
+- Metadata
+- Application data
+- Authentication information in insecure protocols
+
+Therefore:
+
+> Treat packet captures as sensitive security data.
+
+---
+
+# 57. SECURE HANDLING OF PCAPS
+
+Good practices:
+
+- Capture only required traffic
+- Obtain authorization
+- Store captures securely
+- Limit access
+- Avoid unnecessary payload collection
+- Protect PCAP files
+- Delete them according to policy
+- Do not share sensitive captures publicly
+
+---
+
+# 58. ERROR HANDLING
+
+A good sniffer should handle:
+
+- Permission errors
+- Missing interface
+- Unsupported packets
+- Malformed packets
+- Interrupted capture
+- Disk/write errors
+
+Example:
+
+```python
+try:
+    sniff(prn=analyze_packet)
+except PermissionError:
+    print("Permission required for packet capture.")
+except KeyboardInterrupt:
+    print("\nCapture stopped.")
+except Exception as exc:
+    print("Capture error:", exc)
+```
+
+---
+
+# 59. STOPPING THE SNIFFER
+
+A continuous sniffer can normally be stopped with:
+
+```text
+Ctrl + C
+```
+
+The program should handle the interruption cleanly.
+
+---
+
+# 60. PRACTICAL LAB
+
+## LAB OBJECTIVE
+
+Build a Python sniffer that identifies:
+
+```text
+✓ MAC addresses
+✓ IP addresses
+✓ TCP
+✓ UDP
+✓ ICMP
+✓ Ports
+✓ TCP flags
+✓ Packet length
+✓ Timestamp
+```
+
+---
+
+# 61. LAB STEP 1 — INSTALL
+
+```bash
+python -m pip install scapy
+```
+
+Verify:
+
+```bash
+python -c "from scapy.all import sniff; print('Scapy OK')"
+```
+
+---
+
+# 62. LAB STEP 2 — CREATE FILE
+
+Create:
+
+```text
+packet_sniffer.py
+```
+
+Paste the educational sniffer from Section 28.
+
+---
+
+# 63. LAB STEP 3 — RUN
+
+```bash
+python packet_sniffer.py
+```
+
+Depending on your operating system, packet capture may require administrator/root privileges.
+
+---
+
+# 64. LAB STEP 4 — GENERATE YOUR OWN TRAFFIC
+
+Use your authorized lab machine.
+
+For example:
+
+```bash
+ping <your-lab-host>
+```
+
+Then access your own test web server.
+
+The sniffer should display packets.
+
+---
+
+# 65. LAB STEP 5 — IDENTIFY TRAFFIC
+
+Look for:
+
+```text
+ICMP
+TCP
+UDP
+```
+
+Then compare your output with Wireshark.
+
+---
+
+# 66. LAB STEP 6 — SAVE PCAP
+
+Modify the program:
+
+```python
+packets = sniff(count=100)
+wrpcap("lab_capture.pcap", packets)
+```
+
+Open:
+
+```text
+lab_capture.pcap
+```
+
+in Wireshark.
+
+---
+
+# 67. LAB STEP 7 — COMPARE
+
+Compare:
+
+```text
+Your Python Sniffer
+        VS
+Wireshark
+```
+
+Check:
+
+- Source IP
+- Destination IP
+- Source port
+- Destination port
+- Protocol
+- TCP flags
+- Packet length
+
+---
+
+# 68. EXPECTED LEARNING
+
+After the lab, you should understand:
+
+```text
+Packet
+  ↓
+Ethernet
+  ↓
+IP
+  ↓
+TCP/UDP/ICMP
+  ↓
+Application
+```
+
+and:
+
+```text
+Capture
+  ↓
+Parse
+  ↓
+Extract
+  ↓
+Filter
+  ↓
+Log
+  ↓
+Analyze
+```
+
+---
+
+# 69. PACKET SNIFFER VS PORT SCANNER
+
+Do not confuse them.
+
+### Packet Sniffer
+
+Observes/captures packets.
+
+### Port Scanner
+
+Actively probes ports.
+
+```text
+Sniffer → Observe
+Scanner → Probe
+```
+
+---
+
+# 70. PACKET SNIFFER VS VULNERABILITY SCANNER
+
+### Packet Sniffer
+
+Analyzes network traffic.
+
+### Vulnerability Scanner
+
+Checks systems for potential known weaknesses.
+
+```text
+Sniffer → What is happening?
+Vulnerability scanner → What may be wrong?
+```
+
+---
+
+# 71. PACKET SNIFFER VS IDS
+
+### Sniffer
+
+Primarily captures and analyzes traffic.
+
+### IDS
+
+Analyzes activity to detect suspicious behavior and generate alerts.
+
+A packet sniffer can be a component of a broader monitoring system.
+
+---
+
+# 72. COMMON DEVELOPMENT MISTAKES
+
+### 1. Capturing everything forever
+
+Can consume significant resources/storage.
+
+### 2. No timeout or packet limit
+
+Use controlled capture duration/count during testing.
+
+### 3. Logging sensitive payloads unnecessarily
+
+Avoid unnecessary collection.
+
+### 4. No error handling
+
+Packet capture can fail due to permissions or interface issues.
+
+### 5. Assuming every SYN is malicious
+
+SYN is normal TCP behavior.
+
+### 6. Assuming port 443 guarantees HTTPS
+
+Port numbers are hints, not proof of application protocol.
+
+### 7. Ignoring IPv6
+
+A production sniffer must consider IPv6.
+
+---
+
+# 73. IMPROVEMENTS TO YOUR SNIFFER
+
+After the basic version works, you can add:
+
+```text
+1. Interface selection
+2. Packet count
+3. Capture timeout
+4. Protocol filters
+5. IP filters
+6. Port filters
+7. JSON logging
+8. CSV logging
+9. PCAP saving
+10. Packet statistics
+11. IPv6 support
+12. Better error handling
+```
+
+---
+
+# 74. ADVANCED ARCHITECTURE
+
+A more professional design:
+
+```text
+Capture Engine
+      ↓
+Packet Decoder
+      ↓
+Protocol Classifier
+      ↓
+Filter Engine
+      ↓
+Statistics Engine
+      ↓
+Logger
+      ↓
+PCAP / JSON / CSV
+```
+
+This separates responsibilities and makes the application easier to maintain.
+
+---
+
+# 75. EXAMPLE OUTPUT
+
+Your final program could produce:
+
+```text
+============================================================
+Time: 2026-10-06 17:20:10
+Length: 74
+Source MAC: AA:BB:CC:DD:EE:01
+Destination MAC: AA:BB:CC:DD:EE:02
+Source IP: 192.168.1.10
+Destination IP: 192.168.1.1
+Protocol: TCP
+Source Port: 51542
+Destination Port: 443
+Flags: S
+============================================================
+```
+
+---
+
+# 76. HARD SCENARIO MCQs
+
+## Q1
+
+What is the primary purpose of a packet sniffer?
+
+A. Exploit vulnerabilities  
+B. Capture and analyze network packets  
+C. Create user accounts  
+D. Patch operating systems
+
+**Answer: B**
+
+---
+
+## Q2
+
+Which Python library is especially useful for programmable packet manipulation and analysis?
+
+A. NumPy  
+B. Scapy  
+C. Flask  
+D. Tkinter
+
+**Answer: B**
+
+---
+
+## Q3
+
+A packet contains:
+
+```text
+Ethernet → IPv4 → TCP
+```
+
+Which layer contains source and destination TCP ports?
+
+A. Ethernet  
+B. IP  
+C. TCP  
+D. DNS
+
+**Answer: C**
+
+---
+
+## Q4
+
+What is the minimum typical size of an IPv4 header without options?
+
+A. 8 bytes  
+B. 14 bytes  
+C. 20 bytes  
+D. 64 bytes
+
+**Answer: C**
+
+---
+
+## Q5
+
+What is the size of a standard UDP header?
+
+A. 8 bytes  
+B. 14 bytes  
+C. 20 bytes  
+D. 40 bytes
+
+**Answer: A**
+
+---
+
+## Q6
+
+Which IPv4 protocol number represents TCP?
+
+A. 1  
+B. 6  
+C. 17  
+D. 53
+
+**Answer: B**
+
+---
+
+## Q7
+
+Which IPv4 protocol number represents UDP?
+
+A. 1  
+B. 6  
+C. 17  
+D. 80
+
+**Answer: C**
+
+---
+
+## Q8
+
+A Python sniffer reports:
+
+```text
+TCP SYN detected
+```
+
+What is the correct conclusion?
+
+A. An attack definitely occurred  
+B. A TCP connection attempt was observed  
+C. DNS poisoning occurred  
+D. Data exfiltration occurred
+
+**Answer: B**
+
+---
+
+## Q9
+
+Why might a packet sniffer identify TCP port 443 but not display readable application data?
+
+A. TCP is broken  
+B. TLS may be encrypting the application data  
+C. Port 443 is always closed  
+D. Ethernet cannot carry data
+
+**Answer: B**
+
+---
+
+## Q10
+
+What is the purpose of `wrpcap()` in Scapy?
+
+A. Encrypt packets  
+B. Save packets to a PCAP file  
+C. Scan ports  
+D. Resolve DNS
+
+**Answer: B**
+
+---
+
+# 77. HARDER SCENARIO MCQs
+
+## Q11
+
+You build a Python sniffer and notice that it sees only traffic involving your own computer. Is the program necessarily broken?
+
+A. Yes  
+B. No; switched-network forwarding normally limits which unicast frames reach the interface  
+C. Yes, because promiscuous mode always captures everything  
+D. No network can be sniffed
+
+**Answer: B**
+
+---
+
+## Q12
+
+A sniffer identifies:
+
+```text
+192.168.1.10:51542 → 192.168.1.1:443
+```
+
+What can you confidently identify from this information?
+
+A. The exact application payload  
+B. Source/destination IP and TCP ports  
+C. The user's password  
+D. The server's private key
+
+**Answer: B**
+
+---
+
+## Q13
+
+Your sniffer crashes when it receives an unexpected packet type.
+
+What is the best development improvement?
+
+A. Ignore all packets  
+B. Add protocol checks and exception handling  
+C. Disable networking  
+D. Capture only passwords
+
+**Answer: B**
+
+---
+
+## Q14
+
+A program flags every SYN as malicious.
+
+What is the main problem?
+
+A. SYN is not part of TCP  
+B. SYN is a normal part of TCP connection establishment  
+C. SYN belongs to DNS  
+D. SYN means encryption
+
+**Answer: B**
+
+---
+
+## Q15
+
+You save captured packets to `lab_capture.pcap`.
+
+What is the best next tool for detailed interactive investigation?
+
+A. Calculator  
+B. Wireshark  
+C. Text editor only  
+D. Compiler
+
+**Answer: B**
+
+---
+
+## Q16
+
+A packet contains:
+
+```text
+EtherType = 0x0800
+```
+
+What does this indicate?
+
+A. ARP  
+B. IPv4  
+C. IPv6  
+D. DNS
+
+**Answer: B**
+
+---
+
+## Q17
+
+A packet contains:
+
+```text
+EtherType = 0x0806
+```
+
+What does this indicate?
+
+A. IPv4  
+B. IPv6  
+C. ARP  
+D. TCP
+
+**Answer: C**
+
+---
+
+## Q18
+
+A packet's IPv4 protocol field is `17`.
+
+Which protocol follows?
+
+A. TCP  
+B. UDP  
+C. ICMP  
+D. ARP
+
+**Answer: B**
+
+---
+
+## Q19
+
+Your sniffer captures a large number of packets and stores all raw payloads indefinitely.
+
+What is the major concern?
+
+A. No concern  
+B. Storage, performance, privacy, and sensitive-data exposure  
+C. TCP will stop working  
+D. DNS will disappear
+
+**Answer: B**
+
+---
+
+## Q20
+
+You want to design a maintainable packet sniffer.
+
+Which architecture is best?
+
+A. One huge function containing everything  
+B. Capture → Decode → Classify → Filter → Statistics → Logging  
+C. Capture → Delete  
+D. Scan → Exploit → Delete
+
+**Answer: B**
+
+---
+
+# 78. EXAM TRAPS
+
+### Trap 1
+
+**Scapy and Wireshark are identical.**
+
+❌ No.
+
+Scapy is highly programmable; Wireshark is primarily an interactive protocol analyzer.
+
+---
+
+### Trap 2
+
+**A packet sniffer automatically sees all network traffic.**
+
+❌ No.
+
+What an interface can capture depends on network architecture, switching, interface configuration, capture point, and permissions.
+
+---
+
+### Trap 3
+
+**Port 443 proves HTTPS.**
+
+❌ No.
+
+Port numbers are commonly associated with services but are not proof of application protocol.
+
+---
+
+### Trap 4
+
+**SYN means an attack.**
+
+❌ No.
+
+SYN is normal TCP behavior.
+
+---
+
+### Trap 5
+
+**A sniffer can automatically read HTTPS passwords.**
+
+❌ No.
+
+TLS protects application data.
+
+---
+
+# 79. DAY 33 QUICK REVISION
+
+| Concept | Remember |
+|---|---|
+| Packet sniffer | Captures/analyzes packets |
+| Scapy | Python packet manipulation/analysis |
+| Wireshark | Deep packet analysis |
+| Ethernet | MAC addresses + EtherType |
+| IPv4 | IP addressing |
+| TCP | Reliable, connection-oriented |
+| UDP | Connectionless |
+| TCP SYN | Connection initiation |
+| TCP flags | SYN/ACK/FIN/RST etc. |
+| PCAP | Packet capture file |
+| `wrpcap()` | Save packets |
+| `sniff()` | Capture packets |
+| `packet.haslayer()` | Check protocol layer |
+| `packet[IP]` | Access IP layer |
+| `packet[TCP]` | Access TCP layer |
+| `packet[UDP]` | Access UDP layer |
+
+---
+
+# 80. DAY 33 MEMORY TRICK
+
+Remember:
+
+> **C-D-F-L**
+
+### C — Capture
+
+Capture packets.
+
+### D — Decode
+
+Understand protocol layers.
+
+### F — Filter
+
+Focus on relevant traffic.
+
+### L — Log
+
+Store useful information.
+
+```text
+CAPTURE
+   ↓
+DECODE
+   ↓
+FILTER
+   ↓
+LOG
+   ↓
+ANALYZE
+```
+
+---
+
+# 81. MOST IMPORTANT CODE TO REMEMBER
+
+### Capture
+
+```python
+from scapy.all import sniff
+
+sniff(count=20)
+```
+
+### Callback
+
+```python
+sniff(prn=packet_callback)
+```
+
+### IP
+
+```python
+if packet.haslayer(IP):
+    ip = packet[IP]
+```
+
+### TCP
+
+```python
+if packet.haslayer(TCP):
+    tcp = packet[TCP]
+```
+
+### UDP
+
+```python
+if packet.haslayer(UDP):
+    udp = packet[UDP]
+```
+
+### Save PCAP
+
+```python
+wrpcap("capture.pcap", packets)
+```
+
+---
+
+# 82. DAY 33 GOLDEN RULE
+
+> **A packet sniffer observes and parses network traffic; it does not automatically prove an attack. Always combine packet fields, timing, protocol behavior, and context before declaring suspicious activity.**
+
+# ONE-LINE EXAM ANSWER
+
+> **A Python-based packet sniffer captures network packets through an authorized interface, parses protocol layers such as Ethernet, IP, TCP and UDP, extracts useful fields such as addresses and ports, and can log or save the captured traffic for further analysis.**

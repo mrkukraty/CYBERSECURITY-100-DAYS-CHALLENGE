@@ -1,0 +1,2142 @@
+# DAY 37 – PRIVILEGE ESCALATION IN LINUX
+
+## Learning and Performing Linux Privilege Escalation in an Authorized Lab
+
+> **Lab-only rule:** Perform privilege-escalation exercises only on your own Linux VM or an intentionally vulnerable machine such as a dedicated training VM. Never attempt these techniques against systems without authorization.
+
+---
+
+# 1. DAY 37 OBJECTIVES
+
+By the end of this lesson, you should understand:
+
+- What privilege escalation is
+- Linux users and groups
+- Root privileges
+- Horizontal vs vertical privilege escalation
+- Linux permissions
+- `sudo`
+- SUID/SGID
+- Linux capabilities
+- Cron jobs
+- Writable files/directories
+- PATH-related weaknesses
+- Services
+- Environment variables
+- Kernel vulnerabilities
+- Credential/configuration weaknesses
+- Enumeration methodology
+- Manual privilege-escalation checks
+- Automated enumeration tools
+- Exploitation in a safe lab
+- Post-escalation verification
+- Remediation
+- Reporting
+
+---
+
+# 2. WHAT IS PRIVILEGE ESCALATION?
+
+Privilege escalation occurs when a user or process gains privileges beyond those originally authorized.
+
+Example:
+
+```text
+Normal User
+     ↓
+Privilege Escalation
+     ↓
+Root
+```
+
+In Linux:
+
+> **Root = UID 0**
+
+Root has extremely broad control over the system.
+
+---
+
+# 3. WHY PRIVILEGE ESCALATION MATTERS
+
+Imagine an attacker initially obtains access as:
+
+```text
+student
+```
+
+The account may have limited permissions.
+
+However, a misconfiguration might allow:
+
+```text
+student
+   ↓
+sudo misconfiguration
+   ↓
+root
+```
+
+The impact can increase dramatically.
+
+---
+
+# 4. TWO MAIN TYPES
+
+## Vertical Privilege Escalation
+
+A lower-privileged user obtains higher privileges.
+
+Example:
+
+```text
+Normal User
+     ↓
+Root
+```
+
+This is what people usually mean when discussing Linux privilege escalation.
+
+---
+
+## Horizontal Privilege Escalation
+
+A user accesses another account with similar privilege.
+
+Example:
+
+```text
+User A
+  ↓
+User B
+```
+
+Neither account necessarily has root privileges.
+
+---
+
+# 5. MEMORY TRICK
+
+> **Vertical = Level Up**
+
+> **Horizontal = Same Level, Different Account**
+
+---
+
+# 6. LINUX USER IDENTIFICATION
+
+Important commands:
+
+```bash
+whoami
+```
+
+Shows the current username.
+
+```bash
+id
+```
+
+Shows:
+
+- UID
+- GID
+- Groups
+
+Example:
+
+```text
+uid=1000(user)
+gid=1000(user)
+groups=1000(user),27(sudo)
+```
+
+---
+
+# 7. WHY `id` IS IMPORTANT
+
+Suppose:
+
+```text
+uid=1001(alice)
+groups=1001(alice),27(sudo)
+```
+
+The user belongs to the `sudo` group.
+
+That deserves investigation because the account may have elevated privileges through `sudo`.
+
+---
+
+# 8. ROOT
+
+Root has:
+
+```text
+UID = 0
+```
+
+Check:
+
+```bash
+id
+```
+
+If you see:
+
+```text
+uid=0(root)
+```
+
+you are operating as root.
+
+Another check:
+
+```bash
+whoami
+```
+
+Expected:
+
+```text
+root
+```
+
+---
+
+# 9. BASIC ENUMERATION
+
+Before attempting escalation:
+
+> **Enumerate first.**
+
+Think:
+
+```text
+USER
+ ↓
+GROUPS
+ ↓
+SUDO
+ ↓
+FILES
+ ↓
+SUID
+ ↓
+CAPABILITIES
+ ↓
+CRON
+ ↓
+SERVICES
+ ↓
+PROCESSES
+ ↓
+SOFTWARE
+ ↓
+KERNEL
+```
+
+---
+
+# 10. PRIVILEGE ESCALATION METHODOLOGY
+
+Memorize:
+
+> **U-G-S-F-C-C-S-K**
+
+```text
+U = User
+G = Groups
+S = Sudo
+F = Files
+C = Capabilities
+C = Cron
+S = Services
+K = Kernel
+```
+
+A more complete professional workflow:
+
+```text
+Initial Access
+      ↓
+Local Enumeration
+      ↓
+Identify Weakness
+      ↓
+Validate
+      ↓
+Controlled Exploitation
+      ↓
+Root Verification
+      ↓
+Impact Assessment
+      ↓
+Cleanup
+      ↓
+Report
+```
+
+---
+
+# 11. LINUX FILE PERMISSIONS
+
+Linux permissions commonly appear as:
+
+```text
+-rwxr-xr--
+```
+
+Three main permission groups:
+
+```text
+Owner
+Group
+Others
+```
+
+Permissions:
+
+```text
+r = read
+w = write
+x = execute
+```
+
+---
+
+# 12. PERMISSION EXAMPLE
+
+```text
+-rwxr-xr--
+```
+
+Break it down:
+
+```text
+Owner  = rwx
+Group  = r-x
+Others = r--
+```
+
+Therefore:
+
+| User | Permissions |
+|---|---|
+| Owner | Read + Write + Execute |
+| Group | Read + Execute |
+| Others | Read |
+
+---
+
+# 13. NUMERIC PERMISSIONS
+
+Linux permissions can also be represented numerically.
+
+```text
+r = 4
+w = 2
+x = 1
+```
+
+Therefore:
+
+```text
+rwx = 7
+rw- = 6
+r-x = 5
+r-- = 4
+```
+
+Example:
+
+```text
+chmod 755 file
+```
+
+means:
+
+```text
+Owner  = 7 = rwx
+Group  = 5 = r-x
+Others = 5 = r-x
+```
+
+---
+
+# 14. WHY FILE PERMISSIONS MATTER
+
+Suppose a privileged process executes a script:
+
+```text
+/root/backup.sh
+```
+
+If an unprivileged user can modify that script and a root process executes it, that may create a privilege-escalation opportunity.
+
+Conceptually:
+
+```text
+User
+ ↓
+Writable privileged file
+ ↓
+Privileged process
+ ↓
+Higher privileges
+```
+
+---
+
+# 15. SUDO
+
+`sudo` allows authorized users to execute commands with elevated privileges according to configured policy.
+
+Check:
+
+```bash
+sudo -l
+```
+
+This shows commands the current user may execute through sudo.
+
+---
+
+# 16. WHY `sudo -l` IS IMPORTANT
+
+Suppose an account is allowed to execute a particular administrative program without a password.
+
+That configuration may be legitimate.
+
+But if the program provides a way to execute arbitrary commands, it may create a privilege-escalation path.
+
+Therefore:
+
+> **Do not just ask "Does the user have sudo?"**
+
+Ask:
+
+> **"Exactly what can the user run through sudo?"**
+
+---
+
+# 17. SUDO MISCONFIGURATION
+
+Potentially dangerous configurations include:
+
+- Excessive sudo permissions
+- Wildcard rules
+- Unsafe administrative scripts
+- Programs that allow command execution
+- Scripts writable by low-privileged users
+- Misconfigured environment handling
+
+Important:
+
+> A sudo entry alone does not automatically mean vulnerability.
+
+It must be analyzed in context.
+
+---
+
+# 18. SUID
+
+SUID means:
+
+> **Set User ID**
+
+For an executable with SUID set, the program can execute with the privileges of its file owner.
+
+Example:
+
+```text
+-rwsr-xr-x
+```
+
+The `s` indicates SUID.
+
+---
+
+# 19. WHY SUID MATTERS
+
+Suppose:
+
+```text
+Owner = root
+SUID = enabled
+```
+
+Then the executable may run with root privileges.
+
+If the program is poorly designed or misconfigured, it may create a privilege-escalation path.
+
+Conceptually:
+
+```text
+User
+ ↓
+Root-owned SUID program
+ ↓
+Unsafe behavior
+ ↓
+Potential privilege escalation
+```
+
+---
+
+# 20. FINDING SUID FILES
+
+In an authorized lab, you can enumerate SUID executables:
+
+```bash
+find / -perm -4000 -type f 2>/dev/null
+```
+
+This identifies files with the SUID permission bit.
+
+Important:
+
+> Finding a SUID file does **not** automatically mean it is vulnerable.
+
+---
+
+# 21. SGID
+
+SGID means:
+
+> **Set Group ID**
+
+For an executable, SGID can cause execution with the file's group privileges.
+
+Example permission:
+
+```text
+-rwxr-sr-x
+```
+
+The `s` in the group position indicates SGID.
+
+---
+
+# 22. SUID VS SGID
+
+| SUID | SGID |
+|---|---|
+| Set User ID | Set Group ID |
+| Uses file owner's privileges | Uses file group's privileges |
+| Often associated with root-owned binaries | Can provide elevated group access |
+
+Memory:
+
+> **SUID → User**
+
+> **SGID → Group**
+
+---
+
+# 23. LINUX CAPABILITIES
+
+Linux capabilities divide some traditionally root-only privileges into smaller units.
+
+View capabilities:
+
+```bash
+getcap -r / 2>/dev/null
+```
+
+Potentially interesting capabilities can include:
+
+```text
+cap_setuid
+cap_net_raw
+cap_dac_override
+```
+
+The significance depends on:
+
+- Which executable has the capability
+- Which capability is granted
+- How the program behaves
+- Whether it can be influenced by the attacker
+
+---
+
+# 24. CAPABILITY EXAMPLE
+
+Conceptually:
+
+```text
+Normal User
+     ↓
+Executable
+     ↓
+Special capability
+     ↓
+Unexpected privileged operation
+```
+
+Again:
+
+> A capability is not automatically a vulnerability.
+
+---
+
+# 25. CRON
+
+`cron` is used for scheduled tasks.
+
+Examples:
+
+```text
+Every minute
+Every hour
+Every day
+```
+
+System cron configuration can be found in locations such as:
+
+```text
+/etc/crontab
+/etc/cron.d/
+/etc/cron.hourly/
+/etc/cron.daily/
+```
+
+---
+
+# 26. CRON PRIVILEGE ESCALATION CONCEPT
+
+Suppose:
+
+```text
+Root runs backup.sh every minute
+```
+
+and:
+
+```text
+Normal user can modify backup.sh
+```
+
+Then:
+
+```text
+Normal User
+      ↓
+Modify root-executed script
+      ↓
+Cron executes it as root
+      ↓
+Potential privilege escalation
+```
+
+This is a classic exam scenario.
+
+---
+
+# 27. CRON ENUMERATION
+
+Useful commands:
+
+```bash
+cat /etc/crontab
+```
+
+and:
+
+```bash
+ls -la /etc/cron.d/
+```
+
+Also inspect scheduled jobs relevant to the lab.
+
+---
+
+# 28. PATH HIJACKING
+
+`PATH` tells the shell where to search for executable commands.
+
+Check:
+
+```bash
+echo $PATH
+```
+
+Example:
+
+```text
+/usr/local/bin:/usr/bin:/bin
+```
+
+---
+
+# 29. PATH-RELATED WEAKNESS
+
+Imagine a privileged script executes:
+
+```bash
+backup
+```
+
+instead of:
+
+```bash
+/usr/local/bin/backup
+```
+
+If the search path is unsafe, another executable with the same name could potentially be selected.
+
+Conceptually:
+
+```text
+Privileged Script
+       ↓
+Command without absolute path
+       ↓
+PATH resolution
+       ↓
+Unexpected executable
+```
+
+This is why privileged scripts should use controlled paths.
+
+---
+
+# 30. ENVIRONMENT VARIABLES
+
+Environment variables can affect program behavior.
+
+Examples:
+
+```bash
+echo $PATH
+echo $HOME
+env
+```
+
+Security-sensitive privileged programs should not blindly trust attacker-controlled environment settings.
+
+---
+
+# 31. WRITABLE DIRECTORIES
+
+Check directory permissions carefully.
+
+Example concept:
+
+```text
+Privileged process
+      ↓
+Uses files in /some/directory
+      ↓
+Directory writable by normal user
+```
+
+This can create a security risk.
+
+Important principle:
+
+> **A privileged process should not depend on attacker-writable files or directories.**
+
+---
+
+# 32. PROCESSES
+
+List processes:
+
+```bash
+ps aux
+```
+
+Another useful command:
+
+```bash
+ps -ef
+```
+
+Look for:
+
+- Root-owned processes
+- Unusual services
+- Scripts
+- Custom applications
+- Scheduled processes
+
+---
+
+# 33. WHY PROCESSES MATTER
+
+Suppose:
+
+```text
+root
+  ↓
+custom_script.sh
+```
+
+and the script is writable by an ordinary user.
+
+That could represent a privilege-escalation path.
+
+The key question is:
+
+> **Who owns the process and what files does it execute?**
+
+---
+
+# 34. SERVICES
+
+List services on systems using systemd:
+
+```bash
+systemctl list-units --type=service
+```
+
+Inspect a service:
+
+```bash
+systemctl status <service>
+```
+
+Potential issues:
+
+- Vulnerable service
+- Insecure service configuration
+- Writable service executable
+- Writable configuration
+- Excessive privileges
+- Unsafe startup scripts
+
+---
+
+# 35. KERNEL VULNERABILITIES
+
+The Linux kernel is a critical component.
+
+Check:
+
+```bash
+uname -a
+```
+
+or:
+
+```bash
+uname -r
+```
+
+An outdated kernel may contain known vulnerabilities.
+
+However:
+
+> **Never assume an old kernel is automatically exploitable.**
+
+You must verify:
+
+- Exact kernel version
+- Distribution
+- Architecture
+- Configuration
+- Vulnerability applicability
+- Available patches
+- Exploit reliability
+
+---
+
+# 36. SOFTWARE VERSION ENUMERATION
+
+Useful commands include:
+
+```bash
+cat /etc/os-release
+```
+
+and:
+
+```bash
+uname -a
+```
+
+For installed packages, the command depends on the Linux distribution.
+
+Examples:
+
+```bash
+dpkg -l
+```
+
+for Debian-based systems.
+
+On RPM-based systems:
+
+```bash
+rpm -qa
+```
+
+---
+
+# 37. CREDENTIALS AND CONFIGURATION FILES
+
+During an authorized assessment, configuration files should be reviewed for insecurely stored credentials.
+
+Potential locations include:
+
+```text
+Application configuration
+Backup files
+Environment files
+Service configurations
+User configuration
+```
+
+Examples of sensitive information:
+
+- Passwords
+- API keys
+- Tokens
+- Private keys
+
+---
+
+# 38. IMPORTANT SECURITY PRINCIPLE
+
+A file being readable does not automatically make it a vulnerability.
+
+You must consider:
+
+```text
+Who can read it?
+What information is exposed?
+Is that access intended?
+What is the impact?
+```
+
+---
+
+# 39. SSH KEYS
+
+Linux systems may use SSH keys for authentication.
+
+Typical user SSH directory:
+
+```text
+~/.ssh/
+```
+
+Examples:
+
+```text
+authorized_keys
+known_hosts
+```
+
+Private keys should be strongly protected.
+
+Incorrect permissions on sensitive keys can create security problems.
+
+---
+
+# 40. WRITABLE `/etc/passwd` — CONCEPT
+
+The `/etc/passwd` file contains account information.
+
+Normally, ordinary users should not be able to modify it.
+
+If a low-privileged account can modify critical authentication files, that represents a severe security issue.
+
+This is a good exam example of:
+
+> **Critical file permission misconfiguration**
+
+---
+
+# 41. `/etc/shadow`
+
+`/etc/shadow` stores password-hash information on typical Linux systems.
+
+It should be highly restricted.
+
+Concept:
+
+```text
+/etc/passwd
+     +
+/etc/shadow
+```
+
+Security depends on proper permissions and authentication configuration.
+
+---
+
+# 42. ENUMERATION CHECKLIST
+
+When you obtain a low-privileged Linux shell, think:
+
+```text
+1. Who am I?
+2. What groups do I belong to?
+3. What can sudo run?
+4. What SUID files exist?
+5. What SGID files exist?
+6. What capabilities exist?
+7. What cron jobs run?
+8. What processes are running?
+9. What services are running?
+10. What files/directories are writable?
+11. What software versions exist?
+12. What kernel version exists?
+13. Are there exposed credentials/configurations?
+14. Are there unusual environment variables?
+15. Are privileged scripts writable?
+```
+
+---
+
+# 43. MASTER ENUMERATION COMMANDS
+
+```bash
+whoami
+id
+sudo -l
+
+uname -a
+cat /etc/os-release
+
+ps aux
+ps -ef
+
+echo $PATH
+env
+
+find / -perm -4000 -type f 2>/dev/null
+
+find / -perm -2000 -type f 2>/dev/null
+
+getcap -r / 2>/dev/null
+
+cat /etc/crontab
+
+ls -la /etc/cron.d/
+
+systemctl list-units --type=service
+
+ss -tulpn
+```
+
+These commands are primarily for **enumeration**. Whether any finding can actually be exploited must be validated separately.
+
+---
+
+# 44. AUTOMATED ENUMERATION
+
+Manual enumeration teaches the fundamentals.
+
+In authorized labs, tools such as:
+
+- LinPEAS
+- Linux Exploit Suggester
+- pspy
+
+may assist with enumeration.
+
+### Important
+
+Automated tools generate **potential findings**.
+
+They do not replace:
+
+> Human validation.
+
+---
+
+# 45. LINPEAS
+
+LinPEAS is commonly used to identify potential Linux privilege-escalation opportunities.
+
+It can examine areas such as:
+
+- Users
+- Groups
+- Sudo
+- SUID
+- Capabilities
+- Cron
+- Services
+- Files
+- Environment
+- Kernel
+- Software
+
+Think:
+
+> **LinPEAS = Linux Privilege Escalation Enumeration Assistant**
+
+---
+
+# 46. AUTOMATED TOOL VS MANUAL ENUMERATION
+
+| Manual | Automated |
+|---|---|
+| Better understanding | Faster |
+| More controlled | Broad checks |
+| Easier to learn fundamentals | Can produce many findings |
+| Less noise | Possible false positives |
+
+Best approach:
+
+> **Automate enumeration, manually validate findings.**
+
+---
+
+# 47. PRIVILEGE ESCALATION DECISION TREE
+
+```text
+Low-privileged shell
+       ↓
+Who am I?
+       ↓
+What groups?
+       ↓
+sudo -l
+       ↓
+SUID/SGID
+       ↓
+Capabilities
+       ↓
+Cron
+       ↓
+Writable files
+       ↓
+Processes/services
+       ↓
+Credentials/configuration
+       ↓
+Kernel/software versions
+       ↓
+Identify candidate weakness
+       ↓
+Validate
+       ↓
+Controlled exploitation
+       ↓
+Verify privilege
+```
+
+---
+
+# 48. EXAMPLE SCENARIO 1 — SUDO
+
+You obtain:
+
+```text
+uid=1000(student)
+```
+
+You execute:
+
+```bash
+sudo -l
+```
+
+and discover that the account can execute a privileged administrative program.
+
+What should you do?
+
+A. Assume root access  
+B. Examine exactly what the program can do and whether the configuration creates an escalation path  
+C. Delete sudo configuration  
+D. Restart the server
+
+**Answer: B**
+
+---
+
+# 49. SCENARIO 2 — SUID
+
+You find:
+
+```text
+-rwsr-xr-x root root suspicious_binary
+```
+
+What does this tell you?
+
+A. It is definitely vulnerable  
+B. It is a root-owned SUID executable and deserves investigation  
+C. It is definitely malware  
+D. It is a cron job
+
+**Answer: B**
+
+---
+
+# 50. SCENARIO 3 — CRON
+
+A root-owned cron job runs every minute.
+
+The script it executes is writable by a normal user.
+
+What is the security concern?
+
+A. DNS poisoning  
+B. Potential privilege escalation through a privileged scheduled task  
+C. XSS  
+D. ARP spoofing
+
+**Answer: B**
+
+---
+
+# 51. SCENARIO 4 — CAPABILITY
+
+An ordinary user finds an executable with a powerful Linux capability.
+
+What is the correct conclusion?
+
+A. Root access is guaranteed  
+B. The capability and executable behavior should be analyzed for a possible escalation path  
+C. The system is automatically compromised  
+D. The capability can be ignored
+
+**Answer: B**
+
+---
+
+# 52. SCENARIO 5 — KERNEL
+
+The system runs an old kernel.
+
+What should the tester conclude?
+
+A. Guaranteed root exploit  
+B. Potential exposure requiring version and vulnerability applicability verification  
+C. No risk  
+D. Immediate reboot
+
+**Answer: B**
+
+---
+
+# 53. SCENARIO 6 — WRITABLE SERVICE
+
+A root service executes:
+
+```text
+/usr/local/bin/backup.sh
+```
+
+An ordinary user can modify `backup.sh`.
+
+What is the concern?
+
+```text
+Normal user
+     ↓
+Modify script
+     ↓
+Root service executes script
+     ↓
+Potential privilege escalation
+```
+
+**Answer: Potential privilege escalation through a writable privileged resource.**
+
+---
+
+# 54. SCENARIO 7 — PATH
+
+A root-owned script calls:
+
+```bash
+backup
+```
+
+instead of using an absolute path.
+
+The execution environment allows an untrusted directory to appear before the legitimate binary.
+
+What category of weakness should be investigated?
+
+**Answer: PATH hijacking / unsafe command resolution.**
+
+---
+
+# 55. PRIVILEGE ESCALATION VS EXPLOITATION
+
+Privilege escalation is a **goal/outcome**.
+
+The underlying weakness may be:
+
+- SUID
+- Sudo
+- Cron
+- Capability
+- Service
+- File permissions
+- Kernel vulnerability
+- Credential exposure
+- PATH configuration
+
+Therefore:
+
+> Privilege escalation is not one single vulnerability.
+
+---
+
+# 56. LOCAL PRIVILEGE ESCALATION
+
+When the attacker already has some access to the machine:
+
+```text
+Initial low privilege
+       ↓
+Local enumeration
+       ↓
+Local weakness
+       ↓
+Higher privilege
+```
+
+This is called:
+
+> **Local Privilege Escalation (LPE)**
+
+---
+
+# 57. REMOTE VS LOCAL
+
+| Remote Exploitation | Local Privilege Escalation |
+|---|---|
+| Attacker may start remotely | Attacker already has local access |
+| Targets exposed service/application | Targets local configuration/weakness |
+| May establish initial access | Attempts to increase privileges |
+| Example: vulnerable network service | Example: insecure SUID configuration |
+
+---
+
+# 58. COMMON PRIVILEGE ESCALATION CATEGORIES
+
+Memorize:
+
+> **S-C-S-C-F-P-K-C**
+
+```text
+S = Sudo
+C = Cron
+S = SUID/SGID
+C = Capabilities
+F = File permissions
+P = Processes/Services
+K = Kernel
+C = Credentials/Configuration
+```
+
+---
+
+# 59. ROOT VERIFICATION
+
+After a successful lab escalation, verify:
+
+```bash
+whoami
+```
+
+and:
+
+```bash
+id
+```
+
+Root should show:
+
+```text
+uid=0(root)
+```
+
+Do not rely solely on a prompt such as:
+
+```text
+#
+```
+
+because shell prompts can be customized.
+
+---
+
+# 60. POST-ESCALATION RESPONSIBILITY
+
+Obtaining root in a lab is not the end.
+
+You should:
+
+- Record evidence
+- Determine the escalation path
+- Avoid unnecessary changes
+- Clean up test artifacts
+- Restore snapshots where appropriate
+- Document remediation
+- Retest after fixing the weakness
+
+---
+
+# 61. DEFENSE AGAINST PRIVILEGE ESCALATION
+
+### Sudo
+
+Use least privilege.
+
+Do not grant unnecessary commands.
+
+### SUID
+
+Remove unnecessary SUID bits.
+
+### Cron
+
+Protect scheduled scripts and directories.
+
+### Files
+
+Use correct ownership and permissions.
+
+### Services
+
+Run services with least privilege.
+
+### Kernel
+
+Apply security updates.
+
+### Credentials
+
+Protect passwords, keys and tokens.
+
+### Capabilities
+
+Grant only necessary capabilities.
+
+### Monitoring
+
+Monitor unusual privilege changes.
+
+---
+
+# 62. PRINCIPLE OF LEAST PRIVILEGE
+
+This is one of the most important defenses.
+
+> Users and processes should receive only the permissions necessary to perform their tasks.
+
+Example:
+
+Bad:
+
+```text
+Application → root
+```
+
+Better:
+
+```text
+Application → dedicated low-privilege account
+```
+
+---
+
+# 63. PRIVILEGE ESCALATION REPORT
+
+Use this format:
+
+```text
+Finding:
+Linux Privilege Escalation
+
+Initial User:
+student
+
+Initial UID:
+1000
+
+Escalation Vector:
+Sudo / SUID / Cron / Capability / Service / etc.
+
+Affected Resource:
+<resource>
+
+Evidence:
+<command/output>
+
+Validation:
+<controlled lab result>
+
+Privilege Obtained:
+root
+
+Impact:
+Unauthorized administrative control
+
+Root Cause:
+<misconfiguration/vulnerability>
+
+Recommendation:
+<remediation>
+
+Retest:
+<result>
+```
+
+---
+
+# 64. DAY 37 PRACTICAL LAB
+
+## Recommended architecture
+
+```text
+Host
+ │
+ ├── Kali Linux
+ │     └── Enumeration/testing
+ │
+ └── Linux Training VM
+       └── Intentionally vulnerable configuration
+```
+
+Use:
+
+- Host-only network
+- Internal network
+- VM snapshot
+- No third-party targets
+
+---
+
+## Lab Exercise
+
+### Step 1 — Obtain a low-privileged account
+
+Use the intentionally provided lab account.
+
+---
+
+### Step 2 — Identify yourself
+
+```bash
+whoami
+id
+```
+
+Record:
+
+```text
+Username:
+UID:
+Groups:
+```
+
+---
+
+### Step 3 — Check sudo
+
+```bash
+sudo -l
+```
+
+Document what is permitted.
+
+---
+
+### Step 4 — Check SUID
+
+```bash
+find / -perm -4000 -type f 2>/dev/null
+```
+
+Record unusual or lab-designated binaries.
+
+---
+
+### Step 5 — Check capabilities
+
+```bash
+getcap -r / 2>/dev/null
+```
+
+---
+
+### Step 6 — Check scheduled tasks
+
+```bash
+cat /etc/crontab
+```
+
+and:
+
+```bash
+ls -la /etc/cron.d/
+```
+
+---
+
+### Step 7 — Check processes
+
+```bash
+ps aux
+```
+
+Look for root-owned custom processes.
+
+---
+
+### Step 8 — Check services
+
+```bash
+systemctl list-units --type=service
+```
+
+---
+
+### Step 9 — Check system version
+
+```bash
+uname -a
+cat /etc/os-release
+```
+
+---
+
+### Step 10 — Check network services
+
+```bash
+ss -tulpn
+```
+
+---
+
+### Step 11 — Analyze candidate weaknesses
+
+Do not immediately exploit everything you find.
+
+For each finding ask:
+
+```text
+Is it actually exploitable?
+Is it in scope?
+What privileges does it provide?
+What impact would exploitation have?
+```
+
+---
+
+### Step 12 — Validate in the lab
+
+Use the specific vulnerability intentionally configured in your training environment.
+
+---
+
+### Step 13 — Verify
+
+```bash
+whoami
+id
+```
+
+---
+
+### Step 14 — Document
+
+Record:
+
+```text
+Initial privilege
+Weakness
+Evidence
+Escalation path
+Final privilege
+Impact
+Remediation
+```
+
+---
+
+# 65. HARD SCENARIO-BASED MCQs
+
+## Q1
+
+A user has UID 1000 and discovers:
+
+```text
+uid=1000(user)
+gid=1000(user)
+groups=1000(user),27(sudo)
+```
+
+What should the tester investigate next?
+
+A. DNS records  
+B. `sudo -l`  
+C. ARP table only  
+D. Wi-Fi channel
+
+**Answer: B**
+
+---
+
+## Q2
+
+A SUID executable is owned by root.
+
+What is the correct conclusion?
+
+A. Guaranteed privilege escalation  
+B. It deserves investigation because it runs with owner privileges  
+C. It is definitely malware  
+D. It is a cron job
+
+**Answer: B**
+
+---
+
+## Q3
+
+A root cron job executes a script that is writable by an unprivileged user.
+
+What is the likely security issue?
+
+A. Potential privilege escalation  
+B. DNS spoofing  
+C. XSS  
+D. Packet sniffing
+
+**Answer: A**
+
+---
+
+## Q4
+
+Which command identifies the current user?
+
+A. `whoami`  
+B. `uname`  
+C. `ss`  
+D. `chmod`
+
+**Answer: A**
+
+---
+
+## Q5
+
+Which command provides UID/GID/group information?
+
+A. `id`  
+B. `pwd`  
+C. `ls`  
+D. `cat`
+
+**Answer: A**
+
+---
+
+## Q6
+
+What does UID 0 normally represent?
+
+A. Guest  
+B. Root  
+C. Network user  
+D. Service user
+
+**Answer: B**
+
+---
+
+## Q7
+
+A low-privileged user finds a root-owned binary with SUID set.
+
+What is the best next step?
+
+A. Assume root access  
+B. Analyze the binary's behavior and whether the SUID configuration creates an exploitable condition  
+C. Delete it  
+D. Reboot
+
+**Answer: B**
+
+---
+
+## Q8
+
+What is the purpose of Linux capabilities?
+
+A. Replace all passwords  
+B. Divide certain privileged operations into more granular permissions  
+C. Encrypt every file  
+D. Disable root
+
+**Answer: B**
+
+---
+
+## Q9
+
+A system has an outdated kernel.
+
+What is the correct assessment?
+
+A. Guaranteed exploitation  
+B. Potential vulnerability requiring verification  
+C. No security concern  
+D. It automatically grants root
+
+**Answer: B**
+
+---
+
+## Q10
+
+Which is an example of vertical privilege escalation?
+
+A. User A accessing User B with the same privilege level  
+B. Normal user obtaining root privileges  
+C. Reading DNS records  
+D. Capturing packets
+
+**Answer: B**
+
+---
+
+# 66. HARDER MCQs
+
+## Q11
+
+A privileged service executes a binary from a directory writable by an ordinary user.
+
+What should be investigated?
+
+A. Whether the user can influence which executable the privileged service runs  
+B. Whether DNS works  
+C. Whether Wi-Fi uses WPA3  
+D. Whether ARP is enabled
+
+**Answer: A**
+
+---
+
+## Q12
+
+A tester finds an interesting SUID binary but it is a standard, correctly configured system utility with no exploitable behavior.
+
+What is the correct conclusion?
+
+A. SUID always equals vulnerability  
+B. The binary is not necessarily a privilege-escalation vulnerability  
+C. Root access is guaranteed  
+D. The operating system is compromised
+
+**Answer: B**
+
+---
+
+## Q13
+
+A user can modify a root-owned backup script executed by cron.
+
+What is the key security principle violated?
+
+A. Least privilege / separation of privileged resources  
+B. DNS confidentiality  
+C. Wireless encryption  
+D. Packet fragmentation
+
+**Answer: A**
+
+---
+
+## Q14
+
+A tester finds a file containing a password readable by an ordinary user.
+
+What should happen first?
+
+A. Immediately use it everywhere  
+B. Determine whether the credential is valid, what it accesses, and whether the access is authorized  
+C. Publish it  
+D. Delete the account
+
+**Answer: B**
+
+---
+
+## Q15
+
+Which sequence is most appropriate?
+
+A. Exploit everything → investigate  
+B. Enumerate → identify candidate weakness → validate → exploit in scope → verify → report  
+C. Root → enumerate  
+D. Delete logs → report
+
+**Answer: B**
+
+---
+
+# 67. VERY HARD SCENARIO
+
+### Scenario
+
+A tester obtains a shell as:
+
+```text
+student
+UID 1000
+```
+
+They discover:
+
+```text
+1. No useful sudo permissions
+2. Several SUID binaries
+3. One root-owned custom backup program
+4. The backup program reads a configuration file
+5. The configuration file is writable by student
+6. The program executes with root privileges
+```
+
+What is the most important finding?
+
+A. The number of SUID files  
+B. The writable root-used configuration file that influences a privileged program  
+C. The username `student`  
+D. The Linux hostname
+
+### Answer
+
+**B**
+
+### Why?
+
+The strongest escalation path is:
+
+```text
+student
+   ↓
+Writable configuration
+   ↓
+Root privileged program
+   ↓
+Potential control of privileged behavior
+   ↓
+Privilege escalation
+```
+
+The existence of a SUID file by itself is weaker evidence.
+
+---
+
+# 68. VERY HARD SCENARIO 2
+
+A tester finds:
+
+```text
+/etc/crontab
+```
+
+with:
+
+```text
+root ... /opt/scripts/backup.sh
+```
+
+They then find:
+
+```text
+-rwxrwxrwx backup.sh
+```
+
+What is the security concern?
+
+A. The script is readable  
+B. The root-scheduled script is writable by unprivileged users  
+C. Cron is always insecure  
+D. Linux cannot use scheduled tasks
+
+**Answer: B**
+
+---
+
+# 69. VERY HARD SCENARIO 3
+
+A user runs:
+
+```bash
+getcap -r / 2>/dev/null
+```
+
+and finds an executable with a powerful capability.
+
+What should the tester do?
+
+A. Immediately declare root compromise  
+B. Determine how that capability affects the specific executable and whether it creates a practical escalation path  
+C. Delete the executable  
+D. Disable all capabilities
+
+**Answer: B**
+
+---
+
+# 70. EXAM TRAPS
+
+### Trap 1
+
+> SUID = vulnerability.
+
+❌ Incorrect.
+
+SUID is a permission mechanism.
+
+---
+
+### Trap 2
+
+> Old kernel = guaranteed root.
+
+❌ Incorrect.
+
+The exact vulnerability and applicability must be verified.
+
+---
+
+### Trap 3
+
+> sudo group = automatically root.
+
+❌ Incorrect.
+
+You must inspect the actual sudo policy.
+
+---
+
+### Trap 4
+
+> Writable file = privilege escalation.
+
+❌ Incorrect.
+
+The file must be used in a privileged context or otherwise create a security impact.
+
+---
+
+### Trap 5
+
+> Root process = vulnerable.
+
+❌ Incorrect.
+
+The question is whether an unprivileged user can influence that process.
+
+---
+
+# 71. QUICK REVISION TABLE
+
+| Technique/Area | What to Remember |
+|---|---|
+| `whoami` | Current username |
+| `id` | UID/GID/groups |
+| UID 0 | Root |
+| `sudo -l` | Sudo permissions |
+| SUID | Execute with file owner's privileges |
+| SGID | Execute with file group's privileges |
+| Capabilities | Granular privileged permissions |
+| Cron | Scheduled tasks |
+| PATH | Command lookup |
+| Writable script | Potential escalation if privileged process executes it |
+| Services | Check ownership/configuration |
+| Kernel | Check version/applicability |
+| Credentials | Check insecure exposure |
+| `uname -a` | Kernel/system information |
+| `ps aux` | Processes |
+| `ss -tulpn` | Listening network services |
+
+---
+
+# 72. MASTER PRIVILEGE ESCALATION FORMULA
+
+> **ENUMERATE → IDENTIFY → VALIDATE → ESCALATE → VERIFY → REPORT**
+
+```text
+Low Privilege
+     ↓
+Enumerate
+     ↓
+Find Weakness
+     ↓
+Validate
+     ↓
+Controlled Escalation
+     ↓
+Verify UID 0
+     ↓
+Document
+     ↓
+Remediate
+     ↓
+Retest
+```
+
+---
+
+# 73. ONE-LINE EXAM ANSWER
+
+> **Linux privilege escalation is the process of obtaining higher privileges than initially authorized by exploiting weaknesses such as excessive sudo permissions, insecure SUID/SGID binaries, writable privileged files, cron misconfigurations, dangerous capabilities, vulnerable services, exposed credentials, or kernel vulnerabilities.**
+
+---
+
+# 74. DAY 37 GOLDEN RULE
+
+## Never start with:
+
+> "How do I become root?"
+
+Start with:
+
+```text
+WHO AM I?
+    ↓
+WHAT GROUPS?
+    ↓
+WHAT CAN SUDO DO?
+    ↓
+WHAT SUID/SGID EXISTS?
+    ↓
+WHAT CAPABILITIES EXIST?
+    ↓
+WHAT RUNS AS ROOT?
+    ↓
+WHAT IS WRITABLE?
+    ↓
+WHAT CRON/SERVICES EXIST?
+    ↓
+WHAT SOFTWARE/KERNEL VERSION?
+    ↓
+WHAT CREDENTIALS/CONFIGURATION ARE EXPOSED?
+    ↓
+WHICH WEAKNESS IS ACTUALLY VALID?
+    ↓
+CONTROLLED ESCALATION
+    ↓
+VERIFY
+    ↓
+REPORT
+```
+
+# ⭐ DAY 37 MASTER MEMORY
+
+> **SUDO → SUID → CAPABILITIES → CRON → FILES → SERVICES → KERNEL → CREDENTIALS**
+
+Or simply:
+
+> **"Check what root runs, what you can modify, and what privileges you can inherit."**
+
+This mindset is more important than memorizing individual exploits.

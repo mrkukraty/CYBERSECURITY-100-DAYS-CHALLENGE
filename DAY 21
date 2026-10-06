@@ -1,0 +1,1732 @@
+# DAY 21 – REVIEW AND PRACTICE
+
+## Vulnerability Scanning • Web Scanning • Automation • Patch Management • Custom Scanner
+
+---
+
+# 1. DAY 21 OBJECTIVE
+
+Today you will review and practice:
+
+- Vulnerability scanning
+- Vulnerability assessment
+- Application vulnerability identification
+- Automated scanning
+- Web-server scanning
+- Patch management
+- Custom Python vulnerability scanner
+- False positives and false negatives
+- Scan result validation
+- Reporting
+- Rescanning after remediation
+
+### Main Goal
+
+> **Don't just know how to run a scanner — understand how to interpret, validate, remediate, and verify its findings.**
+
+---
+
+# 2. DAYS 15–20 COMPLETE CONNECTION
+
+```text
+DAY 15
+Vulnerability Scanning
+        ↓
+Find potential weaknesses
+        ↓
+DAY 16
+Application Security
+        ↓
+Identify application vulnerabilities
+        ↓
+DAY 17
+Automation
+        ↓
+Automate scanning and reporting
+        ↓
+DAY 18
+Web Server Scanning
+        ↓
+Inspect web-server technologies/issues
+        ↓
+DAY 19
+Patch Management
+        ↓
+Remediate vulnerabilities
+        ↓
+DAY 20
+Custom Vulnerability Scanner
+        ↓
+Build basic detection automation
+        ↓
+DAY 21
+REVIEW + PRACTICE
+        ↓
+Validate → Fix → Rescan
+```
+
+---
+
+# 3. MASTER VULNERABILITY MANAGEMENT CYCLE
+
+Memorize this:
+
+```text
+┌─────────────────────┐
+│ 1. Discover Assets   │
+└──────────┬──────────┘
+           ↓
+┌─────────────────────┐
+│ 2. Scan              │
+└──────────┬──────────┘
+           ↓
+┌─────────────────────┐
+│ 3. Identify Issues   │
+└──────────┬──────────┘
+           ↓
+┌─────────────────────┐
+│ 4. Validate          │
+└──────────┬──────────┘
+           ↓
+┌─────────────────────┐
+│ 5. Prioritize        │
+└──────────┬──────────┘
+           ↓
+┌─────────────────────┐
+│ 6. Remediate         │
+└──────────┬──────────┘
+           ↓
+┌─────────────────────┐
+│ 7. Verify            │
+└──────────┬──────────┘
+           ↓
+┌─────────────────────┐
+│ 8. Rescan            │
+└─────────────────────┘
+```
+
+### Memory
+
+> **Discover → Scan → Validate → Prioritize → Fix → Verify → Rescan**
+
+---
+
+# 4. VULNERABILITY SCANNING
+
+## Definition
+
+Vulnerability scanning is the automated or semi-automated process of identifying potential security weaknesses in systems, applications, networks, or configurations.
+
+### Examples
+
+- Missing patches
+- Outdated software
+- Weak configurations
+- Exposed services
+- Known vulnerable versions
+- Missing security controls
+
+---
+
+# 5. VULNERABILITY SCANNING VS PENETRATION TESTING
+
+| Vulnerability Scanning | Penetration Testing |
+|---|---|
+| Usually automated | Manual + automated |
+| Broad coverage | Deeper targeted testing |
+| Finds potential vulnerabilities | Tests whether weaknesses can actually be exploited |
+| Repeatable | More investigation-oriented |
+| Produces findings | Produces validated attack-path evidence |
+| Less context by itself | More human analysis |
+
+### Exam Memory
+
+> **Scanner = Find**
+
+> **Pentest = Test**
+
+---
+
+# 6. THREAT VS VULNERABILITY VS EXPLOIT VS RISK
+
+| Term | Meaning |
+|---|---|
+| Threat | Potential source of harm |
+| Vulnerability | Weakness |
+| Exploit | Method/code/technique that takes advantage of a weakness |
+| Risk | Potential loss or impact resulting from a threat exploiting a vulnerability |
+
+### Easy Example
+
+```text
+Unlocked door
+    ↓
+Vulnerability
+
+Burglary attempt
+    ↓
+Threat
+
+Tool/technique used to open door
+    ↓
+Exploit
+
+Possible theft
+    ↓
+Risk
+```
+
+---
+
+# 7. NMAP REVIEW
+
+Nmap is primarily used for:
+
+- Host discovery
+- Port scanning
+- Service detection
+- Version detection
+- OS detection
+- Network auditing
+- NSE scripts
+
+### Important Commands
+
+```bash
+nmap <target>
+```
+
+Basic scan.
+
+```bash
+nmap -p 22,80,443 <target>
+```
+
+Specific ports.
+
+```bash
+nmap -p- <target>
+```
+
+All TCP ports.
+
+```bash
+nmap -sV <target>
+```
+
+Service/version detection.
+
+```bash
+nmap -O <target>
+```
+
+OS detection.
+
+```bash
+nmap -sC <target>
+```
+
+Default NSE scripts.
+
+```bash
+nmap -sn <target>
+```
+
+Host discovery.
+
+### Memory
+
+> **-sV = Service Version**
+
+> **-O = Operating System**
+
+> **-p = Ports**
+
+> **-p- = All TCP Ports**
+
+> **-sn = Host Discovery**
+
+---
+
+# 8. NMAP PORT STATES
+
+| State | Meaning |
+|---|---|
+| Open | Service is listening |
+| Closed | Reachable but no service listening |
+| Filtered | Filtering prevents determining state |
+| Open/Filtered | Cannot distinguish reliably |
+| Closed/Filtered | Cannot distinguish reliably |
+
+### Most Important
+
+> **Open ≠ Vulnerable**
+
+An open port simply indicates that a service is accessible.
+
+---
+
+# 9. COMMON PORTS REVIEW
+
+| Port | Common Service |
+|---:|---|
+| 21 | FTP |
+| 22 | SSH |
+| 23 | Telnet |
+| 25 | SMTP |
+| 53 | DNS |
+| 80 | HTTP |
+| 110 | POP3 |
+| 143 | IMAP |
+| 443 | HTTPS |
+| 445 | SMB |
+| 3306 | MySQL |
+| 3389 | RDP |
+| 5432 | PostgreSQL |
+| 8080 | Alternate HTTP |
+
+### Memory
+
+Focus on:
+
+> **21 FTP → 22 SSH → 23 Telnet → 25 SMTP → 53 DNS → 80 HTTP → 443 HTTPS**
+
+---
+
+# 10. NIKTO REVIEW
+
+Nikto is focused on **web-server scanning**.
+
+It can help identify:
+
+- Potentially dangerous files
+- Default files
+- Outdated server components
+- Insecure configurations
+- Information disclosure
+- Common web-server issues
+
+Example:
+
+```bash
+nikto -h http://<authorized-lab-target>
+```
+
+Save output:
+
+```bash
+nikto -h http://<authorized-lab-target> -o report.txt
+```
+
+### Memory
+
+> **Nmap = Network**
+
+> **Nikto = Web Server**
+
+---
+
+# 11. WAPPALYZER REVIEW
+
+Wappalyzer is primarily used for **technology fingerprinting**.
+
+It can identify technologies such as:
+
+- Web servers
+- Frameworks
+- CMS platforms
+- JavaScript technologies
+- Analytics
+- CDN technologies
+
+### Key Difference
+
+```text
+Wappalyzer
+"What technology is being used?"
+
+Nikto
+"What potential web-server issues are visible?"
+```
+
+### Important
+
+> **Technology detection does not automatically mean vulnerability detection.**
+
+---
+
+# 12. NESSUS / OPENVAS REVIEW
+
+Nessus and OpenVAS/Greenbone technologies are associated with vulnerability assessment/scanning.
+
+They can identify potential:
+
+- Missing patches
+- Vulnerable software
+- Configuration problems
+- Known vulnerabilities
+- Security weaknesses
+
+### Memory
+
+> **Nmap = What's there?**
+
+> **Nessus/OpenVAS = What may be wrong?**
+
+---
+
+# 13. CUSTOM PYTHON SCANNER REVIEW
+
+Your Day 20 scanner performs basic:
+
+```text
+Target
+ ↓
+Port Check
+ ↓
+Service Association
+ ↓
+Rule Check
+ ↓
+Severity
+ ↓
+JSON Report
+```
+
+Important Python modules:
+
+| Module | Purpose |
+|---|---|
+| `socket` | Network connections |
+| `argparse` | Command-line arguments |
+| `json` | Structured output |
+| `datetime` | Timestamps |
+| `pathlib` | File handling |
+| `logging` | Logging |
+| `re` | Pattern matching |
+
+---
+
+# 14. CUSTOM SCANNER LIMITATIONS
+
+Your scanner is educational.
+
+It does NOT provide:
+
+- Complete vulnerability coverage
+- Full CVE detection
+- Complete service fingerprinting
+- Full OS detection
+- Full web application testing
+- Guaranteed vulnerability confirmation
+- Professional vulnerability database coverage
+
+### Important Exam Point
+
+> **A custom scanner can demonstrate security automation concepts, but professional scanners have much broader detection capabilities.**
+
+---
+
+# 15. FALSE POSITIVE VS FALSE NEGATIVE
+
+## False Positive
+
+Scanner says:
+
+```text
+Vulnerability exists
+```
+
+But investigation shows:
+
+```text
+Vulnerability does NOT actually exist
+```
+
+### Memory
+
+> **False Positive = False Alarm**
+
+---
+
+## False Negative
+
+Scanner says:
+
+```text
+No vulnerability detected
+```
+
+But:
+
+```text
+Vulnerability actually exists
+```
+
+### Memory
+
+> **False Negative = Missed Problem**
+
+---
+
+# 16. DETECTION VS VALIDATION
+
+This is one of the most important concepts.
+
+### Detection
+
+Scanner:
+
+```text
+Potential vulnerability detected
+```
+
+### Validation
+
+Analyst:
+
+```text
+Check evidence
+Check version
+Check configuration
+Check applicability
+Confirm actual condition
+```
+
+### Memory
+
+> **Scanner finds → Analyst verifies.**
+
+---
+
+# 17. CVE VS CVSS VS CWE
+
+| Term | Meaning |
+|---|---|
+| CVE | Identifies a known vulnerability |
+| CVSS | Communicates vulnerability severity |
+| CWE | Describes a weakness category |
+
+### Memory
+
+> **CVE = WHAT**
+
+> **CVSS = HOW SEVERE**
+
+> **CWE = WHAT TYPE OF WEAKNESS**
+
+---
+
+# 18. SEVERITY VS RISK
+
+A scanner may report:
+
+```text
+CVSS = 9.8
+```
+
+That does not automatically mean it is the highest business priority.
+
+Consider:
+
+- Internet exposure
+- Asset criticality
+- Sensitive data
+- Exploitability
+- Active exploitation
+- Business impact
+- Existing controls
+
+### Formula
+
+```text
+Risk ≈ Likelihood × Impact
+```
+
+---
+
+# 19. CREDENTIALLED VS UNAUTHENTICATED SCANNING
+
+## Credentialed Scan
+
+Scanner has authorized credentials.
+
+Can potentially inspect:
+
+- Installed software
+- Patch status
+- Local configurations
+- Package versions
+- Security settings
+
+### Memory
+
+> **Credentialed = Inside View**
+
+---
+
+## Uncredentialed Scan
+
+Scanner operates without local credentials.
+
+It generally sees more of an external/unauthenticated perspective.
+
+### Memory
+
+> **Uncredentialed = Outside View**
+
+---
+
+# 20. WEB APPLICATION REVIEW
+
+Application testing should consider:
+
+### Authentication
+
+> Who are you?
+
+### Authorization
+
+> What are you allowed to do?
+
+### Input Validation
+
+> Is user input handled safely?
+
+### Session Security
+
+> Are sessions protected?
+
+### Access Control
+
+> Can users access resources they shouldn't?
+
+### Configuration
+
+> Is the application securely configured?
+
+---
+
+# 21. IMPORTANT WEB VULNERABILITIES
+
+Review:
+
+- Broken access control
+- SQL injection
+- Cross-site scripting (XSS)
+- Command injection
+- Path traversal
+- SSRF
+- CSRF
+- Security misconfiguration
+- File upload weaknesses
+- Sensitive data exposure
+- Authentication weaknesses
+- Session problems
+- Business logic vulnerabilities
+
+### Important
+
+> **Finding an input field does not mean it is vulnerable. Testing and validation are required.**
+
+---
+
+# 22. HTTP STATUS CODES
+
+| Code | Meaning |
+|---:|---|
+| 200 | OK |
+| 201 | Created |
+| 204 | No Content |
+| 301/302 | Redirect |
+| 400 | Bad Request |
+| 401 | Authentication required/failed |
+| 403 | Forbidden |
+| 404 | Not Found |
+| 405 | Method Not Allowed |
+| 429 | Too Many Requests |
+| 500 | Internal Server Error |
+| 502 | Bad Gateway |
+| 503 | Service Unavailable |
+
+### Memory
+
+> **401 = Who are you?**
+
+> **403 = You are not allowed.**
+
+---
+
+# 23. PATCH MANAGEMENT REVIEW
+
+Patch management:
+
+```text
+Inventory
+ ↓
+Identify
+ ↓
+Prioritize
+ ↓
+Test
+ ↓
+Approve
+ ↓
+Deploy
+ ↓
+Verify
+ ↓
+Rescan
+```
+
+### Key Rule
+
+> **Patching is remediation; rescanning verifies the result.**
+
+---
+
+# 24. PATCH PRIORITIZATION
+
+Do not prioritize only by CVSS.
+
+Consider:
+
+```text
+Severity
++
+Exposure
++
+Asset Criticality
++
+Exploitability
++
+Business Impact
++
+Threat Activity
+```
+
+---
+
+# 25. PATCH TESTING
+
+Before broad deployment:
+
+```text
+Patch
+ ↓
+Test Environment
+ ↓
+Compatibility Test
+ ↓
+Pilot
+ ↓
+Production
+ ↓
+Verification
+```
+
+Why?
+
+Because patches can sometimes introduce:
+
+- Compatibility problems
+- Service failures
+- Reboots
+- Application problems
+- Driver issues
+
+---
+
+# 26. PATCH EXCEPTION
+
+If a system cannot immediately be patched:
+
+Document:
+
+- Reason
+- Risk
+- System
+- Owner
+- Compensating controls
+- Approval
+- Expiration/review date
+
+### Important
+
+> **A patch exception is a controlled risk decision, not permission to permanently ignore a vulnerability.**
+
+---
+
+# 27. COMPENSATING CONTROLS
+
+When immediate patching isn't possible:
+
+Possible controls include:
+
+- Network segmentation
+- Firewall restrictions
+- Access restrictions
+- Disabling vulnerable functionality
+- Monitoring
+- Isolation
+
+Concept:
+
+```text
+Vulnerability
+      ↓
+Patch unavailable
+      ↓
+Compensating Control
+      ↓
+Risk reduced
+      ↓
+Patch when possible
+```
+
+---
+
+# 28. AUTOMATED SCANNING REVIEW
+
+Automation workflow:
+
+```text
+Authorized Targets
+       ↓
+Validate Scope
+       ↓
+Run Scanner
+       ↓
+Collect Results
+       ↓
+Parse
+       ↓
+Normalize
+       ↓
+Prioritize
+       ↓
+Report
+       ↓
+Validate
+```
+
+### Python automation principles
+
+Use:
+
+- Timeouts
+- Error handling
+- Logging
+- Structured output
+- Target allowlists
+- Rate limits
+- Secure credential handling
+
+---
+
+# 29. WHY STRUCTURED OUTPUT MATTERS
+
+Compare:
+
+```text
+Raw terminal output
+```
+
+with:
+
+```json
+{
+    "target": "192.168.56.101",
+    "port": 22,
+    "service": "SSH",
+    "state": "open",
+    "severity": "Info"
+}
+```
+
+Structured output is easier to:
+
+- Parse
+- Search
+- Compare
+- Store
+- Visualize
+- Feed into other systems
+
+---
+
+# 30. IMPROVING YOUR CUSTOM SCANNER
+
+Your Day 20 scanner can be improved step by step.
+
+## Level 1
+
+Basic port checking.
+
+```text
+Port → Open/Closed
+```
+
+## Level 2
+
+Service identification.
+
+```text
+Port → Service
+```
+
+## Level 3
+
+Security rules.
+
+```text
+Service → Potential Finding
+```
+
+## Level 4
+
+Severity.
+
+```text
+Finding → Severity
+```
+
+## Level 5
+
+Structured reporting.
+
+```text
+Finding → JSON/CSV
+```
+
+## Level 6
+
+Validation.
+
+```text
+Finding → Evidence → Confirm/Reject
+```
+
+## Level 7
+
+Historical comparison.
+
+```text
+Previous Scan
+      ↓
+Current Scan
+      ↓
+New / Fixed / Existing
+```
+
+---
+
+# 31. PRACTICAL LAB – PART 1
+
+## Objective
+
+Compare your custom scanner with Nmap.
+
+### Step 1
+
+Use your isolated lab target.
+
+### Step 2
+
+Run your custom scanner:
+
+```bash
+python vuln_scanner.py <LAB-IP>
+```
+
+### Step 3
+
+Run:
+
+```bash
+nmap -sV <LAB-IP>
+```
+
+### Step 4
+
+Create a comparison:
+
+| Port | Custom Scanner | Nmap | Same? |
+|---:|---|---|---|
+| 21 | | | |
+| 22 | | | |
+| 23 | | | |
+| 80 | | | |
+| 443 | | | |
+
+### Step 5
+
+Explain why the results may differ.
+
+---
+
+# 32. PRACTICAL LAB – PART 2
+
+## Identify Potential Findings
+
+From your scan, record:
+
+| Finding | Evidence | Severity | Validated? |
+|---|---|---|---|
+| Telnet | Port 23 open | High | |
+| FTP | Port 21 open | Medium | |
+| Other | | | |
+
+### Important
+
+Do not mark a finding as confirmed merely because the scanner reported it.
+
+---
+
+# 33. PRACTICAL LAB – PART 3
+
+## Test Your Reporting
+
+Your report should contain:
+
+```text
+Target
+Timestamp
+Port
+Service
+State
+Finding
+Severity
+Evidence
+Validation Status
+Recommendation
+```
+
+Example:
+
+```text
+Target: 192.168.56.101
+
+Finding: Telnet detected
+
+Evidence:
+TCP/23 is accessible.
+
+Severity:
+High/Potential
+
+Validation:
+Requires configuration/context review.
+
+Recommendation:
+Replace or restrict legacy clear-text administration where appropriate.
+```
+
+---
+
+# 34. PRACTICAL LAB – PART 4
+
+## Rescan Exercise
+
+Simulate remediation in your lab.
+
+Concept:
+
+```text
+Initial Scan
+      ↓
+Finding
+      ↓
+Remediation
+      ↓
+Rescan
+      ↓
+Compare Results
+```
+
+Record:
+
+| Finding | Before | After | Status |
+|---|---|---|---|
+| Finding 1 | Present | | |
+| Finding 2 | Present | | |
+
+---
+
+# 35. PRACTICAL LAB – PART 5
+
+## Build a Better Scanner
+
+Add these features one by one:
+
+### Feature 1
+
+Custom port selection.
+
+### Feature 2
+
+CSV report.
+
+### Feature 3
+
+Logging.
+
+### Feature 4
+
+Timeout configuration.
+
+### Feature 5
+
+Target allowlist.
+
+### Feature 6
+
+Severity filtering.
+
+### Feature 7
+
+Scan comparison.
+
+### Feature 8
+
+Summary:
+
+```text
+Open Ports: 5
+Potential Findings: 2
+High: 1
+Medium: 1
+Low: 0
+```
+
+---
+
+# 36. SCENARIO-BASED PRACTICE EXAM
+
+## Q1
+
+A scanner reports that port 22 is open.
+
+What can you conclude?
+
+A. SSH is likely accessible  
+B. The server is definitely vulnerable  
+C. The server has definitely been compromised  
+D. The server has a critical CVE
+
+**Answer: A**
+
+---
+
+## Q2
+
+A vulnerability scanner reports a critical vulnerability. Before remediation, what should an analyst do?
+
+A. Immediately exploit it  
+B. Validate the finding and assess risk  
+C. Delete the scanner result  
+D. Disable the firewall
+
+**Answer: B**
+
+---
+
+## Q3
+
+A scanner reports a vulnerability that does not actually exist.
+
+What is this?
+
+A. False negative  
+B. False positive  
+C. Exploit  
+D. Patch
+
+**Answer: B**
+
+---
+
+## Q4
+
+A real vulnerability exists but the scanner fails to detect it.
+
+What is this?
+
+A. False positive  
+B. False negative  
+C. Patch exception  
+D. Risk acceptance
+
+**Answer: B**
+
+---
+
+## Q5
+
+A system has CVSS 9.8 but is isolated from all untrusted networks. Another system has CVSS 8.5 and is Internet-facing with sensitive data.
+
+Which factor should influence prioritization?
+
+A. CVSS only  
+B. Context and business risk  
+C. Hostname  
+D. Operating system color
+
+**Answer: B**
+
+---
+
+## Q6
+
+Why should a patch be tested before broad deployment?
+
+A. To increase vulnerability count  
+B. To detect compatibility and operational issues  
+C. To disable security controls  
+D. To avoid documentation
+
+**Answer: B**
+
+---
+
+## Q7
+
+After patch deployment, a rescan still reports the vulnerability.
+
+What should happen?
+
+A. Automatically close the finding  
+B. Investigate and validate the patch/remediation  
+C. Delete the scanner  
+D. Ignore it
+
+**Answer: B**
+
+---
+
+## Q8
+
+A custom scanner checks only 20 ports.
+
+What is a major limitation?
+
+A. It may miss services running on other ports  
+B. It automatically scans every port  
+C. It detects every CVE  
+D. It performs full penetration testing
+
+**Answer: A**
+
+---
+
+## Q9
+
+What is the main purpose of structured JSON output?
+
+A. Automatically exploit vulnerabilities  
+B. Make results easier to process and integrate  
+C. Encrypt network traffic  
+D. Replace authentication
+
+**Answer: B**
+
+---
+
+## Q10
+
+An organization cannot immediately patch a vulnerable production system.
+
+What should it consider?
+
+A. Ignore the vulnerability permanently  
+B. Compensating controls and documented risk management  
+C. Remove all monitoring  
+D. Publish credentials
+
+**Answer: B**
+
+---
+
+## Q11
+
+Which tool is primarily associated with web-server scanning?
+
+A. Nikto  
+B. DHCP  
+C. SSH  
+D. DNS
+
+**Answer: A**
+
+---
+
+## Q12
+
+Which tool is primarily used for technology fingerprinting?
+
+A. Wappalyzer  
+B. SMTP  
+C. FTP  
+D. CVSS
+
+**Answer: A**
+
+---
+
+## Q13
+
+Which tool is primarily a network scanner?
+
+A. Nmap  
+B. CVE  
+C. CVSS  
+D. Wappalyzer
+
+**Answer: A**
+
+---
+
+## Q14
+
+What does CVSS primarily communicate?
+
+A. Vulnerability identifier  
+B. Vulnerability severity  
+C. Network address  
+D. Software license
+
+**Answer: B**
+
+---
+
+## Q15
+
+What does CVE primarily provide?
+
+A. Vulnerability identification  
+B. Patch installation  
+C. Encryption  
+D. Authentication
+
+**Answer: A**
+
+---
+
+## Q16
+
+A scanner detects an outdated software version.
+
+What should an analyst do next?
+
+A. Automatically declare compromise  
+B. Determine whether the installed version is actually affected and validate the finding  
+C. Delete the system  
+D. Disable logging
+
+**Answer: B**
+
+---
+
+## Q17
+
+What is the purpose of a maintenance window?
+
+A. To provide an approved period for maintenance activities  
+B. To disable security permanently  
+C. To prevent patching  
+D. To remove backups
+
+**Answer: A**
+
+---
+
+## Q18
+
+Which statement is correct?
+
+A. Open port = vulnerability  
+B. Open port = accessible service; vulnerability requires further assessment  
+C. Closed port = compromised host  
+D. Filtered port = confirmed vulnerability
+
+**Answer: B**
+
+---
+
+## Q19
+
+A vulnerability scanner finds 1,000 findings. Should all be treated equally?
+
+A. Yes  
+B. No; prioritize according to severity, exposure, asset importance, exploitability, and business impact  
+C. Only the first finding matters  
+D. Delete all low-severity findings
+
+**Answer: B**
+
+---
+
+## Q20
+
+What is the final purpose of rescanning after remediation?
+
+A. Confirm whether the vulnerability remains  
+B. Increase the vulnerability count  
+C. Disable the firewall  
+D. Remove evidence
+
+**Answer: A**
+
+---
+
+# 37. HARD SCENARIO QUESTIONS
+
+## Scenario 1 – Scanner Disagreement
+
+Your custom scanner reports:
+
+```text
+22 OPEN
+80 OPEN
+```
+
+Nmap reports:
+
+```text
+22 OPEN
+80 OPEN
+8080 OPEN
+```
+
+### Question
+
+Why did your scanner miss 8080?
+
+### Answer
+
+Because the custom scanner's port list did not include 8080.
+
+### Lesson
+
+> **Scanner coverage determines what can be detected.**
+
+---
+
+# 38. Scenario 2 – False Positive
+
+Your scanner reports:
+
+```text
+FTP detected
+```
+
+Further investigation shows port 21 is actually being used by a controlled service with a different protocol behavior than expected.
+
+### Question
+
+Should you immediately report a confirmed vulnerability?
+
+### Answer
+
+No.
+
+The finding must be validated.
+
+### Lesson
+
+> **Detection ≠ Confirmation**
+
+---
+
+# 39. Scenario 3 – Patch Verification
+
+A critical vulnerability is reported.
+
+The administrator installs the vendor patch.
+
+The scanner still reports the vulnerability.
+
+### Correct workflow
+
+```text
+Check installed version
+       ↓
+Check patch installation
+       ↓
+Check affected component
+       ↓
+Check scanner evidence
+       ↓
+Rescan
+       ↓
+Close only when verified
+```
+
+### Lesson
+
+> **Never close a vulnerability merely because someone says it was patched.**
+
+---
+
+# 40. Scenario 4 – High CVSS
+
+System A:
+
+```text
+CVSS 9.8
+Internal lab
+No sensitive information
+```
+
+System B:
+
+```text
+CVSS 8.7
+Internet-facing
+Critical business service
+Sensitive data
+```
+
+### Question
+
+Which should potentially receive higher priority?
+
+### Answer
+
+System B may deserve higher priority because risk depends on more than CVSS.
+
+---
+
+# 41. Scenario 5 – No Patch Available
+
+A critical vulnerability has no vendor patch.
+
+### Correct approach
+
+```text
+Assess risk
+ ↓
+Apply compensating controls
+ ↓
+Monitor
+ ↓
+Track vendor advisory
+ ↓
+Patch when available
+ ↓
+Verify
+```
+
+---
+
+# 42. DAY 21 MASTER COMPARISON TABLE
+
+| Tool/Concept | Primary Purpose |
+|---|---|
+| Nmap | Network discovery/scanning |
+| Nikto | Web-server scanning |
+| Wappalyzer | Technology fingerprinting |
+| Nessus | Vulnerability assessment |
+| OpenVAS/GVM | Vulnerability assessment |
+| Custom Python Scanner | Educational/custom detection |
+| CVE | Vulnerability identifier |
+| CVSS | Severity |
+| CWE | Weakness category |
+| Patch Management | Remediation/update process |
+| Rescan | Verify remediation |
+
+---
+
+# 43. MASTER MEMORY MAP
+
+## Information Gathering
+
+```text
+OSINT
+ ↓
+DNS
+ ↓
+Nmap
+```
+
+## Vulnerability Identification
+
+```text
+Nessus/OpenVAS
+ ↓
+Nikto
+ ↓
+Application Testing
+```
+
+## Automation
+
+```text
+Python
+ ↓
+Scanner
+ ↓
+Parser
+ ↓
+Report
+```
+
+## Remediation
+
+```text
+Patch
+ ↓
+Configuration Change
+ ↓
+Compensating Control
+```
+
+## Verification
+
+```text
+Rescan
+ ↓
+Validate
+ ↓
+Close Finding
+```
+
+---
+
+# 44. DAY 15–21 MASTER REVISION
+
+| Day | Topic | Main Idea |
+|---|---|---|
+| 15 | Vulnerability Scanning | Find potential weaknesses |
+| 16 | Application Vulnerabilities | Assess web apps/APIs |
+| 17 | Automation | Automate scanning/reporting |
+| 18 | Web Server Scanning | Assess web-server exposure |
+| 19 | Patch Management | Remediate vulnerabilities |
+| 20 | Custom Scanner | Build basic Python detection |
+| 21 | Review & Practice | Connect everything |
+
+### One-line sequence
+
+> **Find → Understand → Automate → Scan → Fix → Build → Verify**
+
+---
+
+# ⭐ MOST IMPORTANT EXAM POINTS
+
+1. Vulnerability scanning identifies **potential weaknesses**.
+2. Open ports do not automatically indicate vulnerabilities.
+3. Scanner findings must be validated.
+4. False positive = false alarm.
+5. False negative = missed vulnerability.
+6. Nmap is primarily a network discovery/scanning tool.
+7. Nikto focuses on web-server issues.
+8. Wappalyzer focuses on technology fingerprinting.
+9. Nessus/OpenVAS are vulnerability assessment technologies.
+10. CVE identifies a vulnerability.
+11. CVSS communicates severity.
+12. CWE categorizes software weaknesses.
+13. CVSS alone does not determine business priority.
+14. Risk depends on likelihood, impact, exposure, asset criticality, and other context.
+15. Credentialed scanning provides a deeper authorized internal view.
+16. Automated scanners require timeouts, logging, error handling, and scope control.
+17. Structured output such as JSON makes automation easier.
+18. Custom scanners have limited coverage.
+19. Patch testing reduces operational risk.
+20. Patch management is a remediation process.
+21. Compensating controls can reduce risk when immediate patching is impossible.
+22. A patch should be verified after deployment.
+23. Rescanning helps confirm remediation.
+24. Vulnerability management is broader than patch management.
+25. **Scanner = Detection; Analyst = Validation; Patch = Remediation; Rescan = Verification.**
+
+---
+
+# 🧠 DAY 21 MEMORY TRICK
+
+Remember:
+
+## **D-S-V-P-R**
+
+**D → Discover**  
+**S → Scan**  
+**V → Validate**  
+**P → Patch/Remediate**  
+**R → Rescan**
+
+### Full cycle:
+
+> **DISCOVER → SCAN → VALIDATE → PRIORITIZE → REMEDIATE → VERIFY → RESCAN**
+
+---
+
+# ⚡ 30-SECOND REVISION
+
+```text
+NMAP
+= Network Scanning
+
+NIKTO
+= Web Server Scanning
+
+WAPPALYZER
+= Technology Fingerprinting
+
+NESSUS / OPENVAS
+= Vulnerability Assessment
+
+CUSTOM PYTHON SCANNER
+= Basic Custom Detection
+
+CVE
+= Vulnerability
+
+CVSS
+= Severity
+
+CWE
+= Weakness Type
+
+FALSE POSITIVE
+= False Alarm
+
+FALSE NEGATIVE
+= Missed Problem
+
+PATCH
+= Remediation
+
+RESCAN
+= Verification
+```
+
+---
+
+# 🔥 FINAL EXAM FORMULA
+
+```text
+AUTHORIZED TARGET
+       ↓
+ASSET DISCOVERY
+       ↓
+SCANNING
+       ↓
+POTENTIAL FINDING
+       ↓
+VALIDATION
+       ↓
+RISK PRIORITIZATION
+       ↓
+REMEDIATION
+       ↓
+PATCH / CONFIGURATION / CONTROL
+       ↓
+VERIFICATION
+       ↓
+RESCAN
+       ↓
+DOCUMENT & CLOSE
+```
+
+# 🎯 ONE-LINE EXAM ANSWER
+
+> **Vulnerability-management practice involves discovering assets, scanning for potential weaknesses, validating and prioritizing findings, applying appropriate remediation such as patches or configuration changes, and rescanning to verify that the security issue has been resolved.**

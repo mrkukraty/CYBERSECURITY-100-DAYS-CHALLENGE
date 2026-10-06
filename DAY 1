@@ -1,0 +1,342 @@
+# DAY 1 – INTRODUCTION TO ETHICAL HACKING & CYBERSECURITY
+
+## 1. Cybersecurity
+
+**Cybersecurity** is the practice of protecting computers, networks, applications, devices, and data from unauthorized access, attacks, damage, or disruption.
+
+### Main Goals of Cybersecurity – CIA Triad
+
+1. **Confidentiality** – Only authorized people can access information.
+2. **Integrity** – Information must not be changed or tampered with without authorization.
+3. **Availability** – Systems and information should be available when required.
+
+**Example:**  
+For an online banking system:
+- Confidentiality → Only you can see your account details.
+- Integrity → Nobody can modify your balance illegally.
+- Availability → Banking services should be accessible when needed.
+
+---
+
+# 2. Ethical Hacking
+
+**Ethical hacking** is the authorized process of identifying and exploiting security weaknesses in systems, networks, or applications to improve their security.
+
+An **ethical hacker** performs activities similar to a malicious hacker but has **permission** and works within a defined scope.
+
+### Purpose of Ethical Hacking
+
+- Identify vulnerabilities
+- Test security controls
+- Prevent unauthorized access
+- Protect sensitive information
+- Improve overall security
+- Help organizations fix vulnerabilities before attackers exploit them
+
+---
+
+# 3. Types of Hackers
+
+### 1. White Hat Hacker
+A security professional who performs hacking **with authorization**.
+
+**Example:** Penetration tester testing a company's website with written permission.
+
+### 2. Black Hat Hacker
+A hacker who gains unauthorized access for malicious or illegal purposes.
+
+**Example:** Stealing passwords or confidential data.
+
+### 3. Grey Hat Hacker
+A person who may discover or access systems without permission but may not have malicious intentions.
+
+**Important:** Unauthorized access can still be illegal even if the person does not intend to cause harm.
+
+### 4. Script Kiddie
+A person who uses existing hacking tools or scripts without deeply understanding how they work.
+
+### 5. Hacktivist
+A hacker who attacks or compromises systems to promote a political, social, or ideological cause.
+
+### 6. State-Sponsored Hacker
+A hacker or group supported by a government to conduct cyber operations.
+
+---
+
+# 4. Ethical Hacking vs Malicious Hacking
+
+| Ethical Hacking | Malicious Hacking |
+|---|---|
+| Has authorization | No authorization |
+| Legal | Usually illegal |
+| Defined scope | No legitimate scope |
+| Goal is security improvement | Goal may be theft, damage, disruption, etc. |
+| Reports vulnerabilities | Hides or abuses vulnerabilities |
+| Protects systems | Compromises systems |
+
+---
+
+# 5. Legal and Ethical Hacking
+
+Before performing any security test, an ethical hacker must have **explicit authorization** from the system owner.
+
+### Important Rules
+
+1. **Get permission before testing.**
+2. **Define the scope clearly.**
+3. **Test only authorized systems.**
+4. **Do not access unnecessary data.**
+5. **Do not damage or disrupt systems.**
+6. **Protect confidential information.**
+7. **Document findings accurately.**
+8. **Report vulnerabilities responsibly.**
+9. **Follow organizational policies and applicable laws.**
+10. **Stop testing if an activity goes outside the approved scope.**
+
+### Key Principle
+
+> **No authorization = No hacking.**
+
+Even if a system is publicly accessible on the Internet, that does **not** automatically mean you have permission to test it.
+
+---
+
+# 6. Authorization and Scope
+
+### Authorization
+Permission given by the system owner to perform security testing.
+
+### Scope
+Defines **what can and cannot be tested**.
+
+A penetration-testing scope may specify:
+
+- IP addresses
+- Domains
+- Applications
+- Networks
+- Testing dates and times
+- Allowed techniques
+- Restricted techniques
+- Data-handling requirements
+- Emergency contact information
+
+### Example
+
+**Allowed:**  
+`test.example.com`
+
+**Not allowed:**  
+`production.example.com`
+
+An ethical hacker must respect this boundary.
+
+---
+
+# 7. Vulnerability
+
+A **vulnerability** is a weakness in a system, application, network, configuration, or process that could potentially be exploited.
+
+### Examples
+
+- Weak passwords
+- Outdated software
+- Misconfigured services
+- SQL injection
+- Cross-Site Scripting (XSS)
+- Improper access control
+- Unnecessary open ports
+
+---
+
+# 8. Threat
+
+A **threat** is a potential cause of harm to a system or organization.
+
+**Examples:**
+- Malware
+- Cybercriminal
+- Insider threat
+- Phishing attack
+- Natural disaster
+
+---
+
+# 9. Exploit
+
+An **exploit** is a technique, code, or method used to take advantage of a vulnerability.
+
+**Simple relationship:**
+
+**Vulnerability → Exploit → Possible Compromise**
+
+---
+
+# 10. Risk
+
+**Risk** is the possibility of loss or damage resulting from a threat exploiting a vulnerability.
+
+A simple way to remember:
+
+**Risk = Likelihood × Impact**
+
+Example:
+
+A server has a critical vulnerability exposed to the Internet.
+
+- Likelihood → High
+- Impact → High
+- Risk → High
+
+---
+
+# 11. Penetration Testing
+
+**Penetration testing (Pentesting)** is an authorized security assessment in which security professionals attempt to identify and safely demonstrate vulnerabilities.
+
+### Common Types
+
+**1. Black Box Testing**
+- Tester has little or no prior information.
+- Simulates an external attacker.
+
+**2. White Box Testing**
+- Tester has extensive information about the system.
+- Provides deeper testing.
+
+**3. Grey Box Testing**
+- Tester has partial information.
+- Combination of black-box and white-box approaches.
+
+---
+
+# 12. Common Phases of Ethical Hacking
+
+A simplified ethical hacking methodology:
+
+### 1. Reconnaissance
+Collect information about the authorized target.
+
+### 2. Scanning / Enumeration
+Identify hosts, services, ports, technologies, and other relevant information.
+
+### 3. Vulnerability Assessment
+Identify and evaluate potential security weaknesses.
+
+### 4. Exploitation
+Safely demonstrate whether an authorized vulnerability can actually be exploited.
+
+### 5. Post-Exploitation
+Determine the impact and what access or information could potentially be reached, within the agreed scope.
+
+### 6. Reporting
+Document vulnerabilities, evidence, impact, and recommendations for remediation.
+
+### Easy Order to Remember:
+
+**Reconnaissance → Scanning/Enumeration → Vulnerability Assessment → Exploitation → Post-Exploitation → Reporting**
+
+---
+
+# 13. Ethics in Ethical Hacking
+
+An ethical hacker should follow these principles:
+
+- **Authorization** – Obtain permission.
+- **Confidentiality** – Protect sensitive information.
+- **Integrity** – Do not manipulate data unnecessarily.
+- **Availability** – Avoid disrupting services.
+- **Responsibility** – Take responsibility for testing activities.
+- **Professionalism** – Follow agreed rules and standards.
+- **Responsible Disclosure** – Report vulnerabilities appropriately.
+
+---
+
+# 14. Ethical Hacking vs Vulnerability Assessment
+
+### Vulnerability Assessment
+Focuses mainly on **identifying and evaluating vulnerabilities**.
+
+### Penetration Testing
+Goes further by attempting to **validate the exploitability and impact** of vulnerabilities within an authorized scope.
+
+---
+
+# 15. Responsible Disclosure
+
+**Responsible disclosure** is the process of reporting a security vulnerability to the appropriate organization or vendor so that it can be investigated and fixed.
+
+A good vulnerability report should contain:
+
+- Vulnerability name
+- Affected system
+- Description
+- Severity
+- Evidence
+- Impact
+- Reproduction information where appropriate
+- Recommended remediation
+
+---
+
+# 16. Important Cybersecurity Terms
+
+| Term | Meaning |
+|---|---|
+| **Asset** | Something valuable that needs protection |
+| **Threat** | Potential cause of harm |
+| **Vulnerability** | Weakness that can be exploited |
+| **Exploit** | Method used to take advantage of a vulnerability |
+| **Risk** | Potential loss or damage |
+| **Attack** | Attempt to compromise a system |
+| **Payload** | Action/code delivered as part of an attack |
+| **Firewall** | Controls network traffic based on rules |
+| **Authentication** | Verifying who a user is |
+| **Authorization** | Determining what an authenticated user can access |
+| **Encryption** | Converting data into a protected form |
+| **Patch** | Software update that may fix bugs or vulnerabilities |
+
+---
+
+# 17. Golden Rules for Ethical Hackers
+
+1. **Always obtain authorization.**
+2. **Stay within the defined scope.**
+3. **Never intentionally damage systems.**
+4. **Never steal or disclose confidential information.**
+5. **Minimize impact on availability.**
+6. **Keep evidence secure.**
+7. **Document everything important.**
+8. **Report vulnerabilities responsibly.**
+9. **Follow applicable laws and organizational policies.**
+10. **Use your skills to improve security, not cause harm.**
+
+---
+
+## QUICK REVISION
+
+**Cybersecurity** → Protect systems and data.
+
+**Ethical Hacking** → Authorized security testing.
+
+**White Hat** → Authorized hacker.
+
+**Black Hat** → Malicious/unauthorized hacker.
+
+**Vulnerability** → Weakness.
+
+**Exploit** → Method used to exploit a weakness.
+
+**Threat** → Potential source of harm.
+
+**Risk** → Likelihood × Impact.
+
+**Pentesting** → Authorized attempt to find and validate security weaknesses.
+
+**CIA** → Confidentiality + Integrity + Availability.
+
+**Hacking phases** →  
+**Reconnaissance → Scanning/Enumeration → Vulnerability Assessment → Exploitation → Post-Exploitation → Reporting**
+
+**Most important rule:**  
+> **Always have permission before testing a system.**

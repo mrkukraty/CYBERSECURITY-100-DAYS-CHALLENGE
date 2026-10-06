@@ -1,0 +1,444 @@
+# DAY 15 – VULNERABILITY SCANNING BASICS
+## Nessus • OpenVAS/Greenbone • Vulnerability Assessment • CVE • CVSS • Reporting
+
+---
+
+# 1. What is Vulnerability Scanning?
+
+**Vulnerability scanning** is the process of automatically checking systems, applications, networks, or devices for known security weaknesses and misconfigurations.
+
+### Simple Definition
+
+> **Vulnerability scanning = finding potential security weaknesses using automated tools.**
+
+Typical workflow:
+
+```text
+Target
+  ↓
+Discover Assets
+  ↓
+Scan
+  ↓
+Identify Services
+  ↓
+Compare Against Vulnerability Knowledge
+  ↓
+Generate Findings
+  ↓
+Prioritize
+  ↓
+Validate
+  ↓
+Remediate
+  ↓
+Rescan
+```
+
+---
+
+# 2. Vulnerability Scanning vs Penetration Testing
+
+These are related but different.
+
+| Vulnerability Scanning | Penetration Testing |
+|---|---|
+| Usually automated | Often combines manual + automated techniques |
+| Finds potential vulnerabilities | Tests whether weaknesses can actually be exploited |
+| Broad coverage | Deeper investigation |
+| Produces many findings | Focuses on meaningful attack paths |
+| Usually less intrusive | Can be more intrusive |
+| Often repeated regularly | Usually performed as an assessment |
+
+### Memory
+
+> **Scanner = Find**
+
+> **Pentest = Validate/Exploit within scope**
+
+---
+
+# 3. Vulnerability Assessment
+
+A vulnerability assessment generally involves:
+
+```text
+Identify
+   ↓
+Scan
+   ↓
+Analyze
+   ↓
+Prioritize
+   ↓
+Remediate
+   ↓
+Verify
+```
+
+The objective is to understand the security weaknesses in an environment.
+
+---
+
+# 4. What is a Vulnerability?
+
+A **vulnerability** is a weakness that could potentially be exploited to negatively affect a system.
+
+Examples:
+
+- Outdated software
+- Missing security patches
+- Weak configuration
+- Unnecessary services
+- Insecure protocols
+- Weak authentication configuration
+- Known vulnerable software versions
+
+---
+
+# 5. Threat vs Vulnerability vs Exploit vs Risk
+
+This is an important exam topic.
+
+| Term | Meaning |
+|---|---|
+| Threat | Something capable of causing harm |
+| Vulnerability | Weakness that could be exploited |
+| Exploit | Technique/code/process that takes advantage of a weakness |
+| Risk | Potential impact/likelihood of harm |
+
+### Example
+
+```text
+Old vulnerable software
+        ↓
+Vulnerability
+        ↓
+Attacker uses an exploit
+        ↓
+Threat causes damage
+        ↓
+Risk to organization
+```
+
+### Memory
+
+> **Threat = Danger**
+
+> **Vulnerability = Weakness**
+
+> **Exploit = Method**
+
+> **Risk = Potential Loss**
+
+---
+
+# 6. What Does a Vulnerability Scanner Do?
+
+A scanner may:
+
+1. Discover hosts.
+2. Identify services.
+3. Identify software versions.
+4. Check configurations.
+5. Compare information with vulnerability databases.
+6. Identify missing patches.
+7. Assign severity.
+8. Generate reports.
+
+Simplified:
+
+```text
+Target
+  ↓
+Information
+  ↓
+Comparison
+  ↓
+Potential Vulnerability
+  ↓
+Severity
+  ↓
+Report
+```
+
+---
+
+# 7. Nessus
+
+**Nessus** is a widely used vulnerability assessment/scanning platform developed by Tenable.
+
+It can help identify:
+
+- Known vulnerabilities
+- Missing patches
+- Misconfigurations
+- Weak security settings
+- Vulnerable services
+- Compliance-related issues
+
+### Important
+
+Nessus is primarily a **vulnerability assessment/scanning tool**, not a replacement for a full penetration test.
+
+---
+
+# 8. OpenVAS / Greenbone
+
+**OpenVAS** is an open vulnerability scanning technology associated with the **Greenbone** vulnerability-management ecosystem.
+
+It can be used to:
+
+- Scan systems
+- Detect known vulnerabilities
+- Identify configuration weaknesses
+- Generate vulnerability reports
+- Prioritize findings
+
+You may encounter the name:
+
+> **Greenbone Vulnerability Management (GVM)**
+
+in modern environments.
+
+### Exam Memory
+
+> **Nessus → Tenable**
+
+> **OpenVAS → Greenbone ecosystem**
+
+---
+
+# 9. Nessus vs OpenVAS
+
+| Feature | Nessus | OpenVAS / Greenbone |
+|---|---|---|
+| Category | Vulnerability scanner | Vulnerability scanning platform/ecosystem |
+| Vendor/ecosystem | Tenable | Greenbone |
+| Automated scanning | Yes | Yes |
+| Vulnerability detection | Yes | Yes |
+| Reporting | Yes | Yes |
+| Configuration checks | Yes | Yes |
+| Common use | Enterprise/security assessments | Vulnerability management/security assessments |
+
+### Important
+
+The exact features available can depend on the product edition/version.
+
+---
+
+# 10. Vulnerability Scanner Architecture
+
+A simplified architecture:
+
+```text
+                 Scanner
+                    |
+          +---------+---------+
+          |                   |
+       Scanner Engine     Vulnerability Data
+          |                   |
+          +---------+---------+
+                    |
+                    ↓
+                  Target
+                    |
+                    ↓
+               Scan Results
+                    |
+                    ↓
+                  Report
+```
+
+---
+
+# 11. Scan Types
+
+Vulnerability scanners commonly provide different scan profiles.
+
+Examples:
+
+### Basic/General Scan
+
+Looks for common vulnerabilities and configuration problems.
+
+### Credentialed Scan
+
+The scanner is provided authorized credentials and can inspect the system more deeply.
+
+### Uncredentialed Scan
+
+The scanner assesses the target without logging in.
+
+### Web Application Scan
+
+Focuses on web application security issues.
+
+### Network Scan
+
+Focuses on network hosts, services, configurations, and vulnerabilities.
+
+---
+
+# 12. Credentialed vs Uncredentialed Scanning
+
+## Uncredentialed Scan
+
+```text
+Scanner
+   ↓
+Network
+   ↓
+Publicly accessible information
+```
+
+The scanner does not authenticate to the target.
+
+It may have limited visibility.
+
+---
+
+## Credentialed Scan
+
+```text
+Scanner
+   ↓
+Authentication
+   ↓
+Target System
+   ↓
+Internal Checks
+```
+
+The scanner can inspect more information.
+
+### Advantages
+
+- Better visibility
+- More accurate patch detection
+- More detailed configuration checks
+- Better identification of installed software
+
+### Memory
+
+> **Credentialed = Inside View**
+
+> **Uncredentialed = Outside View**
+
+---
+
+# 13. Why Credentialed Scans Can Be Better
+
+Suppose a scanner sees:
+
+```text
+Service version: Unknown
+```
+
+An uncredentialed scan may not be able to determine whether a patch is installed.
+
+A properly configured credentialed scan may inspect:
+
+- Installed software
+- Patch levels
+- Configuration
+- Local security settings
+
+Therefore:
+
+> **Credentialed scanning often provides deeper visibility.**
+
+---
+
+# 14. Scan Targets
+
+A target could be:
+
+- IP address
+- Hostname
+- Authorized network
+- Authorized subnet
+- Server
+- Workstation
+- Virtual machine
+- Web application
+
+### Important
+
+Only scan assets that are explicitly authorized.
+
+For learning, use:
+
+- Your own systems
+- A dedicated lab
+- Metasploitable
+- Other intentionally vulnerable training machines
+
+---
+
+# 15. Safe Lab Architecture
+
+A good training environment:
+
+```text
+              Host PC
+                 |
+        Virtualization Software
+                 |
+       +---------+---------+
+       |                   |
+     Kali              Lab Target
+       |                   |
+       +------ Isolated ---+
+              Network
+```
+
+Possible target:
+
+```text
+Metasploitable
+```
+
+This prevents accidental scanning of unrelated systems.
+
+---
+
+# 16. Vulnerability Scanner Workflow
+
+Typical workflow:
+
+```text
+1. Define Scope
+       ↓
+2. Configure Scan
+       ↓
+3. Select Targets
+       ↓
+4. Select Scan Profile
+       ↓
+5. Run Scan
+       ↓
+6. Review Findings
+       ↓
+7. Validate Important Findings
+       ↓
+8. Prioritize
+       ↓
+9. Remediate
+       ↓
+10. Rescan
+```
+
+### Memory
+
+> **S-C-T-P-R-V-P-R-R**
+
+Scope → Configure → Target → Profile → Run → Validate → Prioritize → Remediate → Rescan
+
+---
+
+# 17. Vulnerability Databases
+
+Scanners need vulnerability knowledge.
+
+Common sources/con

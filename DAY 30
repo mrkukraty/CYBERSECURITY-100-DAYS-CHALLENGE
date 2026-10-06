@@ -1,0 +1,1776 @@
+# DAY 30 – CRACKING WEP AND WPA/WPA2
+
+## Aircrack-ng • WEP Weaknesses • WPA/WPA2 Handshake • Wireless Auditing • Defensive Analysis
+
+---
+
+# 1. DAY 30 OBJECTIVE
+
+Today you learn how wireless security can be **assessed and attacked in an authorized lab**.
+
+Main topics:
+
+- WEP weaknesses
+- WPA/WPA2 security model
+- Aircrack-ng suite
+- Monitor mode
+- Wireless packet capture
+- WEP IV weakness
+- WPA/WPA2 authentication handshake
+- Offline password auditing
+- PMK/handshake concepts
+- Wordlists
+- WPA2-Personal security
+- Why WPA3 improves security
+- Wireless attack workflow
+- Detection and defense
+
+> **Important:** Perform cracking exercises only against your own lab AP or a deliberately vulnerable training environment. Do not capture credentials or disrupt networks without explicit authorization.
+
+---
+
+# 2. WHAT DOES "CRACKING WI-FI" MEAN?
+
+In a security-testing context, Wi-Fi cracking generally means attempting to recover or validate a wireless network credential or security weakness from captured wireless information.
+
+It is different from simply connecting to a Wi-Fi network.
+
+Example:
+
+```text
+Wireless AP
+     ↓
+Capture authorized traffic
+     ↓
+Analyze protocol
+     ↓
+Attempt credential recovery
+     ↓
+Validate security
+     ↓
+Report weakness
+```
+
+---
+
+# 3. WEP VS WPA/WPA2
+
+| Feature | WEP | WPA/WPA2 |
+|---|---|---|
+| Security generation | Obsolete | Newer |
+| Main weakness | Weak cryptographic design | Depends heavily on credential/security configuration |
+| IV handling | Major weakness | Different key-management design |
+| Modern security | Insecure | WPA2-AES remains widely used |
+| Password recovery | Can exploit statistical IV weaknesses | WPA/WPA2-Personal often involves offline password guessing |
+| Recommendation | Never use | Prefer WPA3; WPA2-AES if required |
+
+---
+
+# 4. AIRCRACK-NG
+
+**Aircrack-ng** is a wireless security assessment suite.
+
+It contains tools for different stages of wireless auditing.
+
+Important components include:
+
+| Tool | Purpose |
+|---|---|
+| `airmon-ng` | Manage/assist with monitor mode |
+| `airodump-ng` | Capture and display wireless traffic |
+| `aireplay-ng` | Generate/replay certain wireless frames in authorized testing |
+| `aircrack-ng` | Analyze captures and attempt key recovery |
+| `airdecap-ng` | Decrypt captured traffic when appropriate keys are available |
+| `airbase-ng` | Wireless AP testing functionality |
+
+### Memory
+
+> **Monitor → Capture → Analyze → Validate**
+
+---
+
+# 5. AIRCRACK-NG WORKFLOW
+
+Conceptually:
+
+```text
+        Authorized Lab AP
+               ↓
+        Wireless Adapter
+               ↓
+          Monitor Mode
+               ↓
+        Capture Traffic
+               ↓
+       Identify Security
+          /          \
+        WEP        WPA/WPA2
+         ↓             ↓
+     IV analysis    Handshake
+         ↓             ↓
+     Key recovery   Offline audit
+         ↓             ↓
+           Validate Result
+                 ↓
+               Report
+```
+
+---
+
+# 6. MONITOR MODE
+
+Normally, a Wi-Fi adapter operates as a client interface.
+
+**Monitor mode** allows compatible hardware to observe wireless frames without associating as a normal client.
+
+Conceptually:
+
+```text
+Normal Mode
+Adapter → Communicates as client
+
+Monitor Mode
+Adapter → Observes wireless frames
+```
+
+Monitor mode is useful for authorized wireless assessments.
+
+---
+
+# 7. WHY HARDWARE MATTERS
+
+Not every wireless adapter supports:
+
+- Monitor mode
+- Packet injection
+- The required wireless bands
+- The required drivers
+
+Therefore, a Kali Linux installation alone does not guarantee that a wireless attack lab will work.
+
+You need compatible hardware and drivers.
+
+---
+
+# 8. CHECK WIRELESS INTERFACES
+
+On Kali/Linux:
+
+```bash
+iw dev
+```
+
+or:
+
+```bash
+ip link
+```
+
+You can identify wireless interfaces such as:
+
+```text
+wlan0
+```
+
+The actual interface name may differ.
+
+---
+
+# 9. MONITOR MODE CONCEPT
+
+A compatible adapter can be placed into monitor mode.
+
+Example workflow:
+
+```bash
+airmon-ng
+```
+
+Then, in an authorized lab, the interface may be placed into monitor mode using the appropriate Aircrack-ng tooling.
+
+The interface may become something such as:
+
+```text
+wlan0mon
+```
+
+Interface names vary by system.
+
+---
+
+# 10. WHY MONITOR MODE IS IMPORTANT
+
+It allows the tester to observe wireless frames needed for assessment.
+
+For example:
+
+```text
+Beacon
+Probe
+Authentication
+Association
+Data
+Management frames
+```
+
+Without appropriate capture capability, the tester may not obtain the traffic needed for analysis.
+
+---
+
+# 11. AIRODUMP-NG
+
+`airodump-ng` is primarily used for wireless packet capture and network observation.
+
+Conceptually:
+
+```text
+airodump-ng
+      ↓
+Discover APs
+      ↓
+Observe clients
+      ↓
+Identify channels
+      ↓
+Identify security type
+      ↓
+Capture authorized traffic
+```
+
+Typical information includes:
+
+- BSSID
+- Channel
+- Encryption/security
+- Authentication
+- SSID
+- Client stations
+
+---
+
+# 12. EXAMPLE AIRODUMP OUTPUT
+
+Conceptually you may see:
+
+```text
+BSSID              CH   ENC    AUTH   ESSID
+AA:BB:CC:DD:EE:FF   6   WPA2   PSK    Lab-WiFi
+11:22:33:44:55:66  11   WEP           Legacy-Lab
+```
+
+Interpretation:
+
+```text
+BSSID → AP identifier
+CH    → Channel
+ENC   → Encryption/security information
+AUTH  → Authentication type
+ESSID → Network name
+```
+
+---
+
+# 13. WEP CRACKING
+
+WEP is vulnerable because of weaknesses in its cryptographic design, especially its use of a small IV space and RC4-related construction.
+
+The important exam concept is:
+
+> **WEP security can be defeated by collecting sufficient IVs and exploiting statistical weaknesses in the protocol.**
+
+---
+
+# 14. WHAT IS AN IV?
+
+**IV = Initialization Vector**
+
+WEP uses a short IV that is transmitted as part of wireless frames.
+
+The limited IV space means IV reuse occurs.
+
+Conceptually:
+
+```text
+Packet 1 → IV A
+Packet 2 → IV B
+Packet 3 → IV A  ← reused
+Packet 4 → IV C
+```
+
+Repeated IVs contribute to WEP's weaknesses.
+
+---
+
+# 15. WHY WEP FAILS
+
+The simplified chain:
+
+```text
+Weak IV design
+      ↓
+IV reuse
+      ↓
+Statistical information
+      ↓
+Key-related information
+      ↓
+Potential key recovery
+```
+
+This is why WEP is considered fundamentally insecure.
+
+---
+
+# 16. WEP CRACKING CONCEPT
+
+Authorized lab workflow:
+
+```text
+1. Identify WEP AP
+       ↓
+2. Capture wireless traffic
+       ↓
+3. Collect many IVs
+       ↓
+4. Analyze captured traffic
+       ↓
+5. Attempt key recovery
+       ↓
+6. Validate against lab AP
+```
+
+---
+
+# 17. WHY MANY PACKETS MAY BE REQUIRED
+
+WEP attacks depend on statistical analysis.
+
+Therefore:
+
+> More useful captured IVs generally improve the ability to recover the WEP key.
+
+This is fundamentally different from simply guessing a password.
+
+---
+
+# 18. WEP ATTACK TOOLS
+
+The Aircrack-ng suite historically supports WEP assessment using:
+
+```text
+airodump-ng
+aireplay-ng
+aircrack-ng
+```
+
+Their conceptual roles:
+
+```text
+airodump-ng
+     ↓
+Capture IVs
+
+aireplay-ng
+     ↓
+Authorized traffic-generation/replay techniques
+
+aircrack-ng
+     ↓
+Analyze captured data
+```
+
+---
+
+# 19. WEP EXAM QUESTION
+
+### Why can WEP be cracked more efficiently after collecting many IVs?
+
+Because WEP's weak IV/RC4 construction leaks statistical information that can be used to recover the key.
+
+---
+
+# 20. WPA/WPA2 IS DIFFERENT
+
+WPA/WPA2-Personal does **not** have the same WEP IV weakness.
+
+Instead, a common security-testing approach is:
+
+```text
+Capture authentication exchange
+       ↓
+Obtain required handshake information
+       ↓
+Perform offline password guesses
+       ↓
+Compare derived authentication information
+       ↓
+Determine whether password is recoverable
+```
+
+---
+
+# 21. WPA/WPA2 4-WAY HANDSHAKE
+
+A simplified WPA/WPA2-Personal handshake:
+
+```text
+Client                         AP
+  │                            │
+  │<────── Message 1 ──────────│
+  │─────── Message 2 ─────────>│
+  │<────── Message 3 ──────────│
+  │─────── Message 4 ─────────>│
+  │                            │
+  └──── Secure session ────────┘
+```
+
+The handshake helps both sides establish/confirm session keys.
+
+---
+
+# 22. IMPORTANT: HANDSHAKE ≠ PASSWORD
+
+A captured WPA/WPA2 handshake does **not** normally contain the Wi-Fi password in plaintext.
+
+Instead, it contains information that can be used to test password guesses offline.
+
+This is a very important exam concept.
+
+---
+
+# 23. WPA2-PERSONAL PASSWORD ATTACK
+
+Conceptually:
+
+```text
+Captured handshake
+        +
+Candidate password
+        ↓
+Derive required key material
+        ↓
+Compare authentication information
+        ↓
+Match?
+  ↙       ↘
+YES       NO
+ ↓         ↓
+Candidate  Try next
+password
+```
+
+This can be performed offline once the necessary capture is available.
+
+---
+
+# 24. WHY PASSWORD STRENGTH MATTERS
+
+Consider:
+
+```text
+Wi-Fi password:
+password123
+```
+
+versus:
+
+```text
+Wi-Fi password:
+a long unique random passphrase
+```
+
+A weak password may be vulnerable to dictionary or password-guessing attacks.
+
+A long, unique password makes offline guessing much more difficult.
+
+---
+
+# 25. WORDLIST
+
+A **wordlist** is a collection of candidate passwords used during password auditing.
+
+Example concept:
+
+```text
+candidate1
+candidate2
+candidate3
+...
+```
+
+The auditor tests candidates against the captured authentication information.
+
+### Important
+
+A wordlist attack is only successful if the actual password is among the candidates or can otherwise be derived by the chosen guessing strategy.
+
+---
+
+# 26. DICTIONARY ATTACK
+
+A dictionary attack tests likely passwords from a prepared list.
+
+Conceptually:
+
+```text
+Captured handshake
+        ↓
+Candidate list
+        ↓
+Try candidate
+        ↓
+Authentication match?
+        ↓
+Repeat
+```
+
+Weak/common passwords are particularly vulnerable.
+
+---
+
+# 27. BRUTE FORCE VS DICTIONARY
+
+| Dictionary | Brute Force |
+|---|---|
+| Uses likely candidate passwords | Systematically tries combinations |
+| Faster when password is predictable | Can become extremely expensive |
+| Depends on wordlist quality | Depends heavily on keyspace |
+| Common in password auditing | Useful when search space is manageable |
+
+---
+
+# 28. WPA2 PASSWORD SECURITY
+
+WPA2 encryption itself may be correctly configured, but a weak password can still create risk.
+
+Therefore:
+
+> **Strong encryption + weak password ≠ strong overall security**
+
+---
+
+# 29. WPA2-AES
+
+For modern WPA2 deployments, prefer:
+
+```text
+WPA2
++
+AES-CCMP
+```
+
+Avoid legacy configurations using:
+
+```text
+WEP
+TKIP
+```
+
+where modern alternatives are available.
+
+---
+
+# 30. WPA3 IMPROVEMENT
+
+WPA3-Personal uses:
+
+> **SAE – Simultaneous Authentication of Equals**
+
+One important security improvement is better resistance to offline password-guessing attacks compared with traditional WPA2-Personal PSK authentication.
+
+Conceptually:
+
+```text
+WPA2-Personal
+     ↓
+Captured handshake
+     ↓
+Offline password guessing
+
+WPA3-Personal
+     ↓
+SAE
+     ↓
+Improved protection against offline guessing
+```
+
+---
+
+# 31. WEP VS WPA2 ATTACK MODEL
+
+### WEP
+
+```text
+Weak protocol design
+       ↓
+Collect IVs
+       ↓
+Statistical analysis
+       ↓
+Key recovery
+```
+
+### WPA2-Personal
+
+```text
+Capture authentication exchange
+       ↓
+Candidate password
+       ↓
+Offline verification
+       ↓
+Password recovery if candidate matches
+```
+
+### Memory
+
+> **WEP = IV weakness**
+
+> **WPA2 = Password guessing against captured authentication material**
+
+---
+
+# 32. AIRCRACK-NG TOOL MEMORY
+
+Remember:
+
+```text
+Airmon → Monitor
+Airodump → Capture
+Aireplay → Replay/traffic generation
+Aircrack → Crack/analyze
+```
+
+### Memory Trick
+
+> **MONITOR → DUMP → REPLAY → CRACK**
+
+---
+
+# 33. AUTHORIZED LAB ARCHITECTURE
+
+Use an isolated environment:
+
+```text
+             LAB NETWORK
+                  │
+          ┌───────┴────────┐
+          │                │
+       Test AP         Kali Linux
+          │                │
+       Your AP        USB Wi-Fi Adapter
+```
+
+Do not use:
+
+- Office Wi-Fi
+- Neighbor's Wi-Fi
+- Public Wi-Fi
+- College Wi-Fi
+- Hotel Wi-Fi
+- Any network without authorization
+
+---
+
+# 34. SAFE LAB OPTION
+
+The safest approach is to use:
+
+- Your own spare router/AP
+- A dedicated test SSID
+- A test password
+- A separate wireless adapter
+- An isolated lab environment
+
+Example:
+
+```text
+SSID: CyberLab
+Security: WPA2-Personal
+Password: Lab-only test password
+```
+
+Use a password created specifically for the exercise.
+
+---
+
+# 35. LAB TASK 1 – IDENTIFY ADAPTER
+
+On Kali:
+
+```bash
+iw dev
+```
+
+Then:
+
+```bash
+ip link
+```
+
+Record:
+
+```text
+Interface:
+Driver:
+Supported bands:
+```
+
+---
+
+# 36. LAB TASK 2 – CHECK AIRCRACK-NG
+
+Check whether the suite is installed:
+
+```bash
+aircrack-ng --help
+```
+
+You can also check individual tools:
+
+```bash
+airmon-ng --help
+```
+
+```bash
+airodump-ng --help
+```
+
+---
+
+# 37. LAB TASK 3 – IDENTIFY YOUR LAB AP
+
+Using your own lab AP, identify:
+
+```text
+SSID
+BSSID
+Channel
+Security
+Authentication
+```
+
+Do not capture unrelated networks.
+
+---
+
+# 38. LAB TASK 4 – CAPTURE
+
+For an authorized lab, the general workflow is:
+
+```text
+Enable monitor capability
+        ↓
+Start wireless capture
+        ↓
+Select YOUR AP
+        ↓
+Observe clients/frames
+        ↓
+Save capture
+```
+
+The exact command depends on your adapter, interface name, driver, channel, and lab configuration.
+
+---
+
+# 39. LAB TASK 5 – ANALYZE CAPTURE
+
+For WPA/WPA2:
+
+Check whether the capture contains the authentication exchange required for your authorized test.
+
+For WEP:
+
+Check whether sufficient IV data was collected for analysis.
+
+Conceptually:
+
+```text
+Capture
+   ↓
+Protocol identification
+   ↓
+Required evidence present?
+   ↓
+YES → Offline analysis
+NO  → Improve capture
+```
+
+---
+
+# 40. LAB TASK 6 – PASSWORD AUDIT
+
+For a lab WPA2 network:
+
+```text
+Captured authentication material
+             +
+Authorized candidate wordlist
+             ↓
+        Offline audit
+             ↓
+        Match / No match
+```
+
+The purpose is to determine whether your deliberately configured test password is too weak.
+
+---
+
+# 41. WHAT IF THE PASSWORD IS NOT FOUND?
+
+If the password isn't present in the candidate set:
+
+```text
+No match
+```
+
+does **not** necessarily mean the Wi-Fi is secure.
+
+It may mean:
+
+- Wordlist was incomplete
+- Password is outside the tested keyspace
+- Capture was invalid/incomplete
+- Configuration was misunderstood
+
+---
+
+# 42. WPA/WPA2 CAPTURE DOES NOT GUARANTEE CRACKING
+
+Very important:
+
+> **Capturing a handshake does not mean the password will automatically be recovered.**
+
+Recovery depends on:
+
+- Password strength
+- Candidate keyspace
+- Attack method
+- Capture quality
+- Hardware/resources
+- Protocol/configuration
+
+---
+
+# 43. WHY WPA2 CAN STILL BE SECURE
+
+A properly configured WPA2-AES network with a long, unique random password can be highly resistant to practical password guessing.
+
+Example concept:
+
+```text
+Weak password
+     ↓
+Small search space
+     ↓
+Higher risk
+
+Strong random password
+     ↓
+Huge search space
+     ↓
+Much harder guessing
+```
+
+---
+
+# 44. CAPTURE VS CRACK
+
+These are separate stages.
+
+### Capture
+
+Obtaining the required wireless traffic.
+
+### Crack/Audit
+
+Testing candidate keys/passwords against the captured information.
+
+```text
+CAPTURE ≠ CRACK
+```
+
+---
+
+# 45. DEAUTHENTICATION AND HANDSHAKE CAPTURE
+
+In authorized security labs, testers may study how a client reconnecting can produce authentication traffic useful for testing.
+
+However, deliberately disconnecting clients is disruptive.
+
+Therefore:
+
+> Perform such testing only against your own lab clients/AP and only when disruption is explicitly within the test scope.
+
+For a beginner lab, preferably generate the required reconnect using your own test client rather than disrupting third-party devices.
+
+---
+
+# 46. WIRELESS ATTACK CHAIN
+
+Exam-friendly conceptual chain:
+
+```text
+1. Reconnaissance
+       ↓
+2. Identify AP
+       ↓
+3. Identify security
+       ↓
+4. Monitor/capture
+       ↓
+5. Obtain required evidence
+       ↓
+6. Offline analysis
+       ↓
+7. Credential recovery attempt
+       ↓
+8. Validate
+       ↓
+9. Report
+       ↓
+10. Remediate
+```
+
+---
+
+# 47. WEP ATTACK CHAIN
+
+```text
+Identify WEP
+     ↓
+Capture traffic
+     ↓
+Collect IVs
+     ↓
+Statistical analysis
+     ↓
+Recover key
+     ↓
+Validate
+     ↓
+Report
+```
+
+### Memory:
+
+> **WEP → IV → Statistics → Key**
+
+---
+
+# 48. WPA2 ATTACK CHAIN
+
+```text
+Identify WPA2-Personal
+          ↓
+Capture required authentication exchange
+          ↓
+Prepare authorized candidate passwords
+          ↓
+Offline verification
+          ↓
+Candidate match?
+          ↓
+Validate in lab
+          ↓
+Report
+```
+
+### Memory:
+
+> **WPA2 → Capture → Candidates → Verify**
+
+---
+
+# 49. COMMON MISCONCEPTIONS
+
+### ❌ "WPA2 can be cracked instantly."
+
+Wrong.
+
+Password strength and configuration matter.
+
+### ❌ "A handshake contains the Wi-Fi password."
+
+Wrong.
+
+It contains authentication/key-establishment information used for verification.
+
+### ❌ "A captured handshake means the password is known."
+
+Wrong.
+
+A password recovery attempt still has to find a matching candidate.
+
+### ❌ "Hidden SSID prevents attacks."
+
+Wrong.
+
+SSID hiding is not a substitute for encryption/authentication.
+
+### ❌ "MAC filtering is strong security."
+
+Wrong.
+
+MAC addresses can be observed and spoofed.
+
+---
+
+# 50. WPA2 VS WPA3 EXAM COMPARISON
+
+| Feature | WPA2-Personal | WPA3-Personal |
+|---|---|---|
+| Main authentication model | PSK | SAE |
+| Offline guessing resistance | Weaker | Improved |
+| Modern security | Good when properly configured | Preferred where supported |
+| Strong password still important? | Yes | Yes |
+| Encryption | AES-CCMP commonly used | Modern authenticated encryption options |
+
+---
+
+# 51. WEP VS WPA VS WPA2 VS WPA3
+
+| Technology | Security Status | Key Point |
+|---|---|---|
+| WEP | ❌ Obsolete | IV/cryptographic weaknesses |
+| WPA | ⚠️ Legacy | TKIP |
+| WPA2 | ✅ Widely deployed | AES-CCMP |
+| WPA3 | ✅ Modern | SAE for Personal |
+
+---
+
+# 52. DETECTING WIRELESS ATTACKS
+
+Security teams can monitor for:
+
+- Rogue APs
+- Evil twins
+- Unexpected SSIDs
+- Abnormal deauthentication activity
+- Authentication failures
+- Unusual association patterns
+- Weak security protocols
+- Unknown wireless devices
+- Suspicious signal patterns
+
+---
+
+# 53. DEFENSE AGAINST WEP CRACKING
+
+Simple answer:
+
+> **Do not use WEP.**
+
+Migrate to:
+
+```text
+WPA3
+```
+
+or where appropriate:
+
+```text
+WPA2-AES/CCMP
+```
+
+---
+
+# 54. DEFENSE AGAINST WPA2 PASSWORD GUESSING
+
+Use:
+
+- Long passwords
+- Unique passwords
+- Random passphrases
+- WPA3 where supported
+- Enterprise authentication where appropriate
+- Strong AP administration
+- Network segmentation
+- Monitoring
+
+---
+
+# 55. ENTERPRISE DEFENSE
+
+For organizations:
+
+```text
+WPA2/WPA3 Enterprise
+        +
+802.1X
+        +
+EAP
+        +
+Centralized authentication
+        +
+Network segmentation
+        +
+Monitoring
+```
+
+This is generally preferable to one shared password for all employees.
+
+---
+
+# 56. WIRELESS SECURITY AUDIT CHECKLIST
+
+```text
+□ Identify all authorized APs
+□ Identify SSIDs
+□ Identify BSSIDs
+□ Identify security protocols
+□ Check for WEP
+□ Check for legacy WPA/TKIP
+□ Verify WPA2-AES/WPA3
+□ Check password strength
+□ Check enterprise authentication
+□ Check PMF
+□ Check firmware
+□ Check admin credentials
+□ Check rogue APs
+□ Check guest isolation
+□ Check network segmentation
+□ Review wireless logs
+□ Document findings
+```
+
+---
+
+# 57. SCENARIO-BASED MCQs
+
+## Q1
+
+A security tester discovers an AP using WEP.
+
+What should be the primary recommendation?
+
+A. Hide the SSID  
+B. Enable MAC filtering  
+C. Replace WEP with modern Wi-Fi security  
+D. Increase transmit power
+
+**Answer: C**
+
+---
+
+## Q2
+
+Why is WEP vulnerable?
+
+A. It has no SSID  
+B. Weak IV/cryptographic design creates exploitable statistical weaknesses  
+C. It uses HTTPS  
+D. It uses RADIUS
+
+**Answer: B**
+
+---
+
+## Q3
+
+Which Aircrack-ng tool is primarily used for wireless packet capture?
+
+A. aircrack-ng  
+B. airodump-ng  
+C. airdecap-ng  
+D. airmon-ng
+
+**Answer: B**
+
+---
+
+## Q4
+
+Which tool assists with monitor-mode management?
+
+A. airmon-ng  
+B. airodump-ng  
+C. aircrack-ng  
+D. airdecap-ng
+
+**Answer: A**
+
+---
+
+## Q5
+
+What is the main purpose of `aircrack-ng` in this workflow?
+
+A. DNS resolution  
+B. Key/password analysis and recovery attempts from appropriate captures  
+C. Web crawling  
+D. IP address assignment
+
+**Answer: B**
+
+---
+
+## Q6
+
+A tester captures a WPA2 authentication exchange.
+
+What can they potentially do with it?
+
+A. Automatically read the Wi-Fi password  
+B. Perform offline password verification against candidate passwords  
+C. Automatically access every WPA3 network  
+D. Recover the router administrator password
+
+**Answer: B**
+
+---
+
+## Q7
+
+Why does a strong WPA2 password matter?
+
+A. It increases the difficulty of offline password guessing  
+B. It hides the SSID  
+C. It disables encryption  
+D. It prevents all wireless interference
+
+**Answer: A**
+
+---
+
+## Q8
+
+A tester captures a handshake but cannot recover the password using the available wordlist.
+
+What is the most accurate conclusion?
+
+A. WPA2 is definitely unbreakable  
+B. The password definitely does not exist  
+C. The tested candidates did not produce a match  
+D. The AP must be using WEP
+
+**Answer: C**
+
+---
+
+## Q9
+
+Which authentication mechanism is associated with WPA3-Personal?
+
+A. TKIP  
+B. SAE  
+C. FTP  
+D. WEP
+
+**Answer: B**
+
+---
+
+## Q10
+
+Which combination is preferred for a modern WPA2 deployment?
+
+A. WPA2 + TKIP  
+B. WPA2 + AES-CCMP  
+C. WEP + AES  
+D. Open Wi-Fi + MAC filtering
+
+**Answer: B**
+
+---
+
+# 58. HARD SCENARIO MCQs
+
+## Q11
+
+A company uses WPA2-Personal with a 6-character dictionary password.
+
+The security team captures the required authentication exchange.
+
+What is the primary concern?
+
+A. Offline password guessing may be practical  
+B. WPA2 automatically prevents guessing  
+C. The SSID becomes invisible  
+D. AES stops working
+
+**Answer: A**
+
+---
+
+## Q12
+
+A company uses WPA2-AES with a long, unique random passphrase.
+
+An attacker obtains the authentication exchange.
+
+Which statement is most accurate?
+
+A. The password is automatically revealed  
+B. Offline guessing may still be attempted, but the strong password can make recovery impractical  
+C. WPA2 becomes WEP  
+D. The AP is automatically compromised
+
+**Answer: B**
+
+---
+
+## Q13
+
+A tester collects thousands of WEP IVs.
+
+Why is this useful?
+
+A. WEP's design allows statistical attacks using IV-related information  
+B. It automatically provides the router's admin password  
+C. It disables WPA3  
+D. It changes the SSID
+
+**Answer: A**
+
+---
+
+## Q14
+
+A security analyst captures WPA2 traffic but no authentication exchange needed for their intended offline test.
+
+What should they conclude?
+
+A. The password has been recovered  
+B. They may need an appropriate authorized capture before performing the planned analysis  
+C. The AP uses WEP  
+D. WPA2 has no authentication
+
+**Answer: B**
+
+---
+
+## Q15
+
+An analyst says:
+
+> "I captured a WPA2 handshake, therefore I cracked the Wi-Fi."
+
+What is wrong?
+
+A. Capture and password recovery are separate stages  
+B. WPA2 has no handshake  
+C. Handshakes contain plaintext passwords  
+D. WEP is required
+
+**Answer: A**
+
+---
+
+## Q16
+
+A company wants to prevent employees from sharing one common Wi-Fi password.
+
+Which solution is strongest?
+
+A. Hidden SSID  
+B. MAC filtering  
+C. WPA2/WPA3 Enterprise with 802.1X/EAP  
+D. WEP
+
+**Answer: C**
+
+---
+
+## Q17
+
+A security engineer discovers WPA2 configured with TKIP because an old device requires it.
+
+What should the engineer recommend?
+
+A. Keep TKIP permanently  
+B. Replace or upgrade the legacy device and move toward modern secure configuration  
+C. Disable all encryption  
+D. Hide the SSID
+
+**Answer: B**
+
+---
+
+## Q18
+
+An employee connects to a fake AP with the company's SSID.
+
+Which attack is most likely?
+
+A. Evil twin  
+B. SQL injection  
+C. Directory traversal  
+D. DNS zone transfer
+
+**Answer: A**
+
+---
+
+## Q19
+
+A wireless security assessment discovers a WEP network still operating inside a company.
+
+What is the best remediation?
+
+A. Increase WEP key length  
+B. Hide SSID  
+C. Migrate to modern WPA2-AES/WPA3 security  
+D. Enable FTP
+
+**Answer: C**
+
+---
+
+## Q20
+
+An organization has WPA3-Personal available but uses a very predictable password.
+
+Which statement is correct?
+
+A. WPA3 makes password choice irrelevant  
+B. Strong password practices are still important  
+C. WPA3 automatically generates a new password every day  
+D. SAE eliminates all authentication risks
+
+**Answer: B**
+
+---
+
+# 59. VERY HARD SCENARIO
+
+### Scenario
+
+A security team performs an authorized assessment of a company's wireless network.
+
+They discover:
+
+```text
+SSID: Corp-WiFi
+Security: WPA2-Personal
+Password: common dictionary phrase
+```
+
+They obtain the required authentication exchange from an authorized test client.
+
+Their offline password audit successfully identifies the password.
+
+### Questions
+
+**1. What caused the weakness?**
+
+Weak password selection.
+
+**2. Did the auditor "break AES"?**
+
+No.
+
+**3. What was actually attacked?**
+
+The password-based authentication/security configuration through offline candidate testing.
+
+**4. What should be recommended?**
+
+Depending on requirements:
+
+```text
+WPA3-Personal + strong unique credential
+```
+
+or for enterprise environments:
+
+```text
+WPA2/WPA3-Enterprise
++
+802.1X/EAP
++
+Centralized authentication
+```
+
+---
+
+# 60. DAY 30 PRACTICAL REPORT FORMAT
+
+When documenting an authorized wireless assessment:
+
+```text
+Finding ID:
+WIFI-001
+
+Title:
+Weak Wireless Security Configuration
+
+Target:
+Authorized Lab/Corporate AP
+
+SSID:
+[SSID]
+
+Security:
+WPA2-Personal
+
+Evidence:
+Authorized wireless capture and configuration review
+
+Issue:
+Weak shared password
+
+Risk:
+Offline password guessing may be more practical
+
+Severity:
+Based on actual environment and business impact
+
+Recommendation:
+Use WPA3 where supported or WPA2-AES,
+with a long unique credential.
+Consider Enterprise authentication for organizations.
+
+Status:
+Open / Remediated / Retested
+```
+
+---
+
+# 61. DAY 30 QUICK REVISION
+
+## Aircrack-ng
+
+> Wireless security assessment suite.
+
+## Airmon-ng
+
+> Monitor-mode management/helper.
+
+## Airodump-ng
+
+> Wireless traffic capture/observation.
+
+## Aireplay-ng
+
+> Wireless frame replay/traffic-generation functionality for authorized testing.
+
+## Aircrack-ng
+
+> Analyze captures and attempt key recovery.
+
+## WEP
+
+> Obsolete; vulnerable because of weak cryptographic/IV design.
+
+## WPA2-Personal
+
+> Commonly uses PSK and AES-CCMP.
+
+## WPA3-Personal
+
+> Uses SAE.
+
+## Handshake
+
+> Authentication/key-establishment information, not plaintext password.
+
+## Wordlist
+
+> Candidate password collection.
+
+## Offline attack
+
+> Password candidates can be tested without repeatedly interacting with the AP.
+
+---
+
+# 62. MEMORY TRICKS
+
+### Aircrack Suite
+
+> **MONITOR → DUMP → REPLAY → CRACK**
+
+```text
+Airmon-ng    → Monitor
+Airodump-ng  → Capture
+Aireplay-ng  → Replay
+Aircrack-ng  → Crack
+```
+
+---
+
+### WEP
+
+> **WEP → IV → STATISTICS → KEY**
+
+---
+
+### WPA2
+
+> **WPA2 → HANDSHAKE → CANDIDATES → VERIFY**
+
+---
+
+### WPA3
+
+> **WPA3 → SAE**
+
+---
+
+### Personal vs Enterprise
+
+> **Personal → Password**
+
+> **Enterprise → Identity**
+
+---
+
+# 63. MOST IMPORTANT EXAM QUESTIONS
+
+### Q1. Why is WEP insecure?
+
+Because of fundamental weaknesses in its IV/cryptographic design that permit statistical key-recovery attacks.
+
+### Q2. What is Aircrack-ng?
+
+A suite of tools used for authorized wireless security assessment.
+
+### Q3. What is monitor mode?
+
+A wireless-interface mode that allows compatible hardware to observe wireless frames.
+
+### Q4. What does Airodump-ng do?
+
+Captures and displays wireless traffic and network information.
+
+### Q5. What does Aircrack-ng do?
+
+Analyzes appropriate wireless captures and attempts key/password recovery.
+
+### Q6. What is a WPA2 handshake?
+
+An exchange used in establishing and confirming session keys for a wireless connection.
+
+### Q7. Does a WPA2 handshake contain the password?
+
+No. It provides authentication/key-establishment information that can support offline password verification.
+
+### Q8. Why are weak WPA2 passwords dangerous?
+
+Because captured authentication information can support offline password guessing.
+
+### Q9. What does WPA3-Personal use?
+
+SAE.
+
+### Q10. What is the best defense against WEP cracking?
+
+Stop using WEP and migrate to modern Wi-Fi security.
+
+---
+
+# 64. DAY 30 MASTER FLOW
+
+```text
+              WIRELESS AUDIT
+                    │
+                    ▼
+              Reconnaissance
+                    │
+                    ▼
+             Identify AP
+                    │
+                    ▼
+          Identify Security Type
+             /             \
+           WEP           WPA/WPA2
+            │                │
+            ▼                ▼
+       Capture IVs       Capture required
+            │             authentication
+            ▼                │
+       Analyze IVs           ▼
+            │          Candidate passwords
+            ▼                │
+        Key recovery         ▼
+                       Offline verification
+                              │
+                              ▼
+                         Validate result
+                              │
+                              ▼
+                           Report
+                              │
+                              ▼
+                         Remediate
+                              │
+                              ▼
+                            Retest
+```
+
+---
+
+# ⭐ DAY 30 ONE-LINE EXAM ANSWER
+
+> **WEP can be compromised through weaknesses in its IV/cryptographic design, while WPA/WPA2-Personal security assessments commonly involve capturing authentication information and performing offline password verification; Aircrack-ng provides tools for authorized wireless monitoring, capture, analysis, and key-recovery testing.**
+
+---
+
+# 🏆 DAY 30 FINAL CHECKPOINT
+
+Before moving to Day 31, you should be able to explain:
+
+```text
+□ What is Aircrack-ng?
+□ What is monitor mode?
+□ What is Airodump-ng?
+□ What is Aireplay-ng?
+□ What is WEP?
+□ Why is WEP insecure?
+□ What is an IV?
+□ Why does IV reuse matter?
+□ What is WPA2-Personal?
+□ What is WPA2-AES/CCMP?
+□ What is a 4-way handshake?
+□ Does the handshake contain the password?
+□ What is offline password guessing?
+□ What is a wordlist?
+□ Dictionary vs brute force?
+□ Why does password strength matter?
+□ What is WPA3-SAE?
+□ WPA2 vs WPA3?
+□ Personal vs Enterprise?
+□ What is 802.1X?
+□ What is RADIUS?
+□ What is an evil twin?
+□ What is a rogue AP?
+□ What is deauthentication?
+□ How can WEP be remediated?
+□ How can weak WPA2 passwords be remediated?
+□ Why is capture different from cracking?
+□ Why is authorization essential?
+```
+
+## 🔥 FINAL MEMORY
+
+```text
+WEP
+ ↓
+IV WEAKNESS
+ ↓
+COLLECT IVs
+ ↓
+STATISTICAL ANALYSIS
+ ↓
+KEY RECOVERY
+
+WPA2
+ ↓
+AUTHENTICATION EXCHANGE
+ ↓
+CAPTURE
+ ↓
+CANDIDATE PASSWORDS
+ ↓
+OFFLINE VERIFICATION
+
+WPA3
+ ↓
+SAE
+ ↓
+IMPROVED PROTECTION
+```
+
+**Golden Rule:** A wireless capture is not automatically a compromise. **Capture → analyze → validate** are separate stages, and a strong WPA2/WPA3 configuration with strong credentials can resist practical password-recovery attempts.

@@ -1,0 +1,1170 @@
+# DAY 9 – OSINT (OPEN-SOURCE INTELLIGENCE) TOOLS
+## Maltego • Recon-ng • Shodan • OSINT Workflow
+
+---
+
+# 1. What is OSINT?
+
+**OSINT = Open-Source Intelligence**
+
+OSINT is the process of collecting, analyzing, and using information that is publicly available.
+
+### Simple Definition
+
+> **OSINT = Gathering useful intelligence from publicly available sources.**
+
+OSINT can be used by:
+
+- Cybersecurity professionals
+- Penetration testers
+- Security researchers
+- Threat intelligence teams
+- Law enforcement
+- Journalists
+- Organizations
+
+---
+
+# 2. Examples of Open Sources
+
+Information may come from:
+
+- Search engines
+- Public websites
+- DNS records
+- WHOIS/RDAP
+- Social media
+- Public documents
+- News websites
+- Public code repositories
+- Certificate Transparency logs
+- Public IP information
+- Internet-exposed services
+- Public breach notifications/databases where legally accessible
+
+---
+
+# 3. Why is OSINT Important in Cybersecurity?
+
+OSINT helps security professionals understand an organization's **digital footprint**.
+
+It can help identify:
+
+- Domains
+- Subdomains
+- IP addresses
+- Technologies
+- Publicly exposed services
+- Email addresses
+- Public documents
+- Employee information
+- Cloud infrastructure
+- Potentially exposed information
+
+### Main Goal
+
+> **Understand what information about an organization is publicly available.**
+
+---
+
+# 4. OSINT vs Hacking
+
+OSINT itself is not hacking.
+
+### OSINT
+
+```text
+Public Information
+       ↓
+Collection
+       ↓
+Analysis
+       ↓
+Intelligence
+```
+
+### Hacking
+
+Usually involves unauthorized access or exploitation.
+
+### Important
+
+> **Finding information publicly available does not automatically mean you have permission to attack the system associated with it.**
+
+Always respect authorization and scope.
+
+---
+
+# 5. OSINT Workflow
+
+A basic OSINT workflow is:
+
+```text
+1. Define Objective
+        ↓
+2. Identify Target
+        ↓
+3. Collect Information
+        ↓
+4. Verify Information
+        ↓
+5. Analyze Relationships
+        ↓
+6. Identify Attack Surface
+        ↓
+7. Document Findings
+```
+
+---
+
+# 6. Step 1 – Define the Objective
+
+Before collecting information, determine what you are trying to discover.
+
+Examples:
+
+- Find an organization's public domains.
+- Identify publicly exposed services.
+- Map subdomains.
+- Identify technologies.
+- Find publicly available documents.
+- Review the organization's digital footprint.
+
+### Memory
+
+> **Don't collect everything. Collect what is relevant to the objective.**
+
+---
+
+# 7. Step 2 – Identify the Target
+
+Start with known information such as:
+
+```text
+Organization
+     ↓
+Primary Domain
+     ↓
+Known Subdomains
+     ↓
+Known IP ranges
+```
+
+Example:
+
+```text
+Target:
+example.com
+```
+
+---
+
+# 8. Step 3 – Information Collection
+
+Collect information from multiple sources.
+
+Possible sources:
+
+```text
+Search Engines
+DNS/RDAP
+Certificate Logs
+Public Websites
+Code Repositories
+Shodan
+Social Media
+Public Documents
+```
+
+Using multiple sources improves confidence.
+
+---
+
+# 9. Step 4 – Verify Information
+
+OSINT information can be:
+
+- Outdated
+- Incorrect
+- Incomplete
+- Misleading
+
+Therefore:
+
+> **Never assume that one source is automatically correct.**
+
+Cross-check important information using multiple independent sources.
+
+---
+
+# 10. Step 5 – Analyze Relationships
+
+Raw information is not always useful by itself.
+
+Example:
+
+```text
+Organization
+      ↓
+Domain
+      ↓
+Subdomain
+      ↓
+IP Address
+      ↓
+Service
+      ↓
+Technology
+```
+
+Understanding these relationships is a major part of OSINT.
+
+---
+
+# 11. Step 6 – Identify Attack Surface
+
+After collecting and analyzing information, determine what assets are publicly exposed.
+
+Example:
+
+```text
+Organization
+     |
+     ├── Website
+     ├── API
+     ├── Mail Server
+     ├── VPN
+     ├── Cloud Service
+     └── Public Repository
+```
+
+This becomes useful during later authorized security testing.
+
+---
+
+# 12. Important OSINT Tools
+
+For this day, focus on:
+
+1. **Maltego**
+2. **Recon-ng**
+3. **Shodan**
+
+Other useful tools include:
+
+- theHarvester
+- Amass
+- SpiderFoot
+- Google/Bing search
+- WHOIS/RDAP tools
+- DNS tools
+- Censys
+
+---
+
+# 13. Maltego
+
+**Maltego** is an OSINT and link-analysis platform.
+
+Its main strength is:
+
+> **Visualizing relationships between pieces of information.**
+
+---
+
+# 14. Maltego – What Does It Do?
+
+Maltego can help investigate relationships between entities such as:
+
+- Domains
+- Subdomains
+- IP addresses
+- DNS information
+- Organizations
+- People
+- Email addresses
+- Websites
+- Infrastructure
+
+---
+
+# 15. Maltego Concept
+
+Suppose you start with:
+
+```text
+example.com
+```
+
+Maltego can help visualize relationships such as:
+
+```text
+example.com
+     |
+     ├── Subdomain
+     |
+     ├── IP Address
+     |
+     ├── DNS Information
+     |
+     └── Related Infrastructure
+```
+
+The exact information available depends on the configured data sources and transforms.
+
+---
+
+# 16. Maltego – Entities
+
+Maltego represents pieces of information as **entities**.
+
+Examples:
+
+```text
+Domain
+IP Address
+Email Address
+Person
+Company
+Website
+```
+
+Relationships between entities can then be displayed visually.
+
+---
+
+# 17. Maltego – Transforms
+
+A **Transform** retrieves or derives additional information related to an entity.
+
+Conceptually:
+
+```text
+Domain
+  ↓
+Transform
+  ↓
+Related Information
+```
+
+For example:
+
+```text
+Domain
+ ↓
+Find DNS Information
+ ↓
+IP Address
+ ↓
+Find Related Information
+```
+
+---
+
+# 18. Maltego Strength
+
+### Main Strength:
+
+> **Relationship and link analysis**
+
+It is especially useful when you have lots of information and need to understand how different entities are connected.
+
+### Memory Trick
+
+> **Maltego = Map Relationships**
+
+---
+
+# 19. Recon-ng
+
+**Recon-ng** is a modular reconnaissance framework designed for OSINT and information gathering.
+
+It provides a structured framework for reconnaissance activities.
+
+---
+
+# 20. Recon-ng Features
+
+Recon-ng uses modules to perform different reconnaissance tasks.
+
+It can help collect information related to:
+
+- Domains
+- Hosts
+- Contacts
+- Credentials/exposure information where supported by authorized sources
+- Publicly available infrastructure information
+
+The available modules and data sources depend on the version and configuration.
+
+---
+
+# 21. Recon-ng Architecture
+
+A simplified concept:
+
+```text
+Recon-ng
+   |
+   ├── Modules
+   |
+   ├── Data Sources
+   |
+   ├── Workspace
+   |
+   └── Collected Information
+```
+
+---
+
+# 22. Recon-ng Workspace
+
+A **workspace** helps organize reconnaissance information for a particular investigation.
+
+Example:
+
+```text
+Workspace: Organization_Test
+       |
+       ├── Domains
+       ├── Hosts
+       ├── Contacts
+       └── Other collected information
+```
+
+### Why useful?
+
+It keeps different investigations separated and organized.
+
+---
+
+# 23. Recon-ng Modules
+
+Recon-ng is modular.
+
+Instead of one huge tool performing everything, different modules perform specific tasks.
+
+Concept:
+
+```text
+Recon-ng
+   ↓
+Select Module
+   ↓
+Provide Authorized Target/Input
+   ↓
+Run Module
+   ↓
+Collect Results
+```
+
+---
+
+# 24. Recon-ng Strength
+
+### Main Strength:
+
+> **Structured and modular reconnaissance**
+
+### Memory Trick
+
+> **Recon-ng = Recon Framework**
+
+---
+
+# 25. Shodan
+
+**Shodan** is a search engine focused on Internet-connected devices, services, and exposed infrastructure.
+
+Unlike traditional search engines that primarily index webpages, Shodan collects information about Internet-facing services.
+
+---
+
+# 26. What Can Shodan Show?
+
+Depending on available data, Shodan may provide information about:
+
+- IP addresses
+- Open ports
+- Service banners
+- Software/services
+- Certificates
+- Device types
+- Internet-facing infrastructure
+
+---
+
+# 27. Shodan Concept
+
+Traditional search engine:
+
+```text
+Search
+ ↓
+Web Pages
+```
+
+Shodan:
+
+```text
+Search
+ ↓
+Internet-Exposed Services/Devices
+```
+
+### Memory Trick
+
+> **Shodan = Search the Internet's exposed services**
+
+---
+
+# 28. Shodan and Attack Surface
+
+Suppose an organization owns several Internet-facing services.
+
+Shodan may help a security team identify publicly visible information about those services.
+
+Concept:
+
+```text
+Organization
+      ↓
+Public IP
+      ↓
+Internet-Exposed Service
+      ↓
+Shodan Information
+      ↓
+Security Review
+```
+
+This can help organizations identify unintended exposure.
+
+---
+
+# 29. Important Shodan Terms
+
+### Host
+
+An Internet-connected system associated with an IP address.
+
+### Port
+
+A logical communication endpoint.
+
+### Service
+
+An application/service listening on a port.
+
+### Banner
+
+Information returned by a service that may identify the software or service.
+
+---
+
+# 30. Shodan vs Nmap
+
+This is an important distinction.
+
+| Shodan | Nmap |
+|---|---|
+| Searches Internet-collected information | Actively probes a target |
+| Useful for external attack-surface visibility | Useful for authorized network discovery |
+| Data may already be collected/indexed | Tester performs scans |
+| Can show exposed services | Can discover current reachable services |
+| Passive perspective from tester's standpoint | Active interaction with target |
+
+### Memory
+
+> **Shodan = Search**
+
+> **Nmap = Scan**
+
+---
+
+# 31. Maltego vs Recon-ng vs Shodan
+
+| Tool | Main Purpose | Memory |
+|---|---|---|
+| Maltego | Link/relationship analysis | Map |
+| Recon-ng | Modular reconnaissance | Framework |
+| Shodan | Internet-exposed services | Search |
+| Nmap | Network scanning | Scan |
+| theHarvester | Public information collection | Gather |
+| Amass | Attack-surface discovery | Map/Discover |
+| SpiderFoot | Automated OSINT | Automate |
+
+---
+
+# 32. theHarvester
+
+**theHarvester** is an OSINT reconnaissance tool.
+
+It can gather publicly available information from supported sources.
+
+Potential information includes:
+
+- Email addresses
+- Hostnames
+- Domains
+- Publicly indexed information
+
+### Memory
+
+> **theHarvester = Gather public information**
+
+---
+
+# 33. Amass
+
+**Amass** is commonly used for attack-surface mapping and asset discovery.
+
+It can help identify relationships between:
+
+- Domains
+- Subdomains
+- DNS information
+- IP addresses
+- Infrastructure
+
+### Memory
+
+> **Amass = Attack Surface**
+
+---
+
+# 34. SpiderFoot
+
+**SpiderFoot** is an OSINT automation tool.
+
+It can automate collection from multiple sources and help correlate information.
+
+Concept:
+
+```text
+Multiple Sources
+       ↓
+SpiderFoot
+       ↓
+Collected Intelligence
+       ↓
+Analysis
+```
+
+### Memory
+
+> **SpiderFoot = Automated OSINT**
+
+---
+
+# 35. OSINT Data Categories
+
+You should be able to classify information.
+
+### Domain Information
+
+```text
+Domains
+Subdomains
+DNS records
+```
+
+### Infrastructure
+
+```text
+IP addresses
+Servers
+Ports
+Services
+```
+
+### Organization
+
+```text
+Company
+Departments
+Public employees
+```
+
+### Technology
+
+```text
+Web servers
+Frameworks
+CMS
+Cloud services
+```
+
+### Documents
+
+```text
+PDFs
+Office documents
+Public reports
+```
+
+---
+
+# 36. Digital Footprint
+
+A digital footprint is the collection of information an organization or individual leaves online.
+
+Example:
+
+```text
+Company
+  |
+  ├── Website
+  ├── Social Media
+  ├── Domain
+  ├── Subdomains
+  ├── Public Documents
+  ├── Code Repositories
+  └── Internet-Facing Services
+```
+
+OSINT helps map this footprint.
+
+---
+
+# 37. OSINT Intelligence Cycle
+
+A useful way to remember OSINT is:
+
+```text
+PLAN
+  ↓
+COLLECT
+  ↓
+PROCESS
+  ↓
+ANALYZE
+  ↓
+REPORT
+```
+
+### PLAN
+
+Define what you need.
+
+### COLLECT
+
+Gather public information.
+
+### PROCESS
+
+Organize and clean the information.
+
+### ANALYZE
+
+Find relationships and meaning.
+
+### REPORT
+
+Present useful intelligence.
+
+---
+
+# 38. Data vs Information vs Intelligence
+
+These are different.
+
+### Data
+
+Raw facts.
+
+Example:
+
+```text
+203.0.113.10
+```
+
+### Information
+
+Organized data.
+
+```text
+203.0.113.10 hosts a public web service.
+```
+
+### Intelligence
+
+Analyzed information that supports a security decision.
+
+```text
+The organization has an Internet-facing service that should be reviewed as part of the authorized attack-surface assessment.
+```
+
+### Memory
+
+> **Data → Information → Intelligence**
+
+---
+
+# 39. OSINT Verification
+
+Never blindly trust OSINT results.
+
+Use:
+
+```text
+Source A
+   +
+Source B
+   +
+Source C
+   ↓
+Cross-Verification
+   ↓
+Higher Confidence
+```
+
+### Why?
+
+Information may be:
+
+- Old
+- Incorrect
+- Misattributed
+- Duplicated
+- Taken out of context
+
+---
+
+# 40. False Positives in OSINT
+
+An OSINT tool may associate an asset with an organization incorrectly.
+
+Example:
+
+```text
+Tool:
+IP → Organization X
+
+Reality:
+IP → Hosting Provider
+```
+
+Therefore:
+
+> **OSINT results must be validated before being treated as confirmed facts.**
+
+---
+
+# 41. OSINT and Privacy
+
+OSINT involves publicly available information, but that does not mean every use is appropriate.
+
+Security professionals should:
+
+- Respect privacy
+- Follow authorization
+- Follow laws and organizational policies
+- Collect only necessary information
+- Protect collected information
+- Avoid unnecessary personal-data collection
+
+---
+
+# 42. OSINT in a Penetration Test
+
+A typical authorized workflow:
+
+```text
+Authorization
+      ↓
+Define Scope
+      ↓
+OSINT
+      ↓
+Identify Assets
+      ↓
+Verify Assets
+      ↓
+Map Attack Surface
+      ↓
+Active Testing
+```
+
+OSINT can reduce unnecessary active probing by providing information before direct testing begins.
+
+---
+
+# 43. Example – Authorized Organization Assessment
+
+Suppose the authorized target is:
+
+```text
+example.com
+```
+
+### Step 1 – Public Search
+
+Find:
+
+```text
+example.com
+```
+
+### Step 2 – Domain Information
+
+Identify:
+
+```text
+DNS information
+Subdomains
+Certificate information
+```
+
+### Step 3 – Shodan
+
+Review publicly indexed Internet-facing services associated with confirmed in-scope infrastructure.
+
+### Step 4 – Recon-ng
+
+Organize and collect additional authorized OSINT.
+
+### Step 5 – Maltego
+
+Visualize relationships:
+
+```text
+Domain
+  ↓
+Subdomain
+  ↓
+IP
+  ↓
+Service
+```
+
+### Step 6 – Report
+
+Document the confirmed attack surface.
+
+---
+
+# 44. Tool Selection
+
+Choose the tool based on the question.
+
+| Question | Useful Tool |
+|---|---|
+| What Internet services are exposed? | Shodan |
+| How are entities related? | Maltego |
+| How can I organize modular recon? | Recon-ng |
+| How can I collect public information? | theHarvester |
+| How can I map subdomains/attack surface? | Amass |
+| How can I automate OSINT? | SpiderFoot |
+| How can I actively scan an authorized network? | Nmap |
+
+---
+
+# 45. Common Exam Scenarios
+
+## Scenario 1
+
+A security analyst searches public websites and public documents without directly contacting the target.
+
+**Answer: Passive Reconnaissance**
+
+---
+
+## Scenario 2
+
+A tester wants to visualize relationships between a domain, IP addresses, email addresses, and infrastructure.
+
+**Answer: Maltego**
+
+---
+
+## Scenario 3
+
+A tester wants a modular framework for reconnaissance.
+
+**Answer: Recon-ng**
+
+---
+
+## Scenario 4
+
+A security team wants to find Internet-exposed services associated with its public infrastructure.
+
+**Answer: Shodan**
+
+---
+
+## Scenario 5
+
+A tester actively probes an authorized server to identify open ports.
+
+**Answer: Nmap / Active Reconnaissance**
+
+---
+
+## Scenario 6
+
+A tester needs to understand relationships among domains, hosts, and infrastructure visually.
+
+**Answer: Maltego**
+
+---
+
+# 46. Common Mistakes
+
+### Mistake 1
+
+Thinking OSINT = hacking.
+
+**Correction:** OSINT is information gathering from publicly available sources.
+
+### Mistake 2
+
+Thinking Shodan scans your target immediately.
+
+**Correction:** Shodan primarily provides indexed information about Internet-facing systems/services.
+
+### Mistake 3
+
+Assuming all OSINT results are accurate.
+
+**Correction:** Verify important findings.
+
+### Mistake 4
+
+Confusing Maltego and Recon-ng.
+
+**Maltego → Relationships**
+
+**Recon-ng → Recon Framework**
+
+### Mistake 5
+
+Confusing Shodan and Nmap.
+
+**Shodan → Search**
+
+**Nmap → Scan**
+
+---
+
+# 47. OSINT Defensive Uses
+
+Organizations can use the same techniques defensively.
+
+### Goal:
+
+> **Find what attackers can discover about you.**
+
+Security teams can search for:
+
+- Exposed services
+- Forgotten subdomains
+- Old infrastructure
+- Public documents
+- Leaked secrets
+- Unnecessary technology information
+- Publicly exposed employee information
+
+This is sometimes called **external attack-surface management** or **digital-footprint monitoring**, depending on the specific program.
+
+---
+
+# 48. DAY 9 QUICK REVISION
+
+### OSINT
+
+> Open-Source Intelligence = collecting and analyzing publicly available information.
+
+### Maltego
+
+> Visual relationship/link analysis.
+
+### Recon-ng
+
+> Modular reconnaissance framework.
+
+### Shodan
+
+> Search engine for Internet-exposed services/devices.
+
+### theHarvester
+
+> Public information collection.
+
+### Amass
+
+> Attack-surface and subdomain discovery.
+
+### SpiderFoot
+
+> Automated OSINT.
+
+### Nmap
+
+> Active network discovery and scanning.
+
+---
+
+# 🔥 DAY 9 MEMORY TRICKS
+
+## Main Three Tools
+
+Remember:
+
+> **M-R-S = Map, Recon, Search**
+
+### M → Maltego
+
+**M = Map relationships**
+
+### R → Recon-ng
+
+**R = Recon framework**
+
+### S → Shodan
+
+**S = Search exposed services**
+
+---
+
+## Tool Memory Table
+
+```text
+Maltego     → MAP
+Recon-ng    → RECON
+Shodan      → SEARCH
+Nmap        → SCAN
+theHarvester→ GATHER
+Amass       → ATTACK SURFACE
+SpiderFoot  → AUTOMATE
+```
+
+---
+
+# ⭐ MOST IMPORTANT EXAM POINTS
+
+1. **OSINT = Open-Source Intelligence.**
+2. **OSINT uses publicly available information.**
+3. **OSINT is not the same as hacking.**
+4. **Maltego = relationship/link analysis.**
+5. **Recon-ng = modular reconnaissance framework.**
+6. **Shodan = search engine for Internet-exposed services/devices.**
+7. **Nmap = active network scanning.**
+8. **theHarvester = public information collection.**
+9. **Amass = attack-surface/subdomain discovery.**
+10. **SpiderFoot = OSINT automation.**
+11. **OSINT information should be verified.**
+12. **Data → Information → Intelligence.**
+13. **Shodan searches indexed Internet-facing information; Nmap actively probes an authorized target.**
+14. **Maltego visualizes relationships between entities.**
+15. **Recon-ng organizes reconnaissance through modules and workspaces.**
+16. **OSINT can help map an organization's digital footprint.**
+17. **OSINT should still respect privacy, law, authorization, and scope.**
+18. **A public asset is not automatically an authorized testing target.**
+19. **The objective of OSINT in pentesting is to understand the target's attack surface.**
+20. **Always verify important OSINT findings before treating them as confirmed.**
+
+# ONE-LINE REVISION
+
+> **OSINT gathers publicly available information; Maltego maps relationships, Recon-ng provides a modular recon framework, Shodan searches Internet-exposed services, and the resulting intelligence helps map the target's digital footprint and attack surface.**

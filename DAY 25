@@ -1,0 +1,1518 @@
+# DAY 25 – DIRECTORY TRAVERSAL ATTACKS
+
+## Path Traversal • File Access • Identification • Safe Exploitation • Prevention
+
+---
+
+# 1. WHAT IS DIRECTORY TRAVERSAL?
+
+**Directory Traversal**, also called **Path Traversal**, is a vulnerability where an application improperly handles user-controlled file paths, potentially allowing access to files or directories outside the intended location.
+
+### Simple Definition
+
+> **Directory Traversal = Manipulating a file path so an application accesses a location outside its intended directory.**
+
+It is commonly associated with:
+
+- Web applications
+- File download features
+- File viewers
+- Image/document viewers
+- Archive extraction
+- APIs
+- File management systems
+
+---
+
+# 2. BASIC CONCEPT
+
+Imagine an application is designed to serve files from:
+
+```text
+/var/www/files/
+```
+
+The application expects:
+
+```text
+report.pdf
+```
+
+Conceptually:
+
+```text
+Application
+    ↓
+/var/www/files/report.pdf
+```
+
+The security problem occurs if user-controlled input can cause the application to resolve a path outside the intended directory.
+
+```text
+User Input
+    ↓
+File Path
+    ↓
+Application
+    ↓
+Filesystem
+```
+
+If the application does not safely constrain that path, traversal may be possible.
+
+---
+
+# 3. DIRECTORY TRAVERSAL VS FILE INCLUSION
+
+These concepts are related but not identical.
+
+| Directory Traversal | File Inclusion |
+|---|---|
+| Manipulates a path to access unintended filesystem locations | Causes an application to include/load a file |
+| Often associated with file download/read functionality | Common in applications that dynamically include files |
+| Focus is path resolution | Focus is file inclusion/execution behavior |
+
+### Memory
+
+> **Traversal = Reach unintended path**
+
+> **Inclusion = Application loads/includes a file**
+
+---
+
+# 4. WHY DIRECTORY TRAVERSAL HAPPENS
+
+Common causes include:
+
+- Direct use of user-supplied filenames
+- Unsafe path concatenation
+- Insufficient path validation
+- Poor canonicalization
+- Missing allowlists
+- Unsafe archive extraction
+- Insecure file APIs
+- Trusting client-side validation
+
+### Dangerous design
+
+```text
+User Input
+    ↓
+"/uploads/" + user_input
+    ↓
+Filesystem
+```
+
+The application assumes the resulting path remains inside `/uploads/`.
+
+That assumption can be unsafe.
+
+---
+
+# 5. BASIC PATH STRUCTURE
+
+A filesystem may look like:
+
+```text
+application/
+├── public/
+│   ├── images/
+│   └── documents/
+├── config/
+├── logs/
+└── backups/
+```
+
+Suppose users should only access:
+
+```text
+application/public/documents/
+```
+
+The application must prevent user input from resolving into:
+
+```text
+application/config/
+application/logs/
+application/backups/
+```
+
+---
+
+# 6. THE `..` CONCEPT
+
+Many filesystems use:
+
+```text
+..
+```
+
+to represent the **parent directory**.
+
+For example:
+
+```text
+/home/user/documents/
+```
+
+Parent:
+
+```text
+/home/user/
+```
+
+Another parent:
+
+```text
+/home/
+```
+
+Conceptually:
+
+```text
+documents/
+   ↓ ..
+user/
+   ↓ ..
+home/
+```
+
+This is the fundamental concept behind traditional path traversal.
+
+---
+
+# 7. BASIC TRAVERSAL CONCEPT
+
+Suppose an application expects:
+
+```text
+files/<filename>
+```
+
+Normal:
+
+```text
+files/report.pdf
+```
+
+A traversal attempt conceptually tries to move upward:
+
+```text
+files/
+  ↓ parent
+parent/
+  ↓ parent
+higher-level directory
+```
+
+The exact behavior depends on:
+
+- Operating system
+- Web server
+- Application framework
+- Path normalization
+- Security controls
+
+---
+
+# 8. LINUX VS WINDOWS PATHS
+
+### Linux
+
+Typical path:
+
+```text
+/var/www/app/files/
+```
+
+Path separator:
+
+```text
+/
+```
+
+### Windows
+
+Typical path:
+
+```text
+C:\inetpub\wwwroot\files\
+```
+
+Path separator:
+
+```text
+\
+```
+
+### Important
+
+Different platforms handle paths differently.
+
+A tester must understand the target environment before interpreting results.
+
+---
+
+# 9. URL ENCODING
+
+Applications may receive encoded path characters.
+
+For example:
+
+```text
+.. 
+```
+
+can be represented in encoded form in HTTP contexts.
+
+The important security concept is:
+
+> **Security checks must account for normalization and decoding behavior.**
+
+A filter that checks only one representation may fail if the application later decodes or normalizes the value differently.
+
+---
+
+# 10. DOUBLE ENCODING
+
+Some systems may decode input more than once.
+
+Conceptually:
+
+```text
+Encoded input
+     ↓
+First decoding
+     ↓
+Second decoding
+     ↓
+Filesystem interpretation
+```
+
+A security control that validates the wrong representation may be bypassed.
+
+### Exam Point
+
+> **Canonicalize/normalize safely before making security decisions.**
+
+---
+
+# 11. PATH NORMALIZATION
+
+Path normalization converts different representations of a path into a consistent form.
+
+Example concept:
+
+```text
+/a/b/../c
+```
+
+can normalize to:
+
+```text
+/a/c
+```
+
+Security checks should be based on the **normalized/canonical path**, not just the raw string.
+
+---
+
+# 12. DIRECTORY TRAVERSAL ATTACK FLOW
+
+```text
+Attacker-controlled input
+          ↓
+Application file parameter
+          ↓
+Path construction
+          ↓
+Path normalization
+          ↓
+Filesystem access
+          ↓
+Unintended file/directory
+```
+
+The vulnerability occurs when the final resolved path escapes the permitted directory.
+
+---
+
+# 13. COMMON ATTACK SURFACES
+
+Look for parameters such as:
+
+```text
+file=
+filename=
+path=
+document=
+download=
+template=
+page=
+image=
+folder=
+resource=
+```
+
+Examples:
+
+```text
+/download?file=report.pdf
+/view?document=manual.pdf
+/image?file=photo.jpg
+```
+
+### Important
+
+The presence of a `file` parameter does **not** automatically mean a traversal vulnerability exists.
+
+It must be tested and validated.
+
+---
+
+# 14. IDENTIFYING DIRECTORY TRAVERSAL
+
+Authorized testing workflow:
+
+```text
+1. Define scope
+       ↓
+2. Find file/path parameters
+       ↓
+3. Establish normal behavior
+       ↓
+4. Identify expected directory
+       ↓
+5. Test harmless traversal behavior
+       ↓
+6. Observe response
+       ↓
+7. Determine final resolved path
+       ↓
+8. Validate
+       ↓
+9. Document
+       ↓
+10. Remediate and retest
+```
+
+---
+
+# 15. START WITH A BASELINE
+
+Suppose:
+
+```text
+/download?file=manual.pdf
+```
+
+returns:
+
+```text
+HTTP 200
+manual.pdf
+```
+
+Record:
+
+- Status code
+- Response size
+- Content type
+- Filename
+- Response body
+- Error behavior
+
+This is your baseline.
+
+Then compare controlled test cases.
+
+---
+
+# 16. SAFE LAB TESTING
+
+Use an intentionally vulnerable application with a controlled directory.
+
+Example:
+
+```text
+lab-app/
+├── public/
+│   └── files/
+│       └── test.txt
+├── lab-secret/
+│   └── training.txt
+└── app.py
+```
+
+The goal is to demonstrate that the application can improperly leave:
+
+```text
+public/files/
+```
+
+and reach:
+
+```text
+lab-secret/
+```
+
+without touching real system files.
+
+---
+
+# 17. SAFE LAB ARCHITECTURE
+
+```text
+┌──────────────────┐
+│ Kali Linux       │
+│ Security Tester  │
+└────────┬─────────┘
+         │
+   Host-only/
+   Internal Network
+         │
+         ▼
+┌──────────────────┐
+│ Vulnerable Lab   │
+│ Web Application  │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│ Lab Filesystem   │
+│ Only training    │
+│ files available  │
+└──────────────────┘
+```
+
+Do not test traversal against systems you do not own or have explicit authorization to assess.
+
+---
+
+# 18. DIRECTORY TRAVERSAL EXAMPLE
+
+Suppose the application expects:
+
+```text
+/download?file=test.txt
+```
+
+Internally:
+
+```text
+base_directory + file
+```
+
+The intended result is:
+
+```text
+/lab/public/files/test.txt
+```
+
+A vulnerable application may allow controlled traversal to a file deliberately placed outside that directory.
+
+The important observation is:
+
+```text
+Expected directory
+        ↓
+Parent directory
+        ↓
+Unexpected permitted lab file
+```
+
+---
+
+# 19. WHAT COUNTS AS PROOF?
+
+A strong finding should demonstrate:
+
+```text
+1. User controls path
+2. Application resolves that path
+3. Resolved path escapes intended directory
+4. An unintended lab file is accessed
+5. Behavior is reproducible
+```
+
+Simply seeing an error is **not proof**.
+
+---
+
+# 20. ERROR MESSAGES
+
+Applications may reveal path information through errors.
+
+Example:
+
+```text
+FileNotFoundError:
+C:\application\uploads\test.txt
+```
+
+or:
+
+```text
+No such file:
+ /var/www/app/files/test.txt
+```
+
+This may disclose:
+
+- Operating system
+- Application directory
+- Framework
+- Internal path structure
+
+### Security issue
+
+This can become **information disclosure**, even if traversal itself is not exploitable.
+
+---
+
+# 21. IMPACT OF DIRECTORY TRAVERSAL
+
+Potential impact depends on application permissions and affected files.
+
+### Confidentiality
+
+Unauthorized reading of files.
+
+### Integrity
+
+In some situations, unauthorized modification may be possible.
+
+### Availability
+
+If an attacker can manipulate important files, availability could potentially be affected.
+
+### Information Disclosure
+
+Potential exposure of:
+
+- Configuration
+- Application source
+- Logs
+- Internal documents
+- Backup files
+- Metadata
+
+---
+
+# 22. DIRECTORY TRAVERSAL DOES NOT AUTOMATICALLY MEAN RCE
+
+Important exam point:
+
+> **Path Traversal ≠ Remote Code Execution.**
+
+Traversal generally concerns unintended filesystem access.
+
+RCE requires a separate condition that allows attacker-controlled content to become executable code.
+
+---
+
+# 23. FILE READ VS FILE WRITE
+
+### File Read
+
+Application allows unintended file retrieval.
+
+```text
+Application
+    ↓
+Unintended file
+    ↓
+Response
+```
+
+### File Write
+
+Application allows writing to unintended locations.
+
+```text
+User Input
+    ↓
+Unsafe path
+    ↓
+Filesystem write
+```
+
+File write can be significantly more dangerous depending on permissions and what the application does with the written file.
+
+---
+
+# 24. ARCHIVE EXTRACTION / ZIP SLIP
+
+Directory traversal is not limited to URLs.
+
+A related vulnerability occurs during archive extraction.
+
+Example concept:
+
+```text
+archive.zip
+   ↓
+Extract
+   ↓
+Unexpected path
+```
+
+If an archive contains a file whose path escapes the intended extraction directory, it can cause files to be written outside that directory.
+
+This class is commonly known as:
+
+> **Zip Slip**
+
+---
+
+# 25. SAFE ARCHIVE EXTRACTION
+
+Applications should:
+
+1. Extract into a controlled directory.
+2. Normalize each archive entry path.
+3. Verify the final path remains inside the extraction directory.
+4. Reject unsafe entries.
+5. Apply least-privilege filesystem permissions.
+
+---
+
+# 26. DIRECTORY TRAVERSAL VS ZIP SLIP
+
+| Directory Traversal | Zip Slip |
+|---|---|
+| Often involves user-controlled path parameters | Usually involves archive extraction |
+| Can affect file reads/writes | Primarily dangerous during file extraction |
+| Path escapes intended directory | Archive entry escapes extraction directory |
+| Input often comes from request parameter | Input comes from archive contents |
+
+---
+
+# 27. PRIMARY DEFENSE: DON'T TRUST FILENAMES
+
+If possible, don't let users directly specify filesystem paths.
+
+Instead of:
+
+```text
+/download?file=filename
+```
+
+use an application-controlled identifier:
+
+```text
+/download?id=12345
+```
+
+The server maps:
+
+```text
+12345 → known safe file
+```
+
+This is often safer than accepting arbitrary filesystem paths.
+
+---
+
+# 28. ALLOWLIST APPROACH
+
+Maintain a list of permitted files/resources.
+
+Example:
+
+```text
+Allowed:
+manual.pdf
+guide.pdf
+image.jpg
+```
+
+Anything else:
+
+```text
+REJECT
+```
+
+### Memory
+
+> **Allow known-good values instead of trying to block every bad path.**
+
+---
+
+# 29. CANONICAL PATH VALIDATION
+
+A strong server-side approach is:
+
+```text
+User input
+    ↓
+Resolve/canonicalize path
+    ↓
+Determine final path
+    ↓
+Check it is inside allowed directory
+    ↓
+Allow / Reject
+```
+
+Conceptually:
+
+```text
+BASE = /app/public/files/
+
+FINAL = canonical(user-supplied path)
+
+if FINAL is inside BASE:
+    allow
+else:
+    reject
+```
+
+The exact implementation should use trusted filesystem/path APIs provided by the language or framework.
+
+---
+
+# 30. PYTHON SAFE PATH CONCEPT
+
+Python's `pathlib` can help reason about canonical paths.
+
+Example defensive pattern:
+
+```python
+from pathlib import Path
+
+BASE = Path("/app/public/files").resolve()
+
+candidate = (BASE / user_input).resolve()
+
+if BASE not in candidate.parents and candidate != BASE:
+    raise ValueError("Invalid file path")
+```
+
+Then the application can safely proceed only when the resolved path remains inside the intended directory.
+
+### Important
+
+The exact implementation should also consider:
+
+- Symlinks
+- Permissions
+- Race conditions
+- Platform behavior
+- File type
+- Application requirements
+
+---
+
+# 31. WHY SIMPLE STRING FILTERING IS WEAK
+
+A developer might try:
+
+```text
+if ".." in filename:
+    reject
+```
+
+This is not a complete security strategy.
+
+Why?
+
+Because filesystem paths can have:
+
+- Different separators
+- Encodings
+- Normalization differences
+- Symbolic links
+- Platform-specific behavior
+- Alternate representations
+
+### Better
+
+> **Resolve the path and verify the final location.**
+
+---
+
+# 32. SYMBOLIC LINKS
+
+A symbolic link can point from one filesystem location to another.
+
+Example:
+
+```text
+allowed/
+   link → outside/
+```
+
+An application may believe it is accessing:
+
+```text
+allowed/link/file.txt
+```
+
+while the filesystem resolves it elsewhere.
+
+### Security lesson
+
+Path validation should consider **canonical filesystem resolution**, including symlinks where relevant.
+
+---
+
+# 33. WINDOWS-SPECIFIC CONCERNS
+
+Windows paths may involve:
+
+- Drive letters
+- Backslashes
+- UNC paths
+- Different path normalization behavior
+- Device/path syntax
+
+Example:
+
+```text
+C:\application\files\
+```
+
+Therefore:
+
+> **A security control must be designed for the actual operating system and filesystem semantics.**
+
+---
+
+# 34. LINUX-SPECIFIC CONCERNS
+
+Linux systems commonly use:
+
+```text
+/
+```
+
+as the filesystem root.
+
+Applications may operate under:
+
+```text
+/var/www/
+```
+
+or:
+
+```text
+/opt/application/
+```
+
+Permissions and symbolic links are important when evaluating traversal.
+
+---
+
+# 35. DIRECTORY TRAVERSAL + ACCESS CONTROL
+
+Even if path validation fails, filesystem permissions provide another security layer.
+
+Example:
+
+```text
+Web Application
+       ↓
+Restricted OS account
+       ↓
+Limited file permissions
+```
+
+If the application account cannot read a sensitive file, traversal may not expose it.
+
+### Therefore:
+
+> **Path validation + least privilege = defense in depth.**
+
+---
+
+# 36. TESTING TOOLS
+
+Useful authorized testing tools include:
+
+### Burp Suite
+
+Inspect and modify HTTP requests.
+
+### OWASP ZAP
+
+Web application security testing.
+
+### Browser DevTools
+
+Inspect requests and responses.
+
+### curl
+
+Useful for controlled HTTP requests.
+
+### Python
+
+Useful for building a safe lab and automating authorized tests.
+
+### Filesystem tools
+
+Useful for inspecting the lab server's directory structure.
+
+---
+
+# 37. DIRECTORY TRAVERSAL TESTING WITH BURP
+
+Safe workflow:
+
+```text
+Browser
+   ↓
+Burp Proxy
+   ↓
+Capture file request
+   ↓
+Identify filename parameter
+   ↓
+Send to Repeater
+   ↓
+Change only the test parameter
+   ↓
+Observe response
+   ↓
+Validate against lab files
+```
+
+Do not test arbitrary real-world targets.
+
+---
+
+# 38. FINDING REPORT EXAMPLE
+
+```text
+Title:
+Directory Traversal
+
+Severity:
+Based on validated impact
+
+Affected Component:
+File download endpoint
+
+Parameter:
+file
+
+Description:
+The application uses user-controlled path information
+when locating files and does not sufficiently constrain
+the resolved path to the intended directory.
+
+Evidence:
+A controlled lab file outside the expected directory
+was accessible through path manipulation.
+
+Impact:
+Potential unauthorized file access.
+
+Recommendation:
+Use server-side file identifiers or canonicalize and
+validate the resolved path against an approved base
+directory. Apply least-privilege filesystem permissions.
+
+Status:
+Open / Remediated / Retested
+```
+
+---
+
+# 39. COMMON MISTAKES
+
+### Mistake 1
+
+Only checking for:
+
+```text
+..
+```
+
+❌ Not sufficient.
+
+### Mistake 2
+
+Using client-side validation.
+
+❌ Client-side controls can be bypassed.
+
+### Mistake 3
+
+Assuming URL encoding automatically makes traversal safe.
+
+❌ Encoding and decoding behavior must be understood.
+
+### Mistake 4
+
+Allowing users to specify arbitrary filesystem paths.
+
+❌ Prefer application-controlled file IDs.
+
+### Mistake 5
+
+Running the application with excessive filesystem permissions.
+
+❌ Follow least privilege.
+
+---
+
+# 40. DIRECTORY TRAVERSAL TESTING FORMULA
+
+## **I-N-R-V**
+
+**I → Identify input**
+
+**N → Normalize/understand path**
+
+**R → Resolve final path**
+
+**V → Verify whether it escapes allowed directory**
+
+Then:
+
+```text
+Report → Remediate → Retest
+```
+
+---
+
+# 41. SCENARIO-BASED MCQs
+
+## Q1
+
+An application accepts a filename from a user and uses it directly to locate a file.
+
+What vulnerability should be investigated?
+
+A. XSS  
+B. Directory Traversal  
+C. CSRF  
+D. DNS spoofing
+
+**Answer: B**
+
+---
+
+## Q2
+
+What does `..` commonly represent in filesystem paths?
+
+A. Current directory  
+B. Parent directory  
+C. Root directory  
+D. Temporary directory
+
+**Answer: B**
+
+---
+
+## Q3
+
+Which is the strongest general approach?
+
+A. Block only `..`  
+B. Allow any filename  
+C. Canonicalize the path and verify it remains inside the permitted directory  
+D. Validate only in JavaScript
+
+**Answer: C**
+
+---
+
+## Q4
+
+An application returns an error containing:
+
+```text
+C:\inetpub\app\files\test.txt
+```
+
+What information may this expose?
+
+A. Internal filesystem path  
+B. User's password  
+C. DNS password  
+D. Wi-Fi key
+
+**Answer: A**
+
+---
+
+## Q5
+
+Which attack is closely related to unsafe archive extraction?
+
+A. Zip Slip  
+B. ARP spoofing  
+C. SQL Injection  
+D. CSRF
+
+**Answer: A**
+
+---
+
+## Q6
+
+Why is least privilege useful against directory traversal?
+
+A. It prevents all traversal attempts  
+B. It limits which files the application account can access  
+C. It encrypts filenames  
+D. It disables HTTP
+
+**Answer: B**
+
+---
+
+## Q7
+
+An application rejects `..` but still allows arbitrary filesystem paths.
+
+Is the application necessarily secure?
+
+A. Yes  
+B. No  
+C. Only on Linux  
+D. Only with HTTPS
+
+**Answer: B**
+
+---
+
+## Q8
+
+A tester accesses a file intentionally placed outside the application's allowed directory in a controlled lab.
+
+What does this provide?
+
+A. Evidence of a potential path traversal vulnerability  
+B. Proof of XSS  
+C. Proof of SQL injection  
+D. Proof of DNS poisoning
+
+**Answer: A**
+
+---
+
+## Q9
+
+Which approach can avoid accepting arbitrary filesystem paths?
+
+A. Use server-side file IDs mapped to known files  
+B. Accept all paths  
+C. Disable logging  
+D. Hide the filename
+
+**Answer: A**
+
+---
+
+## Q10
+
+Does directory traversal automatically mean remote code execution?
+
+A. Yes  
+B. No  
+C. Always on Windows  
+D. Always on Linux
+
+**Answer: B**
+
+---
+
+# 42. HARD SCENARIO MCQs
+
+## Q11
+
+A developer implements:
+
+```python
+if ".." not in filename:
+    open(filename)
+```
+
+What is the best security assessment?
+
+A. Completely secure  
+B. Weak because string filtering is not a reliable path-security mechanism  
+C. Secure if HTTPS is enabled  
+D. Secure only for PDFs
+
+**Answer: B**
+
+---
+
+## Q12
+
+An application correctly canonicalizes the requested path and verifies that it remains under the approved base directory.
+
+What security goal does this primarily provide?
+
+A. Preventing path escape  
+B. Preventing SQL injection  
+C. Preventing XSS  
+D. Preventing phishing
+
+**Answer: A**
+
+---
+
+## Q13
+
+A web application runs under an OS account that can read almost every file on the server. A path traversal vulnerability is discovered.
+
+Why is this especially serious?
+
+A. The application's filesystem access is excessive  
+B. DNS is disabled  
+C. HTTPS is too strong  
+D. The browser cannot render HTML
+
+**Answer: A**
+
+---
+
+## Q14
+
+A ZIP upload feature extracts archive files. An archive entry resolves outside the intended extraction directory.
+
+What should the tester investigate?
+
+A. Zip Slip/path traversal during extraction  
+B. SQL injection  
+C. XSS only  
+D. DNS enumeration
+
+**Answer: A**
+
+---
+
+## Q15
+
+A file download endpoint returns HTTP 403 for traversal attempts.
+
+Can the tester automatically conclude the application is secure?
+
+A. Yes  
+B. No; controls should be validated and alternate path-resolution behavior considered within the authorized test scope  
+C. Yes, because 403 always means secure  
+D. Only if the server uses Linux
+
+**Answer: B**
+
+---
+
+## Q16
+
+A path is checked before resolving symbolic links, and the link points outside the permitted directory.
+
+What could happen?
+
+A. The application may bypass the intended directory restriction  
+B. SQL injection automatically occurs  
+C. XSS automatically occurs  
+D. HTTPS stops working
+
+**Answer: A**
+
+---
+
+## Q17
+
+A developer changes the application from:
+
+```text
+User supplies filename
+```
+
+to:
+
+```text
+User supplies file ID
+```
+
+and the server maps the ID to a predefined file.
+
+Why is this generally safer?
+
+A. It reduces direct user control over filesystem paths  
+B. It encrypts the database  
+C. It prevents every web vulnerability  
+D. It disables HTTP
+
+**Answer: A**
+
+---
+
+# 43. PRACTICAL LAB CHECKLIST
+
+```text
+□ Create isolated lab
+□ Create allowed directory
+□ Create controlled file outside it
+□ Start vulnerable training application
+□ Identify file parameter
+□ Request legitimate file
+□ Establish baseline
+□ Test controlled traversal behavior
+□ Observe response
+□ Confirm resolved path
+□ Verify controlled file access
+□ Document evidence
+□ Fix path handling
+□ Retest
+```
+
+---
+
+# 44. MASTER MEMORY
+
+## Directory Traversal
+
+> **TRAVERSAL = ESCAPE THE INTENDED DIRECTORY**
+
+Remember:
+
+```text
+User Input
+    ↓
+Path Construction
+    ↓
+Path Resolution
+    ↓
+Does it remain inside BASE?
+       ↓
+   YES → Allow
+   NO  → Reject
+```
+
+---
+
+# 45. DEFENSE MEMORY
+
+## **I-C-L**
+
+**I → Identifier instead of arbitrary path**
+
+**C → Canonicalize and validate**
+
+**L → Least privilege**
+
+Add:
+
+```text
+Safe archive extraction
++
+Server-side validation
++
+Secure error handling
++
+Retesting
+```
+
+---
+
+# 46. 30-SECOND REVISION
+
+```text
+Directory Traversal
+= Accessing paths outside intended directory.
+
+Also called:
+Path Traversal
+
+Core concept:
+.. = Parent directory
+
+Common targets:
+File download
+File viewer
+Image loader
+Document viewer
+Archive extraction
+
+Main defense:
+Canonicalize/resolve path
++
+Verify final path stays inside allowed directory
+
+Better design:
+Use file IDs instead of arbitrary paths
+
+Additional:
+Allowlist
++
+Least privilege
++
+Safe archive extraction
+
+Related:
+Zip Slip
+
+Important:
+Traversal ≠ RCE
+Error ≠ proof
+Filtering ".." alone ≠ complete defense
+```
+
+---
+
+# ⭐ MOST IMPORTANT EXAM POINTS
+
+1. Directory Traversal is also called **Path Traversal**.
+2. It occurs when user-controlled path information allows access outside the intended directory.
+3. `..` commonly represents the parent directory.
+4. Path normalization/canonicalization is important.
+5. Security decisions should be made using the resolved/canonical path.
+6. Blocking only `..` is not a complete defense.
+7. URL encoding and decoding behavior must be considered.
+8. Symbolic links can complicate path validation.
+9. Windows and Linux have different filesystem semantics.
+10. Prefer application-controlled file IDs over arbitrary filesystem paths.
+11. Use allowlists where practical.
+12. Apply least-privilege filesystem permissions.
+13. Zip Slip is a related archive-extraction path traversal problem.
+14. Detailed filesystem errors can cause information disclosure.
+15. Directory Traversal does not automatically mean RCE.
+16. File read and file write have different impacts.
+17. Client-side validation is not sufficient.
+18. Findings should be reproduced and validated.
+19. Automated scanner findings require manual validation.
+20. Test only systems for which you have explicit authorization.
+
+---
+
+# 🔥 FINAL EXAM FORMULA
+
+```text
+USER-CONTROLLED PATH
+        ↓
+UNSAFE PATH HANDLING
+        ↓
+PATH NORMALIZATION / RESOLUTION
+        ↓
+PATH ESCAPES BASE DIRECTORY
+        ↓
+UNINTENDED FILE/DIRECTORY ACCESS
+        ↓
+DIRECTORY TRAVERSAL
+        ↓
+VALIDATE
+        ↓
+REPORT
+        ↓
+CANONICALIZE + CONSTRAIN PATH
+        +
+LEAST PRIVILEGE
+        +
+SAFE FILE IDENTIFIERS
+        ↓
+RETEST
+```
+
+# 🎯 ONE-LINE EXAM ANSWER
+
+> **Directory Traversal is a vulnerability in which improperly handled user-controlled path information allows an application to access files or directories outside its intended location; it is mitigated by using controlled file identifiers, canonicalizing and validating resolved paths, safe archive extraction, allowlists, and least-privilege filesystem permissions.**

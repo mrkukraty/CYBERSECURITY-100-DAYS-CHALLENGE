@@ -1,0 +1,2143 @@
+# DAY 29 – WIRELESS NETWORK BASICS
+
+## Wi-Fi Protocols • 802.11 • Frequency Bands • Authentication • Encryption • WPA2 • WPA3 • Wireless Security
+
+---
+
+# 1. WHAT IS A WIRELESS NETWORK?
+
+A **wireless network** allows devices to communicate without a physical network cable, typically using radio waves.
+
+Examples:
+
+- Wi-Fi
+- Bluetooth
+- Cellular networks
+- Wireless sensor networks
+
+In cybersecurity, Wi-Fi security is especially important because radio communication can extend beyond the physical boundaries of a building.
+
+### Simple Definition
+
+> **Wireless network = A network in which devices communicate using wireless signals instead of physical cables.**
+
+---
+
+# 2. WHAT IS WI-FI?
+
+**Wi-Fi** is a family of wireless networking technologies based primarily on the **IEEE 802.11** standards.
+
+Typical Wi-Fi network:
+
+```text
+                 Internet
+                    │
+                 Router
+                    │
+              Access Point
+             /      |      \
+            /       |       \
+         Laptop   Phone    Printer
+```
+
+The access point (AP) provides wireless connectivity to client devices.
+
+---
+
+# 3. IMPORTANT WIRELESS TERMS
+
+| Term | Meaning |
+|---|---|
+| Wi-Fi | Wireless LAN technology |
+| WLAN | Wireless Local Area Network |
+| AP | Access Point |
+| STA | Wireless station/client |
+| SSID | Network name |
+| BSSID | Identifier of a particular AP radio/interface |
+| Channel | Radio frequency allocation used for communication |
+| Band | Frequency range |
+| WPA | Wi-Fi security protocol family |
+| PSK | Pre-Shared Key |
+| SAE | Simultaneous Authentication of Equals |
+| 802.11 | IEEE wireless LAN standard family |
+
+---
+
+# 4. SSID
+
+**SSID = Service Set Identifier**
+
+It is commonly displayed to users as the Wi-Fi network name.
+
+Example:
+
+```text
+SSID: Office-WiFi
+```
+
+Important:
+
+> Hiding the SSID is **not** a strong security mechanism.
+
+An access point can still be discoverable through wireless management traffic and other mechanisms.
+
+### Exam Point
+
+> **SSID = Wi-Fi network name**
+
+---
+
+# 5. BSSID
+
+**BSSID** identifies a specific basic service set and is commonly represented by a MAC address associated with the AP's wireless interface.
+
+Example:
+
+```text
+SSID  → Office-WiFi
+BSSID → 00:11:22:33:44:55
+```
+
+### Memory
+
+> **SSID = Name**
+
+> **BSSID = Specific AP identifier**
+
+---
+
+# 6. ACCESS POINT
+
+An **Access Point (AP)** provides wireless connectivity to clients.
+
+Example:
+
+```text
+             Access Point
+             /    |    \
+            /     |     \
+         Phone  Laptop  Tablet
+```
+
+The AP may also connect the wireless network to a wired LAN.
+
+---
+
+# 7. WIRELESS CLIENT / STATION
+
+A wireless device communicating through an AP is commonly called a **station (STA)**.
+
+Examples:
+
+- Laptop
+- Smartphone
+- Tablet
+- Wireless printer
+- IoT device
+
+---
+
+# 8. FREQUENCY BANDS
+
+Common Wi-Fi bands include:
+
+```text
+2.4 GHz
+5 GHz
+6 GHz
+```
+
+Different Wi-Fi generations and devices support different combinations.
+
+---
+
+# 9. 2.4 GHz BAND
+
+Advantages:
+
+- Longer range than higher-frequency bands in many environments
+- Better penetration through some obstacles
+- Widely supported
+
+Disadvantages:
+
+- More congestion
+- Fewer non-overlapping channels in common deployments
+- Interference from other devices
+
+Examples of potential interference sources include Bluetooth and some household equipment.
+
+---
+
+# 10. 5 GHz BAND
+
+Advantages:
+
+- More available channels than 2.4 GHz
+- Generally less congested
+- Supports high-throughput Wi-Fi deployments
+
+Disadvantages:
+
+- Generally shorter range than 2.4 GHz
+- More affected by obstacles in many environments
+
+---
+
+# 11. 6 GHz BAND
+
+The 6 GHz band is used by newer Wi-Fi generations, including **Wi-Fi 6E and Wi-Fi 7** where permitted by local regulations and supported by the equipment.
+
+Advantages:
+
+- Additional spectrum
+- More channels
+- Less legacy-device congestion in compatible deployments
+
+Important:
+
+> Availability and permitted channel/power configurations depend on the country and regulatory environment.
+
+---
+
+# 12. FREQUENCY MEMORY
+
+```text
+2.4 GHz → Range + congestion
+5 GHz   → Speed/channels + shorter range
+6 GHz   → Newer Wi-Fi + additional spectrum
+```
+
+---
+
+# 13. WI-FI GENERATIONS
+
+Wi-Fi generations are associated with IEEE 802.11 amendments.
+
+| Wi-Fi Generation | Common IEEE Association |
+|---|---|
+| Wi-Fi 4 | 802.11n |
+| Wi-Fi 5 | 802.11ac |
+| Wi-Fi 6 | 802.11ax |
+| Wi-Fi 6E | 802.11ax extended into 6 GHz |
+| Wi-Fi 7 | 802.11be |
+
+### Important
+
+Wi-Fi generation names are marketing/industry labels built around underlying IEEE standards.
+
+---
+
+# 14. IEEE 802.11
+
+**IEEE 802.11** defines wireless LAN technologies.
+
+It specifies things such as:
+
+- Wireless communication
+- MAC operation
+- Frame formats
+- Channels
+- Association
+- Authentication mechanisms
+- Medium access
+
+---
+
+# 15. WI-FI VS ETHERNET
+
+| Wi-Fi | Ethernet |
+|---|---|
+| Wireless | Wired |
+| Radio communication | Physical cable |
+| Shared wireless medium | Physical link |
+| More exposed to radio-based attacks | Requires physical/network access for many attacks |
+| Mobility | Limited mobility |
+
+Both can be secured, but wireless introduces additional considerations.
+
+---
+
+# 16. WI-FI NETWORK MODES
+
+## Infrastructure Mode
+
+Most common enterprise/home Wi-Fi architecture.
+
+```text
+Laptop ──┐
+Phone  ──┼── Access Point ── LAN
+Tablet ──┘
+```
+
+---
+
+## Ad Hoc Mode
+
+Wireless devices communicate more directly without a traditional AP architecture.
+
+This is less common in modern mainstream Wi-Fi deployments.
+
+---
+
+# 17. BASIC WI-FI CONNECTION PROCESS
+
+A simplified connection looks like:
+
+```text
+Client
+  ↓
+Discover network
+  ↓
+Authentication/association
+  ↓
+Security handshake/authentication
+  ↓
+Obtain network configuration
+  ↓
+Communicate
+```
+
+For a typical infrastructure network:
+
+```text
+Scan
+ ↓
+Select SSID
+ ↓
+Authenticate
+ ↓
+Associate
+ ↓
+Establish security keys
+ ↓
+Obtain IP configuration
+ ↓
+Use network
+```
+
+---
+
+# 18. WI-FI MANAGEMENT FRAMES
+
+802.11 communication includes different frame categories.
+
+Three major categories:
+
+```text
+Management
+Control
+Data
+```
+
+### Management Frames
+
+Used to manage the wireless connection.
+
+Examples include:
+
+- Beacon
+- Probe Request
+- Probe Response
+- Authentication
+- Association Request
+- Association Response
+- Deauthentication
+- Disassociation
+
+---
+
+# 19. BEACON FRAME
+
+An AP periodically sends **beacon frames**.
+
+They can advertise information such as:
+
+- SSID
+- Supported capabilities
+- Supported rates
+- Security information
+- Channel-related information
+
+Conceptually:
+
+```text
+Access Point
+     ↓
+Beacon
+     ↓
+"Office-WiFi is available"
+```
+
+---
+
+# 20. PROBE REQUEST / RESPONSE
+
+A client can send a **Probe Request** to discover wireless networks.
+
+An AP can respond with a **Probe Response**.
+
+Simplified:
+
+```text
+Client                    AP
+  │                       │
+  │── Probe Request ──────>│
+  │<── Probe Response ─────│
+```
+
+---
+
+# 21. AUTHENTICATION VS ASSOCIATION
+
+These terms are often confused.
+
+### Authentication
+
+Establishes the authentication relationship required by the wireless security method.
+
+### Association
+
+Establishes the client's relationship with the AP so it can participate in the wireless network.
+
+Simplified:
+
+```text
+Authentication
+      ↓
+Association
+      ↓
+Security setup
+      ↓
+Network access
+```
+
+Exact details vary by security mode.
+
+---
+
+# 22. WI-FI SECURITY EVOLUTION
+
+Historically important security mechanisms:
+
+```text
+WEP
+ ↓
+WPA
+ ↓
+WPA2
+ ↓
+WPA3
+```
+
+Security improved significantly across these generations.
+
+---
+
+# 23. WEP
+
+**WEP = Wired Equivalent Privacy**
+
+WEP is an obsolete wireless security mechanism.
+
+Major problems include:
+
+- Weak cryptographic design
+- Small IV space
+- Key recovery attacks
+- Poor security by modern standards
+
+### Exam Point
+
+> **WEP should not be used for modern secure Wi-Fi deployments.**
+
+---
+
+# 24. WPA
+
+**WPA = Wi-Fi Protected Access**
+
+WPA was introduced as an improvement over WEP.
+
+It commonly used:
+
+```text
+TKIP
+```
+
+However, WPA/TKIP is now legacy technology and should not be selected for modern secure deployments.
+
+---
+
+# 25. WPA2
+
+**WPA2** significantly improved Wi-Fi security.
+
+It is commonly associated with:
+
+```text
+AES
+CCMP
+```
+
+Two major deployment models:
+
+### WPA2-Personal
+
+Uses a shared password/PSK-based model.
+
+```text
+User
+ ↓
+Wi-Fi Password
+ ↓
+WPA2-Personal
+```
+
+### WPA2-Enterprise
+
+Uses enterprise authentication infrastructure, commonly based on:
+
+```text
+802.1X
++
+EAP
++
+Authentication Server
+```
+
+---
+
+# 26. WPA3
+
+**WPA3** is the newer Wi-Fi security generation.
+
+Important improvements include:
+
+- Stronger password-based authentication design for Personal mode
+- Improved protection against offline password guessing
+- Enterprise security improvements
+- Better security defaults
+
+WPA3-Personal uses:
+
+> **SAE – Simultaneous Authentication of Equals**
+
+---
+
+# 27. WPA3-PERSONAL
+
+Instead of the older WPA2-PSK approach, WPA3-Personal uses **SAE**.
+
+Conceptually:
+
+```text
+Client                    AP
+  │                       │
+  │──── SAE exchange ─────│
+  │                       │
+  │── Secure key setup ───│
+  │                       │
+  └──── Secure Wi-Fi ─────┘
+```
+
+### Important
+
+SAE improves resistance to certain offline password-guessing attacks compared with traditional WPA2-PSK authentication.
+
+---
+
+# 28. WPA2 VS WPA3
+
+| Feature | WPA2-Personal | WPA3-Personal |
+|---|---|---|
+| Authentication | PSK-based | SAE |
+| Security | Strong when configured properly | Improved |
+| Offline password attack resistance | Weaker | Improved |
+| Modern recommendation | Still widely deployed | Preferred where supported |
+
+---
+
+# 29. WPA2-ENTERPRISE
+
+Enterprise Wi-Fi can use:
+
+```text
+802.1X
++
+EAP
++
+RADIUS/authentication server
+```
+
+Architecture:
+
+```text
+Wireless Client
+      │
+      ▼
+     AP
+      │
+      ▼
+802.1X / EAP
+      │
+      ▼
+Authentication Server
+      │
+      ▼
+    Result
+```
+
+This allows centralized authentication instead of one shared Wi-Fi password.
+
+---
+
+# 30. PERSONAL VS ENTERPRISE
+
+| Personal | Enterprise |
+|---|---|
+| Shared credential model | Individual/user/device authentication |
+| Easier for homes/small networks | Suitable for organizations |
+| WPA2-PSK / WPA3-SAE | 802.1X/EAP |
+| One shared secret is common | Centralized authentication |
+
+### Memory
+
+> **Personal = Password**
+
+> **Enterprise = Identity**
+
+---
+
+# 31. RADIUS
+
+**RADIUS** is commonly used for centralized network authentication, authorization, and accounting.
+
+In enterprise Wi-Fi:
+
+```text
+Client
+ ↓
+AP
+ ↓
+RADIUS
+ ↓
+Authentication decision
+```
+
+The AP typically acts as the network access point while the authentication server makes the centralized authentication decision.
+
+---
+
+# 32. EAP
+
+**EAP = Extensible Authentication Protocol**
+
+EAP is a framework supporting multiple authentication methods.
+
+Examples include:
+
+- EAP-TLS
+- PEAP
+- EAP-TTLS
+
+### EAP-TLS
+
+Uses certificates and provides strong mutual authentication when properly deployed.
+
+---
+
+# 33. ENCRYPTION VS AUTHENTICATION
+
+Very important distinction.
+
+### Authentication
+
+> **Who is allowed to connect?**
+
+### Encryption
+
+> **How is communication protected from unauthorized reading?**
+
+Example:
+
+```text
+Authentication
+     ↓
+Verify client
+     ↓
+Key establishment
+     ↓
+Encrypted communication
+```
+
+---
+
+# 34. WPA SECURITY COMPONENTS
+
+You may encounter:
+
+```text
+WEP
+TKIP
+AES
+CCMP
+GCMP
+PSK
+SAE
+802.1X
+EAP
+RADIUS
+```
+
+Do not treat all of these as the same type of technology.
+
+---
+
+# 35. AES
+
+**AES = Advanced Encryption Standard**
+
+AES is a symmetric encryption algorithm.
+
+Used in many modern security systems, including Wi-Fi security mechanisms.
+
+### Memory
+
+> **AES = Encryption algorithm**
+
+---
+
+# 36. CCMP
+
+**CCMP = Counter Mode with Cipher Block Chaining Message Authentication Code Protocol**
+
+It is a security protocol based on AES that provides confidentiality and integrity protection for Wi-Fi data.
+
+Common association:
+
+```text
+WPA2
+ ↓
+AES-CCMP
+```
+
+---
+
+# 37. GCMP
+
+**GCMP = Galois/Counter Mode Protocol**
+
+Modern Wi-Fi generations can use AES-based authenticated encryption mechanisms including GCMP.
+
+For basic exam preparation:
+
+```text
+WPA2 → AES-CCMP
+Modern Wi-Fi → AES-based authenticated encryption
+```
+
+---
+
+# 38. TKIP
+
+**TKIP = Temporal Key Integrity Protocol**
+
+TKIP was introduced with WPA as an improvement over WEP.
+
+However:
+
+> TKIP is legacy and should not be used in modern secure configurations.
+
+---
+
+# 39. PSK
+
+**PSK = Pre-Shared Key**
+
+A shared secret is configured on the wireless network and clients.
+
+Example:
+
+```text
+SSID: Office-WiFi
+
+Password:
+[shared secret]
+```
+
+WPA2-Personal commonly uses PSK.
+
+---
+
+# 40. SAE
+
+**SAE = Simultaneous Authentication of Equals**
+
+Used by WPA3-Personal.
+
+Key benefit:
+
+> Better protection against certain offline password-guessing attacks.
+
+### Memory
+
+> **WPA2 → PSK**
+
+> **WPA3 → SAE**
+
+---
+
+# 41. WI-FI HANDSHAKE CONCEPT
+
+With WPA2-Personal, a client and AP perform a **4-way handshake** as part of establishing session keys.
+
+Simplified:
+
+```text
+Client                         AP
+  │                            │
+  │<──── Message 1 ────────────│
+  │──── Message 2 ────────────>│
+  │<──── Message 3 ────────────│
+  │──── Message 4 ────────────>│
+  │                            │
+  └──── Secure communication ──┘
+```
+
+The handshake helps establish and confirm the keys used to protect the connection.
+
+---
+
+# 42. IMPORTANT HANDSHAKE POINT
+
+The 4-way handshake is **not simply "the Wi-Fi password being sent over the air."**
+
+The password is not transmitted as plaintext through the handshake.
+
+Security depends on the protocol, credential strength, configuration, and implementation.
+
+---
+
+# 43. COMMON WIRELESS SECURITY THREATS
+
+Conceptually important attacks include:
+
+- Eavesdropping
+- Rogue access points
+- Evil twin attacks
+- Deauthentication attacks
+- Weak password attacks
+- Misconfiguration
+- Credential theft
+- Unsecured networks
+- Legacy protocol attacks
+- Wireless jamming/interference
+- Unauthorized access points
+
+---
+
+# 44. EAVESDROPPING
+
+An attacker may attempt to capture wireless traffic.
+
+Modern encryption helps protect properly secured Wi-Fi traffic.
+
+However:
+
+> Encryption does not make the existence of the wireless network invisible.
+
+---
+
+# 45. ROGUE ACCESS POINT
+
+A **rogue AP** is an unauthorized wireless access point connected to or operating within an organization's environment.
+
+Example:
+
+```text
+Company LAN
+     │
+     ├── Authorized AP
+     │
+     └── Unauthorized AP ← Rogue AP
+```
+
+Risk:
+
+- Unauthorized network access
+- Data interception
+- Bypass of security controls
+
+---
+
+# 46. EVIL TWIN
+
+An **evil twin** is a malicious AP designed to impersonate a legitimate wireless network.
+
+Example:
+
+```text
+Legitimate:
+Company-WiFi
+
+Fake:
+Company-WiFi
+```
+
+A user may accidentally connect to the fake network.
+
+### Memory
+
+> **Evil Twin = Fake Wi-Fi pretending to be the real Wi-Fi**
+
+---
+
+# 47. EVIL TWIN VS ROGUE AP
+
+| Rogue AP | Evil Twin |
+|---|---|
+| Unauthorized AP | AP impersonating another network |
+| May be connected to organizational infrastructure | Designed to imitate a legitimate SSID |
+| Main issue = unauthorized wireless access | Main issue = deception/impersonation |
+
+An AP can potentially be both rogue and an evil twin depending on the circumstances.
+
+---
+
+# 48. DEAUTHENTICATION ATTACK
+
+802.11 management traffic includes deauthentication frames.
+
+A malicious actor may abuse deauthentication mechanisms to disrupt a client's wireless connection.
+
+Conceptually:
+
+```text
+Client ←── Deauthentication ── Fake/attacker source
+   ↓
+Connection interrupted
+```
+
+Potential purpose:
+
+- Denial of service
+- Disconnection
+- Disruption
+- In some attack scenarios, forcing reconnection
+
+Modern Wi-Fi protections can improve resistance to certain management-frame attacks.
+
+---
+
+# 49. PROTECTED MANAGEMENT FRAMES
+
+**PMF = Protected Management Frames**
+
+Also associated with:
+
+```text
+802.11w
+```
+
+PMF helps protect certain management frames from spoofing/tampering.
+
+WPA3 requires stronger management-frame protection expectations than legacy Wi-Fi configurations.
+
+---
+
+# 50. WIRELESS JAMMING
+
+Jamming is intentional interference designed to disrupt wireless communication.
+
+```text
+Normal signal
+     +
+Interference
+     ↓
+Communication disrupted
+```
+
+This is primarily an availability attack.
+
+### CIA Mapping
+
+```text
+Jamming → Availability
+```
+
+---
+
+# 51. WIRELESS ATTACKS AND CIA TRIAD
+
+| Attack | Main Security Property Affected |
+|---|---|
+| Eavesdropping | Confidentiality |
+| Unauthorized access | Confidentiality/Integrity |
+| Evil Twin | Confidentiality/Integrity |
+| Deauthentication | Availability |
+| Jamming | Availability |
+| Credential theft | Confidentiality |
+| Rogue AP | Confidentiality/Integrity |
+
+---
+
+# 52. OPEN WI-FI
+
+Open Wi-Fi generally does not require a shared Wi-Fi password for network access.
+
+Risks can include:
+
+- Unauthorized network use
+- Traffic exposure depending on application-layer protections
+- Fake AP attacks
+- User tracking
+- Malicious redirection
+
+### Important
+
+HTTPS still provides application-layer protection for properly configured connections.
+
+---
+
+# 53. HIDDEN SSID
+
+Some administrators disable SSID broadcasting.
+
+This is sometimes called:
+
+> **Hidden SSID**
+
+But:
+
+> Hidden SSID is not strong security.
+
+It should not replace:
+
+- WPA2/WPA3
+- Strong credentials
+- Network segmentation
+- Monitoring
+- Proper authentication
+
+---
+
+# 54. MAC ADDRESS FILTERING
+
+An administrator can configure an AP to allow only specific MAC addresses.
+
+However:
+
+> MAC filtering should not be considered strong authentication.
+
+MAC addresses can be observed and may be spoofed.
+
+Use proper wireless security instead.
+
+---
+
+# 55. WI-FI PASSWORD SECURITY
+
+For Personal Wi-Fi:
+
+Use:
+
+- Long
+- Unique
+- Random
+- Hard-to-guess
+
+credentials.
+
+Avoid:
+
+```text
+password123
+companyname
+admin123
+mobile number
+```
+
+A strong passphrase reduces the risk of password guessing.
+
+---
+
+# 56. WIRELESS NETWORK SEGMENTATION
+
+Organizations should avoid putting every wireless device on the same unrestricted network.
+
+Example:
+
+```text
+                 Firewall
+                    │
+        ┌───────────┼───────────┐
+        │           │           │
+     Staff Wi-Fi  Guest Wi-Fi  IoT
+        │           │           │
+     Internal     Internet    Restricted
+      Access       Only       Network
+```
+
+### Benefit
+
+If one wireless segment is compromised, segmentation can limit lateral movement.
+
+---
+
+# 57. GUEST WI-FI
+
+Guest Wi-Fi should generally be separated from internal resources.
+
+Example:
+
+```text
+Guest Wi-Fi
+    ↓
+Internet
+```
+
+rather than:
+
+```text
+Guest Wi-Fi
+    ↓
+Internal Servers
+```
+
+---
+
+# 58. WIRELESS SECURITY BEST PRACTICES
+
+```text
+✓ Prefer WPA3 where supported
+✓ Use WPA2-AES/CCMP when WPA3 is unavailable
+✓ Avoid WEP
+✓ Avoid legacy TKIP
+✓ Use strong unique passwords
+✓ Use enterprise authentication for suitable organizations
+✓ Enable appropriate PMF
+✓ Segment guest networks
+✓ Disable unnecessary features
+✓ Update AP firmware
+✓ Monitor rogue APs
+✓ Protect AP administration
+✓ Change default administrator credentials
+✓ Use HTTPS/secure management
+✓ Keep network equipment patched
+```
+
+---
+
+# 59. AP ADMINISTRATION SECURITY
+
+The wireless password and AP administrator password are different concepts.
+
+Secure the management interface using:
+
+- Strong administrator credentials
+- MFA where supported
+- HTTPS/secure management
+- Restricted management access
+- Firmware updates
+- Network segmentation
+
+---
+
+# 60. WI-FI SECURITY ARCHITECTURE
+
+A secure enterprise deployment can look like:
+
+```text
+                    Internet
+                       │
+                    Firewall
+                       │
+                ┌──────┴──────┐
+                │             │
+          Internal LAN      Guest VLAN
+                │             │
+           RADIUS/Auth       Internet
+                │
+          Wireless APs
+                │
+        ┌───────┼───────┐
+        │       │       │
+      Staff    Staff   IoT
+     Device   Device  Devices
+```
+
+---
+
+# 61. VLANs AND WI-FI
+
+VLANs can separate logical networks.
+
+Example:
+
+```text
+VLAN 10 → Staff
+VLAN 20 → Guest
+VLAN 30 → IoT
+VLAN 40 → Management
+```
+
+Wireless SSIDs can be mapped to different VLANs depending on the network design.
+
+---
+
+# 62. WIRELESS SECURITY TOOLS
+
+Common defensive/assessment tools include:
+
+- Wireshark
+- Kismet
+- Aircrack-ng suite
+- Nmap
+- Wifite
+- Wireless controller dashboards
+
+### Important
+
+Use wireless assessment tools only on networks you own or have explicit permission to test.
+
+---
+
+# 63. WIRESHARK AND WI-FI
+
+Wireshark can analyze captured wireless traffic when the capture environment and encryption/session context permit appropriate analysis.
+
+It can help examine:
+
+- 802.11 frames
+- Management traffic
+- Authentication/association
+- DHCP
+- DNS
+- TCP/IP traffic
+
+---
+
+# 64. KISMET
+
+Kismet is a wireless network detector/sniffer and monitoring tool.
+
+It can help identify:
+
+- Access points
+- Wireless clients
+- Channels
+- SSIDs
+- Wireless activity
+
+It is useful for authorized wireless assessments and monitoring.
+
+---
+
+# 65. AIRCRACK-NG
+
+Aircrack-ng is a suite of wireless security assessment tools.
+
+It can be used for authorized:
+
+- Wireless monitoring
+- Packet capture
+- Security auditing
+- Analysis
+
+Use it only in controlled environments or with explicit authorization.
+
+---
+
+# 66. WI-FI PACKET CATEGORIES
+
+802.11 frames:
+
+```text
+Management
+Control
+Data
+```
+
+### Management
+
+Network management and connection setup.
+
+### Control
+
+Helps coordinate access to the wireless medium.
+
+### Data
+
+Carries higher-layer data.
+
+### Memory
+
+> **M-C-D = Manage → Control → Data**
+
+---
+
+# 67. IMPORTANT WI-FI MANAGEMENT FRAMES
+
+| Frame | Purpose |
+|---|---|
+| Beacon | AP advertises network information |
+| Probe Request | Client searches for networks |
+| Probe Response | AP responds to discovery |
+| Authentication | Wireless authentication exchange |
+| Association Request | Client requests association |
+| Association Response | AP responds |
+| Deauthentication | Ends authentication relationship |
+| Disassociation | Ends association |
+
+---
+
+# 68. WI-FI SECURITY COMPARISON
+
+| Technology | Status |
+|---|---|
+| WEP | Obsolete/insecure |
+| WPA/TKIP | Legacy |
+| WPA2-AES/CCMP | Strong and widely deployed |
+| WPA3-SAE | Modern/preferred where supported |
+| WPA2-Enterprise | Strong enterprise option |
+| WPA3-Enterprise | Modern enterprise security option |
+
+---
+
+# 69. IMPORTANT DIFFERENCES
+
+### WEP vs WPA2
+
+```text
+WEP
+→ Old
+→ Weak
+→ Do not use
+
+WPA2-AES
+→ Modern relative to WEP
+→ Strong when correctly configured
+```
+
+### WPA2 vs WPA3
+
+```text
+WPA2-Personal → PSK
+WPA3-Personal → SAE
+```
+
+---
+
+# 70. COMMON EXAM CONFUSIONS
+
+### SSID vs BSSID
+
+```text
+SSID  → Network name
+BSSID → Specific AP/BSS identifier
+```
+
+### Authentication vs Encryption
+
+```text
+Authentication → Who can connect?
+Encryption     → How is data protected?
+```
+
+### WPA2 vs WPA3
+
+```text
+WPA2 → PSK
+WPA3 → SAE
+```
+
+### Personal vs Enterprise
+
+```text
+Personal   → Shared/password-based
+Enterprise → 802.1X/EAP/RADIUS
+```
+
+---
+
+# 71. SCENARIO-BASED MCQs
+
+## Q1
+
+What does SSID identify?
+
+A. Encryption algorithm  
+B. Wi-Fi network name/identifier  
+C. IP address  
+D. DNS server
+
+**Answer: B**
+
+---
+
+## Q2
+
+Which technology is obsolete and should not be used for modern Wi-Fi security?
+
+A. WPA3  
+B. WPA2-AES  
+C. WEP  
+D. WPA2-Enterprise
+
+**Answer: C**
+
+---
+
+## Q3
+
+WPA3-Personal primarily uses which authentication mechanism?
+
+A. WEP  
+B. TKIP  
+C. SAE  
+D. FTP
+
+**Answer: C**
+
+---
+
+## Q4
+
+WPA2-Personal is commonly associated with:
+
+A. PSK  
+B. RADIUS only  
+C. DNSSEC  
+D. FTP
+
+**Answer: A**
+
+---
+
+## Q5
+
+Which protocol is commonly associated with centralized enterprise Wi-Fi authentication?
+
+A. RADIUS  
+B. FTP  
+C. DNS  
+D. SMTP
+
+**Answer: A**
+
+---
+
+## Q6
+
+What does EAP provide?
+
+A. A framework for authentication methods  
+B. File compression  
+C. DNS resolution  
+D. IP addressing
+
+**Answer: A**
+
+---
+
+## Q7
+
+What is an evil twin?
+
+A. Two legitimate APs using different channels  
+B. A malicious AP impersonating a legitimate network  
+C. A backup router  
+D. A VLAN
+
+**Answer: B**
+
+---
+
+## Q8
+
+What is the main purpose of a rogue AP attack?
+
+A. Provide authorized enterprise access  
+B. Introduce an unauthorized wireless access point  
+C. Encrypt DNS  
+D. Improve Wi-Fi speed
+
+**Answer: B**
+
+---
+
+## Q9
+
+What is the primary effect of wireless jamming?
+
+A. Confidentiality improvement  
+B. Availability disruption  
+C. Password encryption  
+D. Authentication
+
+**Answer: B**
+
+---
+
+## Q10
+
+Which cookie-like security concept has a direct Wi-Fi equivalent?
+
+A. None; Wi-Fi security uses different mechanisms  
+B. SameSite  
+C. HttpOnly  
+D. CSP
+
+**Answer: A**
+
+---
+
+# 72. HARD SCENARIO QUESTIONS
+
+## Q11
+
+An organization uses WPA2-Personal with a short password such as a common dictionary word.
+
+The encryption algorithm is configured correctly.
+
+What is the major concern?
+
+A. Weak credential can make password guessing easier  
+B. AES automatically makes any password secure  
+C. SSID is hidden  
+D. VLANs are impossible
+
+**Answer: A**
+
+---
+
+## Q12
+
+A company wants every employee to authenticate individually rather than sharing one Wi-Fi password.
+
+Which architecture is most appropriate?
+
+A. WPA2/WPA3 Enterprise with 802.1X/EAP and centralized authentication  
+B. WEP  
+C. Hidden SSID  
+D. MAC filtering only
+
+**Answer: A**
+
+---
+
+## Q13
+
+An attacker creates an AP named exactly like the organization's legitimate Wi-Fi.
+
+What is this commonly called?
+
+A. Evil twin  
+B. DNS poisoning  
+C. SQL Injection  
+D. Directory Traversal
+
+**Answer: A**
+
+---
+
+## Q14
+
+A wireless administrator says:
+
+> "We hid our SSID, so attackers cannot discover our network."
+
+What is the correct response?
+
+A. Correct  
+B. Hidden SSID is not a strong security control and should not replace proper wireless security  
+C. SSID hiding provides WPA3  
+D. SSID hiding encrypts all traffic
+
+**Answer: B**
+
+---
+
+## Q15
+
+An administrator uses MAC filtering as the only wireless security mechanism.
+
+Why is this inadequate?
+
+A. MAC addresses can be observed and spoofed  
+B. MAC addresses cannot exist on Wi-Fi  
+C. MAC filtering encrypts passwords  
+D. MAC filtering creates WPA3
+
+**Answer: A**
+
+---
+
+## Q16
+
+An employee connects to a Wi-Fi network called:
+
+```text
+Company-Free-WiFi
+```
+
+It has a stronger signal than the normal company network.
+
+The AP is unauthorized.
+
+What should the security team investigate?
+
+A. Rogue/Evil Twin AP  
+B. SQL Injection  
+C. Directory Traversal  
+D. DNS MX records
+
+**Answer: A**
+
+---
+
+## Q17
+
+An attacker sends forged deauthentication traffic and wireless clients repeatedly disconnect.
+
+What security property is primarily affected?
+
+A. Availability  
+B. Confidentiality only  
+C. Integrity only  
+D. Authentication database integrity
+
+**Answer: A**
+
+---
+
+## Q18
+
+A security engineer recommends WPA3-Personal instead of WPA2-Personal where all required devices support it.
+
+What is one important reason?
+
+A. WPA3-Personal uses SAE and improves resistance to certain offline password-guessing attacks  
+B. WPA3 removes the need for authentication  
+C. WPA3 disables encryption  
+D. WPA3 uses WEP
+
+**Answer: A**
+
+---
+
+## Q19
+
+An organization wants guest users to access the Internet but not internal servers.
+
+What is an appropriate control?
+
+A. Network segmentation/firewall policy  
+B. Hidden SSID only  
+C. MAC filtering only  
+D. WEP
+
+**Answer: A**
+
+---
+
+## Q20
+
+An administrator says:
+
+> "Our Wi-Fi uses HTTPS, so we don't need Wi-Fi encryption."
+
+What is wrong?
+
+A. HTTPS protects individual application connections but does not replace wireless network security controls  
+B. HTTPS automatically creates WPA3  
+C. HTTPS prevents rogue APs  
+D. HTTPS disables radio communication
+
+**Answer: A**
+
+---
+
+# 73. HARDER EXAM SCENARIOS
+
+## Q21
+
+A company uses WPA3-Personal, but employees use the same weak password everywhere.
+
+What remains a major risk?
+
+A. Credential/password weakness  
+B. WPA3 becomes WEP  
+C. SSID becomes encrypted  
+D. RADIUS is automatically enabled
+
+**Answer: A**
+
+---
+
+## Q22
+
+An organization deploys WPA2-Enterprise with 802.1X but does not properly validate server certificates in a client authentication method.
+
+What should security engineers investigate?
+
+A. Authentication-server impersonation and credential exposure risks  
+B. SQL Injection  
+C. Directory Traversal  
+D. DNS MX configuration
+
+**Answer: A**
+
+---
+
+## Q23
+
+A wireless network uses WPA2-AES correctly. An attacker captures wireless traffic.
+
+What is the correct conclusion?
+
+A. Capturing traffic automatically reveals all plaintext  
+B. Proper encryption is designed to prevent unauthorized reading of protected traffic  
+C. WPA2 provides no confidentiality  
+D. The attacker automatically knows the Wi-Fi password
+
+**Answer: B**
+
+---
+
+## Q24
+
+A security team detects an unauthorized AP physically connected to the internal corporate network.
+
+Why is this particularly serious?
+
+A. It may create an unauthorized bridge into the internal network  
+B. It automatically enables WPA3  
+C. It only affects Wi-Fi speed  
+D. It is always harmless
+
+**Answer: A**
+
+---
+
+## Q25
+
+A wireless network is configured with strong WPA3 security, but the AP's administrator interface uses default credentials.
+
+What is the issue?
+
+A. Wireless encryption does not protect the AP's management account from weak/default credentials  
+B. WPA3 automatically protects all administrator accounts  
+C. Default credentials are safe if the SSID is hidden  
+D. WPA3 disables management interfaces
+
+**Answer: A**
+
+---
+
+# 74. PRACTICAL LAB – SAFE WIRELESS ANALYSIS
+
+Only perform wireless testing on equipment/networks you own or have explicit authorization to assess.
+
+## Task 1 – Identify Your Adapter
+
+Linux:
+
+```bash
+ip link
+```
+
+or:
+
+```bash
+iw dev
+```
+
+Windows:
+
+```powershell
+netsh wlan show interfaces
+```
+
+---
+
+## Task 2 – View Wireless Information
+
+Windows:
+
+```powershell
+netsh wlan show interfaces
+```
+
+Look for:
+
+```text
+SSID
+BSSID
+Radio type
+Channel
+Signal
+Authentication
+Cipher
+```
+
+---
+
+## Task 3 – Examine Wi-Fi Configuration
+
+Record:
+
+```text
+SSID
+BSSID
+Band
+Channel
+Authentication
+Cipher
+Signal strength
+```
+
+Do not attempt to bypass or attack networks you do not own.
+
+---
+
+# 75. WIRESHARK PRACTICE
+
+In an authorized capture, identify:
+
+```text
+Beacon
+Probe Request
+Probe Response
+Authentication
+Association
+Data frames
+Deauthentication
+Disassociation
+```
+
+Try to understand the sequence:
+
+```text
+Beacon
+ ↓
+Probe/Discovery
+ ↓
+Authentication
+ ↓
+Association
+ ↓
+Security establishment
+ ↓
+Network communication
+```
+
+---
+
+# 76. WIRELESS SECURITY CHECKLIST
+
+For a home/enterprise AP:
+
+```text
+□ WPA3 preferred where supported
+□ WPA2-AES/CCMP if WPA3 unavailable
+□ No WEP
+□ No legacy TKIP
+□ Strong unique Wi-Fi credential
+□ Strong AP administrator credential
+□ Firmware updated
+□ Management access restricted
+□ Guest network separated
+□ IoT devices segmented where appropriate
+□ Rogue AP monitoring
+□ Appropriate PMF configuration
+□ Secure DNS/HTTPS for applications
+□ Logging and monitoring
+```
+
+---
+
+# 77. DAY 29 QUICK REVISION
+
+### Wi-Fi
+
+> Wireless LAN technology based primarily on IEEE 802.11.
+
+### SSID
+
+> Wi-Fi network name.
+
+### BSSID
+
+> Identifier for a specific basic service set/AP radio.
+
+### AP
+
+> Provides wireless network access.
+
+### WEP
+
+> Obsolete and insecure.
+
+### WPA
+
+> Legacy improvement over WEP.
+
+### WPA2
+
+> Common modern security generation; WPA2-Personal commonly uses PSK and AES-CCMP.
+
+### WPA3
+
+> Newer security generation; WPA3-Personal uses SAE.
+
+### Personal
+
+> Password/shared-secret model.
+
+### Enterprise
+
+> 802.1X/EAP with centralized authentication such as RADIUS.
+
+### AES
+
+> Symmetric encryption algorithm.
+
+### CCMP
+
+> AES-based Wi-Fi security protocol commonly associated with WPA2.
+
+### TKIP
+
+> Legacy WPA security protocol; avoid in modern configurations.
+
+### SAE
+
+> WPA3-Personal authentication mechanism.
+
+### Evil Twin
+
+> Fake AP impersonating a legitimate Wi-Fi network.
+
+### Rogue AP
+
+> Unauthorized access point.
+
+### Jamming
+
+> Wireless interference causing availability problems.
+
+---
+
+# 78. MEMORY TRICKS
+
+## Wi-Fi Security Evolution
+
+> **WEP → WPA → WPA2 → WPA3**
+
+Think:
+
+```text
+Weak → Better → Strong → Newer
+```
+
+---
+
+## WPA2 vs WPA3
+
+> **WPA2 = PSK**
+
+> **WPA3 = SAE**
+
+---
+
+## Enterprise Wi-Fi
+
+> **EAP → RADIUS → Enterprise**
+
+---
+
+## Wi-Fi Frames
+
+> **M-C-D**
+
+**M** → Management
+
+**C** → Control
+
+**D** → Data
+
+---
+
+## Wi-Fi Identity
+
+> **SSID = Name**
+
+> **BSSID = AP Identifier**
+
+---
+
+## Frequency
+
+> **2.4 → Range**
+
+> **5 → More channels**
+
+> **6 → New spectrum/newer Wi-Fi**
+
+---
+
+# 79. MOST IMPORTANT EXAM QUESTIONS
+
+### 1. What is Wi-Fi?
+
+Wireless LAN technology based primarily on IEEE 802.11.
+
+### 2. What is SSID?
+
+The Wi-Fi network name/identifier.
+
+### 3. What is BSSID?
+
+An identifier associated with a specific basic service set/AP radio.
+
+### 4. What is WEP?
+
+An obsolete and insecure wireless security mechanism.
+
+### 5. What is WPA2?
+
+A Wi-Fi security generation commonly using AES-CCMP.
+
+### 6. What is WPA3?
+
+A newer Wi-Fi security generation with stronger security mechanisms, including SAE for Personal mode.
+
+### 7. What is SAE?
+
+Simultaneous Authentication of Equals, used by WPA3-Personal.
+
+### 8. What is PSK?
+
+Pre-Shared Key, commonly used in Personal Wi-Fi security.
+
+### 9. What is WPA2-Enterprise?
+
+Enterprise Wi-Fi using 802.1X/EAP and centralized authentication infrastructure.
+
+### 10. What is RADIUS?
+
+A protocol commonly used for centralized authentication, authorization and accounting.
+
+### 11. What is an Evil Twin?
+
+A malicious AP impersonating a legitimate wireless network.
+
+### 12. What is a Rogue AP?
+
+An unauthorized wireless access point.
+
+### 13. What is deauthentication?
+
+An 802.11 management mechanism for ending authentication; maliciously spoofed deauthentication can disrupt clients.
+
+### 14. What is wireless jamming?
+
+Intentional interference designed to disrupt wireless communication.
+
+### 15. Why is hidden SSID not sufficient?
+
+Because hiding the network name does not provide strong authentication or encryption.
+
+---
+
+# 80. DAY 29 MASTER FORMULA
+
+```text
+WI-FI
+  ↓
+802.11
+  ↓
+AP + CLIENT
+  ↓
+SSID / BSSID
+  ↓
+AUTHENTICATION
+  ↓
+WPA2 / WPA3
+  ↓
+ENCRYPTION
+  ↓
+SECURE COMMUNICATION
+```
+
+---
+
+# ⭐ ONE-LINE EXAM ANSWER
+
+> **Wireless network security protects Wi-Fi communications and access using IEEE 802.11 security mechanisms such as WPA2/WPA3, strong authentication, encryption, secure configuration, network segmentation, management-frame protection, monitoring, and protection against threats such as rogue access points, evil twins, deauthentication attacks, and jamming.**
+
+---
+
+# 🏆 DAY 29 FINAL CHECKPOINT
+
+Before moving to Day 30, make sure you can explain without notes:
+
+```text
+□ What is Wi-Fi?
+□ What is IEEE 802.11?
+□ What is an Access Point?
+□ What is SSID?
+□ What is BSSID?
+□ What are 2.4 GHz, 5 GHz and 6 GHz?
+□ What are Wi-Fi 4/5/6/6E/7?
+□ What are management/control/data frames?
+□ What is a beacon?
+□ What is a probe request?
+□ Authentication vs association?
+□ What is WEP?
+□ Why is WEP insecure?
+□ What is WPA?
+□ What is WPA2?
+□ What is WPA3?
+□ WPA2-Personal vs WPA2-Enterprise?
+□ What is PSK?
+□ What is SAE?
+□ What is AES?
+□ What is CCMP?
+□ What is TKIP?
+□ What is 802.1X?
+□ What is EAP?
+□ What is RADIUS?
+□ What is a rogue AP?
+□ What is an evil twin?
+□ What is deauthentication?
+□ What is PMF?
+□ What is wireless jamming?
+□ Why is hidden SSID not security?
+□ Why is MAC filtering weak?
+□ Why is network segmentation important?
+```
+
+## 🔥 FINAL MEMORY
+
+```text
+SSID       → NAME
+BSSID      → AP ID
+
+WEP        → OBSOLETE
+WPA        → LEGACY
+WPA2       → PSK + AES/CCMP
+WPA3       → SAE
+
+PERSONAL   → PASSWORD
+ENTERPRISE → 802.1X + EAP + RADIUS
+
+EVIL TWIN  → FAKE AP
+ROGUE AP   → UNAUTHORIZED AP
+JAMMING    → AVAILABILITY
+DEAUTH     → DISCONNECTION
+```
+
+**Golden Rule:** Use wireless assessment tools only on networks and devices you own or have explicit authorization to test. For exams, remember: **WPA2/WPA3 protect the wireless link; HTTPS/TLS protects application-layer communication. They are complementary, not interchangeable.**

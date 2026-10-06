@@ -1,0 +1,979 @@
+# DAY 3 – OPERATING SYSTEM FUNDAMENTALS
+## Linux and Windows for Cybersecurity
+
+## 1. What is an Operating System?
+
+An **Operating System (OS)** is system software that manages computer hardware and provides services for applications and users.
+
+### Main Functions of an OS
+
+- Process management
+- Memory management
+- File management
+- User management
+- Device management
+- Network management
+- Security and access control
+
+### Examples
+
+**Windows:** Windows 10, Windows 11, Windows Server
+
+**Linux:** Ubuntu, Debian, Fedora, Kali Linux, Rocky Linux
+
+---
+
+# 2. Why Operating Systems Matter in Cybersecurity
+
+Cybersecurity professionals need to understand operating systems because:
+
+- Servers run operating systems.
+- Applications run on operating systems.
+- User accounts and permissions are managed by the OS.
+- Logs are stored by the OS.
+- Security controls are implemented at the OS level.
+- Attackers may target OS vulnerabilities.
+- Security tools often interact directly with the OS.
+
+---
+
+# 3. Kernel
+
+The **kernel** is the core component of an operating system.
+
+It manages communication between:
+
+**Applications ↔ Kernel ↔ Hardware**
+
+### Main responsibilities
+
+- CPU/process management
+- Memory management
+- Hardware/device management
+- System calls
+- File-system operations
+- Network operations
+
+---
+
+# 4. Process
+
+A **process** is a program that is currently running.
+
+Example:
+
+Opening a browser creates one or more processes.
+
+### Process vs Program
+
+**Program** → Stored executable/application.
+
+**Process** → Running instance of that program.
+
+### Cybersecurity Importance
+
+Security professionals monitor processes to identify:
+
+- Unknown programs
+- Suspicious processes
+- High resource usage
+- Unexpected child processes
+- Potential malware activity
+
+---
+
+# 5. Thread
+
+A **thread** is a unit of execution within a process.
+
+A single process can contain multiple threads.
+
+### Simple Relationship
+
+**Application → Process → Threads**
+
+---
+
+# 6. File System
+
+A **file system** organizes and manages files and directories on storage.
+
+### Windows
+
+Common file systems:
+
+- NTFS
+- exFAT
+- FAT32
+
+### Linux
+
+Common file systems include:
+
+- ext4
+- XFS
+- Btrfs
+
+---
+
+# 7. Windows File System Basics
+
+Windows commonly uses drive letters.
+
+Example:
+
+```text
+C:\
+```
+
+Important directories include:
+
+```text
+C:\Windows
+C:\Users
+C:\Program Files
+C:\ProgramData
+```
+
+### User profile
+
+Typically:
+
+```text
+C:\Users\<username>
+```
+
+---
+
+# 8. Linux File System Basics
+
+Linux uses a single directory tree beginning at:
+
+```text
+/
+```
+
+This is called the **root directory**.
+
+Important directories:
+
+| Directory | Purpose |
+|---|---|
+| `/` | Root of filesystem |
+| `/home` | User home directories |
+| `/etc` | Configuration files |
+| `/var` | Variable data and logs |
+| `/tmp` | Temporary files |
+| `/usr` | User programs and utilities |
+| `/bin` | Essential commands |
+| `/root` | Home directory of root user |
+| `/dev` | Device files |
+| `/proc` | Process/kernel information |
+
+---
+
+# 9. Windows vs Linux
+
+| Windows | Linux |
+|---|---|
+| Developed by Microsoft | Open-source kernel ecosystem |
+| Uses drive letters | Uses a single filesystem hierarchy |
+| Commonly uses NTFS | Commonly uses ext4 |
+| PowerShell / CMD | Shells such as Bash |
+| `.exe`, `.msi` commonly used | Executable permission is separate from filename extension |
+| Registry is an important configuration database | Configuration is commonly stored in files |
+| Active Directory is common in enterprises | LDAP/Kerberos and other systems are common in Linux environments |
+
+---
+
+# 10. User Accounts
+
+An operating system uses user accounts to identify users and control access.
+
+### Common account types
+
+**Standard User**
+- Limited privileges
+- Used for normal activities
+
+**Administrator / Root**
+- High privileges
+- Can perform system-level operations
+
+### Linux
+
+The highly privileged account is:
+
+```text
+root
+```
+
+### Windows
+
+The highly privileged account type is:
+
+```text
+Administrator
+```
+
+---
+
+# 11. Authentication vs Authorization
+
+### Authentication
+
+**"Who are you?"**
+
+Verifies the identity of a user.
+
+Examples:
+
+- Password
+- PIN
+- Smart card
+- Biometric
+- Security key
+
+### Authorization
+
+**"What are you allowed to do?"**
+
+Determines what an authenticated user can access.
+
+### Easy Trick
+
+**Authentication = Identity**
+
+**Authorization = Permissions**
+
+---
+
+# 12. File Permissions
+
+Operating systems control who can access files.
+
+### Linux Permissions
+
+Three basic permission types:
+
+**r = Read**
+
+**w = Write**
+
+**x = Execute**
+
+Three main ownership categories:
+
+**User → Group → Others**
+
+Example:
+
+```text
+-rwxr-xr--
+```
+
+Meaning:
+
+- User → `rwx`
+- Group → `r-x`
+- Others → `r--`
+
+---
+
+# 13. Windows Permissions
+
+Windows commonly uses **NTFS permissions**.
+
+Common permissions include:
+
+- Read
+- Write
+- Modify
+- Read & Execute
+- Full Control
+
+Windows uses **Access Control Lists (ACLs)** to define permissions.
+
+---
+
+# 14. Least Privilege
+
+**Principle of Least Privilege (PoLP)** means users and processes should receive only the permissions necessary to perform their tasks.
+
+### Example
+
+A normal employee does not need administrator privileges to read email.
+
+### Security Benefit
+
+Reduces the impact of:
+
+- Malware
+- Account compromise
+- Unauthorized changes
+- Privilege escalation
+
+---
+
+# 15. Linux Basic Commands
+
+### `pwd`
+
+Shows the current directory.
+
+```bash
+pwd
+```
+
+### `ls`
+
+Lists files and directories.
+
+```bash
+ls
+```
+
+### `cd`
+
+Changes directory.
+
+```bash
+cd /home/user
+```
+
+### `mkdir`
+
+Creates a directory.
+
+```bash
+mkdir test
+```
+
+### `touch`
+
+Creates an empty file.
+
+```bash
+touch file.txt
+```
+
+### `cp`
+
+Copies files.
+
+```bash
+cp file.txt backup.txt
+```
+
+### `mv`
+
+Moves or renames files.
+
+```bash
+mv old.txt new.txt
+```
+
+### `cat`
+
+Displays file contents.
+
+```bash
+cat file.txt
+```
+
+### `less`
+
+Views a file page by page.
+
+```bash
+less file.txt
+```
+
+### `rm`
+
+Removes files.
+
+```bash
+rm file.txt
+```
+
+**Be careful:** deleting files from the command line can be irreversible.
+
+---
+
+# 16. Linux Security Commands
+
+### `whoami`
+
+Shows the current user.
+
+```bash
+whoami
+```
+
+### `id`
+
+Shows user and group information.
+
+```bash
+id
+```
+
+### `ps`
+
+Shows running processes.
+
+```bash
+ps
+```
+
+### `ss`
+
+Displays network sockets/connections.
+
+```bash
+ss
+```
+
+### `ip`
+
+Displays network configuration.
+
+```bash
+ip addr
+```
+
+### `chmod`
+
+Changes file permissions.
+
+```bash
+chmod
+```
+
+### `chown`
+
+Changes file ownership.
+
+```bash
+chown
+```
+
+### `sudo`
+
+Runs a command with elevated privileges when permitted.
+
+```bash
+sudo command
+```
+
+---
+
+# 17. Windows Command Prompt Basics
+
+### `dir`
+
+Lists files and directories.
+
+```cmd
+dir
+```
+
+### `cd`
+
+Changes directory.
+
+```cmd
+cd C:\Users
+```
+
+### `mkdir`
+
+Creates a directory.
+
+```cmd
+mkdir test
+```
+
+### `copy`
+
+Copies files.
+
+```cmd
+copy file.txt backup.txt
+```
+
+### `move`
+
+Moves files.
+
+```cmd
+move file.txt C:\Temp
+```
+
+### `del`
+
+Deletes files.
+
+```cmd
+del file.txt
+```
+
+### `whoami`
+
+Shows the current user.
+
+```cmd
+whoami
+```
+
+### `ipconfig`
+
+Displays IP configuration.
+
+```cmd
+ipconfig
+```
+
+### `tasklist`
+
+Shows running processes.
+
+```cmd
+tasklist
+```
+
+### `netstat`
+
+Displays network connections/statistics.
+
+```cmd
+netstat
+```
+
+---
+
+# 18. PowerShell
+
+**PowerShell** is Microsoft's powerful command-line shell and scripting environment.
+
+It is widely used for:
+
+- System administration
+- Automation
+- Security administration
+- Process management
+- Network management
+- Incident response
+
+Example:
+
+```powershell
+Get-Process
+```
+
+Shows running processes.
+
+```powershell
+Get-Service
+```
+
+Shows services.
+
+```powershell
+Get-NetIPConfiguration
+```
+
+Shows network configuration.
+
+---
+
+# 19. Windows Registry
+
+The **Windows Registry** is a hierarchical database used by Windows to store configuration information.
+
+It contains information related to:
+
+- Operating system configuration
+- Applications
+- Users
+- Hardware
+- Services
+
+### Security Importance
+
+Security professionals may examine the Registry during:
+
+- Incident response
+- Malware investigation
+- Configuration analysis
+- Forensics
+
+---
+
+# 20. Services
+
+A **service** is a background process that performs a system or application function.
+
+### Windows
+
+Examples can be viewed using:
+
+```powershell
+Get-Service
+```
+
+### Linux
+
+Modern Linux systems commonly use **systemd**.
+
+Example:
+
+```bash
+systemctl status
+```
+
+### Security Importance
+
+Unexpected or suspicious services may indicate:
+
+- Misconfiguration
+- Persistence
+- Unauthorized software
+- Malware
+
+---
+
+# 21. Logs
+
+**Logs** are records of events occurring on a system.
+
+Security professionals use logs to investigate:
+
+- Login attempts
+- Failed authentication
+- Process activity
+- Network activity
+- System changes
+- Security events
+
+### Windows
+
+Important security events can be viewed through:
+
+**Event Viewer**
+
+### Linux
+
+Common logs are stored under:
+
+```text
+/var/log/
+```
+
+Modern Linux systems may also use:
+
+```bash
+journalctl
+```
+
+---
+
+# 22. Windows Event Viewer
+
+**Event Viewer** is a Windows tool used to view system and security events.
+
+Important categories include:
+
+- Application
+- Security
+- System
+
+### Cybersecurity Use
+
+It can help investigate:
+
+- Failed logins
+- Successful logins
+- Service changes
+- System errors
+- Suspicious activity
+
+---
+
+# 23. Linux Log Files
+
+Common examples include:
+
+```text
+/var/log/auth.log
+/var/log/syslog
+```
+
+The exact log locations can vary by Linux distribution and logging configuration.
+
+---
+
+# 24. Environment Variables
+
+Environment variables store configuration information that programs can access.
+
+### Windows
+
+```cmd
+echo %PATH%
+```
+
+PowerShell:
+
+```powershell
+$env:PATH
+```
+
+### Linux
+
+```bash
+echo $PATH
+```
+
+### Security Importance
+
+Sensitive information such as credentials or API keys should **not** be unnecessarily stored in environment variables because they can sometimes be exposed through processes, logs, or configuration mistakes.
+
+---
+
+# 25. PATH
+
+`PATH` is an environment variable that tells the operating system where to search for executable programs.
+
+Example:
+
+When you type:
+
+```text
+python
+```
+
+the OS searches directories listed in `PATH` for the executable.
+
+---
+
+# 26. Processes and Services – Cybersecurity
+
+Security professionals monitor processes and services to detect abnormal behavior.
+
+### Questions to ask
+
+- What process is running?
+- Which user started it?
+- Where is the executable located?
+- What network connections does it make?
+- Is it expected?
+- When did it start?
+- What parent process launched it?
+
+---
+
+# 27. Privilege Escalation
+
+**Privilege escalation** occurs when an attacker or unauthorized process gains higher privileges than originally permitted.
+
+Two common types:
+
+### Vertical Privilege Escalation
+
+Low-privileged user → Administrator/root
+
+### Horizontal Privilege Escalation
+
+One user → Another user's resources at a similar privilege level
+
+### Security Goal
+
+Prevent unauthorized users or processes from gaining additional privileges.
+
+---
+
+# 28. Common OS Security Controls
+
+Operating systems provide several security mechanisms:
+
+- User authentication
+- File permissions
+- Access control
+- Firewalls
+- Security updates
+- Antivirus/endpoint protection
+- Logging
+- Application controls
+- Encryption
+- Privilege management
+
+---
+
+# 29. Linux Security Tools/Utilities to Know
+
+For cybersecurity fundamentals, know the purpose of:
+
+| Command | Purpose |
+|---|---|
+| `whoami` | Current user |
+| `id` | User/group information |
+| `ps` | Processes |
+| `top` | Process/resource monitoring |
+| `ss` | Network sockets |
+| `ip` | Network configuration |
+| `ls` | Files/directories |
+| `find` | Search files |
+| `grep` | Search text |
+| `chmod` | Change permissions |
+| `chown` | Change ownership |
+| `sudo` | Elevated execution |
+| `systemctl` | Manage services |
+| `journalctl` | View systemd logs |
+
+---
+
+# 30. Windows Security Tools/Utilities to Know
+
+| Tool/Command | Purpose |
+|---|---|
+| `Task Manager` | Processes/resources |
+| `Event Viewer` | System/security logs |
+| `PowerShell` | Administration/scripting |
+| `ipconfig` | Network configuration |
+| `tasklist` | Running processes |
+| `netstat` | Network connections |
+| `whoami` | Current user |
+| `Get-Process` | Processes |
+| `Get-Service` | Services |
+| `Get-NetIPConfiguration` | Network configuration |
+| `Windows Defender` | Endpoint protection |
+| `Windows Firewall` | Network traffic control |
+
+---
+
+# 31. Linux vs Windows – Cybersecurity Perspective
+
+| Area | Linux | Windows |
+|---|---|---|
+| Shell | Bash and others | PowerShell / CMD |
+| Privileged account | root | Administrator |
+| Permissions | r/w/x | NTFS ACLs |
+| Logs | `/var/log`, journal | Event Viewer/Event Logs |
+| Services | systemd commonly | Windows Services |
+| Network tools | `ip`, `ss` | `ipconfig`, `netstat`, PowerShell |
+| Processes | `ps`, `top` | Task Manager, `tasklist`, PowerShell |
+| Configuration | Many text/config files | Registry + configuration files |
+| Common enterprise identity | Various tools | Active Directory commonly used |
+
+---
+
+# 32. Important Cybersecurity Concepts
+
+### Attack Surface
+
+The **attack surface** is the collection of points through which an attacker could potentially interact with or attack a system.
+
+Examples:
+
+- Open ports
+- Network services
+- Applications
+- User accounts
+- Remote access services
+
+### Hardening
+
+**Hardening** means reducing unnecessary attack surface and improving security configuration.
+
+Examples:
+
+- Disable unnecessary services
+- Apply security updates
+- Use strong authentication
+- Restrict privileges
+- Configure firewalls
+- Remove unnecessary software
+
+---
+
+# 33. OS Hardening Checklist
+
+1. Keep the OS updated.
+2. Remove unnecessary applications.
+3. Disable unnecessary services.
+4. Use strong authentication.
+5. Apply least privilege.
+6. Configure the firewall.
+7. Enable security logging.
+8. Monitor suspicious processes.
+9. Use endpoint protection.
+10. Regularly review user accounts and permissions.
+11. Back up important data.
+12. Protect sensitive files with appropriate access controls.
+
+---
+
+# QUICK REVISION
+
+### Operating System
+> Software that manages hardware, software, users, and system resources.
+
+### Kernel
+> Core component of the operating system.
+
+### Process
+> A running instance of a program.
+
+### Thread
+> A unit of execution within a process.
+
+### Authentication
+> **Who are you?**
+
+### Authorization
+> **What are you allowed to do?**
+
+### Least Privilege
+> Give users/processes only the permissions they need.
+
+### Linux Root
+> Highest-privilege account: `root`
+
+### Windows
+> High-privilege account type: `Administrator`
+
+### Linux Permissions
+> **r = Read, w = Write, x = Execute**
+
+### Windows Permissions
+> Commonly controlled through **NTFS ACLs**.
+
+### Linux Logs
+> Commonly found under `/var/log/`
+
+### Windows Logs
+> **Event Viewer / Windows Event Logs**
+
+### Linux Network
+> `ip`, `ss`
+
+### Windows Network
+> `ipconfig`, `netstat`
+
+### Linux Processes
+> `ps`, `top`
+
+### Windows Processes
+> Task Manager, `tasklist`, PowerShell
+
+### Linux Services
+> `systemctl`
+
+### Windows Services
+> Services / `Get-Service`
+
+### Most Important Cybersecurity Concept
+
+> **An attacker may exploit an OS vulnerability, misconfiguration, weak permissions, exposed service, or compromised account to gain unauthorized access or privileges.**

@@ -1,0 +1,1618 @@
+# DAY 16 – IDENTIFYING VULNERABILITIES IN APPLICATIONS
+## Web Applications • APIs • OWASP • Authentication • Authorization • Input Validation • Security Testing
+
+---
+
+# 1. What is Application Security?
+
+**Application Security (AppSec)** is the practice of protecting software applications from security vulnerabilities throughout their lifecycle.
+
+It includes:
+
+- Secure design
+- Secure coding
+- Authentication
+- Authorization
+- Input validation
+- Session security
+- Data protection
+- Error handling
+- Security testing
+- Vulnerability remediation
+
+### Simple Definition
+
+> **Application Security = Protecting an application from security weaknesses and attacks.**
+
+---
+
+# 2. What is a Web Application?
+
+A **web application** is software accessed through a web browser or HTTP/HTTPS.
+
+Examples:
+
+- Banking portals
+- Email systems
+- E-commerce websites
+- Employee portals
+- Online dashboards
+- Learning platforms
+
+Basic architecture:
+
+```text
+User
+ ↓
+Browser
+ ↓
+HTTP/HTTPS
+ ↓
+Web Server
+ ↓
+Application
+ ↓
+Database
+```
+
+---
+
+# 3. What is an API?
+
+**API = Application Programming Interface**
+
+An API allows different software components to communicate.
+
+Example:
+
+```text
+Mobile App
+     ↓
+   API
+     ↓
+Application Server
+     ↓
+ Database
+```
+
+A REST API commonly uses HTTP methods such as:
+
+| Method | Typical Purpose |
+|---|---|
+| GET | Retrieve data |
+| POST | Create/submit data |
+| PUT | Replace/update data |
+| PATCH | Partially update data |
+| DELETE | Delete data |
+
+### Important
+
+The HTTP method alone does **not** guarantee authorization or security.
+
+---
+
+# 4. Web Application vs API
+
+| Web Application | API |
+|---|---|
+| Often designed for human users | Often designed for software clients |
+| Browser-based interaction | Programmatic interaction |
+| HTML/CSS/JS commonly involved | JSON/XML commonly used |
+| Forms and pages | Endpoints and resources |
+| Cookies may be used | Tokens/API keys may be used |
+
+Both can contain similar security problems.
+
+---
+
+# 5. Application Vulnerability
+
+An **application vulnerability** is a weakness in application design, implementation, configuration, or deployment that could negatively affect security.
+
+Examples:
+
+- Broken access control
+- Injection
+- Authentication weaknesses
+- Security misconfiguration
+- Sensitive data exposure
+- Weak session management
+- Insecure API authorization
+
+---
+
+# 6. Application Security Testing Process
+
+A simplified authorized workflow:
+
+```text
+Scope
+ ↓
+Understand Application
+ ↓
+Map Attack Surface
+ ↓
+Identify Inputs
+ ↓
+Test Authentication
+ ↓
+Test Authorization
+ ↓
+Test Input Handling
+ ↓
+Test Session Management
+ ↓
+Test Security Configuration
+ ↓
+Validate Findings
+ ↓
+Report
+ ↓
+Remediate
+ ↓
+Retest
+```
+
+### Memory
+
+> **S-M-I-A-A-I-S-V-R-R**
+
+Scope → Map → Inputs → Authentication → Authorization → Input → Security → Validate → Report → Retest
+
+---
+
+# 7. What is an Attack Surface?
+
+The **attack surface** is the collection of possible entry points through which an application can be interacted with or potentially attacked.
+
+For a web application:
+
+```text
+Attack Surface
+├── Login
+├── Registration
+├── Search
+├── File Upload
+├── Forms
+├── APIs
+├── Admin Panel
+├── Cookies
+├── Headers
+└── URL Parameters
+```
+
+### Memory
+
+> **Attack Surface = Places where input enters or functionality is exposed.**
+
+---
+
+# 8. Application Mapping
+
+Before looking for vulnerabilities, understand the application.
+
+Identify:
+
+- Pages
+- Endpoints
+- API routes
+- Parameters
+- Forms
+- Authentication mechanisms
+- User roles
+- Cookies
+- Session behavior
+- File upload functionality
+- Administrative functionality
+
+Example:
+
+```text
+Application
+   |
+   +-- /login
+   +-- /register
+   +-- /profile
+   +-- /orders
+   +-- /admin
+   +-- /api/users
+   +-- /api/orders
+```
+
+---
+
+# 9. Authentication vs Authorization
+
+This is one of the most important concepts.
+
+## Authentication
+
+> **Who are you?**
+
+Examples:
+
+- Username/password
+- MFA
+- Certificate
+- Passkey
+
+## Authorization
+
+> **What are you allowed to do?**
+
+Example:
+
+```text
+User A
+ ↓
+Authenticated
+ ↓
+Can view own profile
+ ↓
+Cannot access admin functions
+```
+
+### Memory
+
+> **Authentication = Identity**
+
+> **Authorization = Permission**
+
+---
+
+# 10. Broken Access Control
+
+**Broken access control** occurs when an application fails to properly enforce what users are allowed to access or perform.
+
+Example:
+
+```text
+Normal User
+     ↓
+Requests administrative function
+     ↓
+Server fails to verify permission
+     ↓
+Unauthorized action succeeds
+```
+
+### Important
+
+Changing something in the browser is not automatically a vulnerability.
+
+The important question is:
+
+> **Does the server properly enforce authorization?**
+
+---
+
+# 11. IDOR / Insecure Direct Object Reference
+
+IDOR is a common example of an authorization problem.
+
+Suppose an API uses:
+
+```text
+/api/profile/1001
+```
+
+A user legitimately accesses their own resource.
+
+If changing the identifier to another user's resource allows unauthorized access, that indicates an access-control weakness.
+
+### Concept
+
+```text
+User A
+ ↓
+Own Resource → Allowed
+
+User A
+ ↓
+Another User's Resource → Should be Denied
+```
+
+### Memory
+
+> **IDOR = Can I access someone else's object just by changing its reference?**
+
+Testing should only be performed using accounts and resources you are authorized to test.
+
+---
+
+# 12. Input Validation
+
+Applications receive input from users.
+
+Examples:
+
+- Username
+- Password
+- Search terms
+- IDs
+- File names
+- JSON fields
+- URL parameters
+
+Applications should validate input.
+
+### Basic Principle
+
+```text
+User Input
+   ↓
+Validate
+   ↓
+Sanitize/Normalize where appropriate
+   ↓
+Process safely
+```
+
+---
+
+# 13. Injection
+
+**Injection** occurs when untrusted input is interpreted as part of a command, query, or expression.
+
+Common examples:
+
+- SQL Injection
+- Command Injection
+- LDAP Injection
+- Template Injection
+
+### Basic Concept
+
+```text
+Untrusted Input
+       ↓
+Application
+       ↓
+Interpreter/Database
+       ↓
+Input changes intended operation
+```
+
+---
+
+# 14. SQL Injection
+
+SQL Injection occurs when untrusted input is improperly incorporated into SQL queries.
+
+Unsafe conceptual example:
+
+```text
+Application
+     ↓
+User input
+     ↓
+SQL query
+     ↓
+Database
+```
+
+If input changes the intended meaning of the query, the application may be vulnerable.
+
+### Prevention
+
+Use:
+
+- Parameterized queries
+- Prepared statements
+- Safe ORM practices
+- Input validation
+- Least-privileged database accounts
+
+### Exam Memory
+
+> **SQL Injection = Untrusted input affects SQL query logic.**
+
+---
+
+# 15. Cross-Site Scripting (XSS)
+
+**XSS** occurs when untrusted content is improperly handled and executed as script in another user's browser.
+
+Common categories:
+
+### Stored XSS
+
+Malicious content is stored by the application and later delivered to users.
+
+### Reflected XSS
+
+Input is reflected immediately in a response.
+
+### DOM-based XSS
+
+The vulnerability arises from unsafe client-side DOM manipulation.
+
+### Memory
+
+> **Stored = Saved**
+
+> **Reflected = Returned**
+
+> **DOM = Browser-side**
+
+---
+
+# 16. XSS Impact
+
+Depending on the application and protections, XSS can potentially affect:
+
+- User sessions
+- Page content
+- User actions
+- Confidentiality
+- Integrity
+
+### Prevention
+
+Common defenses include:
+
+- Context-aware output encoding
+- Safe templating
+- Input handling
+- Content Security Policy
+- Avoiding unsafe DOM APIs
+
+---
+
+# 17. Command Injection
+
+Command injection occurs when untrusted application input reaches an operating-system command interpreter in an unsafe way.
+
+Concept:
+
+```text
+User Input
+    ↓
+Application
+    ↓
+OS Command
+    ↓
+System
+```
+
+### Prevention
+
+Prefer:
+
+- Avoiding shell execution when possible
+- Safe APIs
+- Strict input validation
+- Allowlisting expected values
+- Least privilege
+
+---
+
+# 18. Security Misconfiguration
+
+Security misconfiguration occurs when an application or infrastructure is configured insecurely.
+
+Examples:
+
+- Debug mode enabled in production
+- Default credentials
+- Unnecessary services
+- Excessive permissions
+- Verbose error messages
+- Missing security headers
+- Improper cloud/storage permissions
+
+### Memory
+
+> **Misconfiguration = Security settings are wrong or unnecessarily weak.**
+
+---
+
+# 19. Sensitive Data Exposure
+
+Applications must protect sensitive information.
+
+Examples:
+
+- Passwords
+- Authentication tokens
+- Personal information
+- Financial information
+- API secrets
+- Internal system information
+
+Potential problems include:
+
+- Sending sensitive data over insecure connections
+- Storing passwords improperly
+- Exposing secrets in API responses
+- Logging sensitive information
+
+---
+
+# 20. Password Storage
+
+Passwords should **not** be stored as plain text.
+
+A secure application generally uses:
+
+```text
+Password
+   ↓
+Password Hashing Function
+   ↓
+Stored Hash
+```
+
+Modern password hashing approaches include algorithms such as:
+
+- Argon2
+- bcrypt
+- scrypt
+
+### Important
+
+General-purpose hashes such as SHA-256 are not designed to be used alone as password-storage mechanisms.
+
+---
+
+# 21. Session Management
+
+After authentication, applications often maintain a session.
+
+Example:
+
+```text
+Login
+ ↓
+Authentication successful
+ ↓
+Session established
+ ↓
+Session identifier/token
+ ↓
+Authenticated requests
+```
+
+Security concerns include:
+
+- Predictable session identifiers
+- Session fixation
+- Session theft
+- Poor expiration
+- Missing logout invalidation
+- Insecure cookie settings
+
+---
+
+# 22. Security Cookie Attributes
+
+Important cookie attributes include:
+
+### Secure
+
+Cookie should be sent over HTTPS connections.
+
+### HttpOnly
+
+Helps prevent JavaScript from directly reading the cookie.
+
+### SameSite
+
+Controls cross-site cookie sending behavior.
+
+### Memory
+
+> **Secure = HTTPS**
+
+> **HttpOnly = JavaScript can't directly read cookie**
+
+> **SameSite = Cross-site cookie control**
+
+These controls reduce risk but do not replace proper application security.
+
+---
+
+# 23. CSRF
+
+**CSRF = Cross-Site Request Forgery**
+
+A CSRF attack attempts to cause an authenticated user's browser to perform an unwanted action.
+
+Concept:
+
+```text
+Victim is logged in
+       ↓
+Attacker-controlled page
+       ↓
+Browser sends request
+       ↓
+Application accepts it
+```
+
+Potential defenses include:
+
+- CSRF tokens
+- SameSite cookies
+- Origin/Referer validation where appropriate
+- Requiring appropriate re-authentication for sensitive actions
+
+---
+
+# 24. API Security
+
+APIs need security at every layer.
+
+Important areas:
+
+```text
+API Security
+├── Authentication
+├── Authorization
+├── Input Validation
+├── Rate Limiting
+├── Data Exposure
+├── Error Handling
+├── Session/Token Security
+├── Logging
+└── Transport Security
+```
+
+---
+
+# 25. API Authentication
+
+Common mechanisms include:
+
+- Session cookies
+- API keys
+- OAuth 2.0
+- OpenID Connect
+- JWT-based systems
+
+### Important
+
+Having a token does not automatically mean the user has permission to access every resource.
+
+> **Authentication ≠ Authorization**
+
+---
+
+# 26. JWT Basics
+
+**JWT = JSON Web Token**
+
+A JWT commonly contains:
+
+```text
+Header.Payload.Signature
+```
+
+Conceptually:
+
+```text
+Header
+  +
+Payload
+  +
+Signature
+```
+
+### Important
+
+JWT payloads are generally **encoded, not automatically encrypted**.
+
+Therefore, sensitive information should not be placed in a JWT payload merely assuming it is secret.
+
+---
+
+# 27. API Authorization Testing
+
+Suppose:
+
+```text
+User A → /api/orders/100
+```
+
+The application should verify that User A is authorized to access order 100.
+
+The security test asks:
+
+> **Does the server enforce ownership/role permissions?**
+
+Do not assume that hiding an ID in the UI provides security.
+
+---
+
+# 28. Rate Limiting
+
+Rate limiting restricts how frequently a client can make requests.
+
+Useful for reducing abuse such as:
+
+- Login guessing
+- API abuse
+- Excessive requests
+- Automated enumeration
+
+Example:
+
+```text
+100 requests/minute
+        ↓
+Limit exceeded
+        ↓
+Requests delayed/rejected
+```
+
+---
+
+# 29. API Data Exposure
+
+An API should return only the information necessary for the client.
+
+Bad design:
+
+```text
+GET /api/user/profile
+```
+
+Response unnecessarily contains:
+
+```text
+name
+email
+phone
+internal_id
+password_hash
+security_settings
+internal_notes
+```
+
+Better:
+
+```text
+name
+email
+```
+
+### Principle
+
+> **Return only what the client needs.**
+
+---
+
+# 30. Error Handling
+
+Poor error messages can leak internal information.
+
+Example:
+
+```text
+Bad:
+Database connection failed:
+server=db-prod-04.internal
+user=admin
+stack trace=...
+```
+
+Better:
+
+```text
+Request could not be processed.
+Please try again later.
+```
+
+Detailed information should be available to authorized administrators through appropriate logs, not unnecessarily exposed to users.
+
+---
+
+# 31. File Upload Security
+
+File uploads are a common application attack surface.
+
+Security checks should include:
+
+- Allowed file types
+- File size limits
+- Content validation
+- Safe file names
+- Storage location
+- Authorization
+- Malware scanning where appropriate
+- Preventing uploaded files from being executed
+
+### Important
+
+> Never trust a file merely because its filename extension looks safe.
+
+---
+
+# 32. Path Traversal
+
+Path traversal occurs when user-controlled input can improperly influence file paths.
+
+Concept:
+
+```text
+Application
+   ↓
+User-controlled filename/path
+   ↓
+File system
+```
+
+A secure application should ensure the requested resource remains within the intended directory and should avoid constructing filesystem paths unsafely.
+
+### Memory
+
+> **Path Traversal = Unauthorized movement through file paths.**
+
+---
+
+# 33. SSRF
+
+**SSRF = Server-Side Request Forgery**
+
+An SSRF vulnerability can cause a server to make requests to unintended destinations based on attacker-controlled input.
+
+Concept:
+
+```text
+User
+ ↓
+Web Application
+ ↓
+Server makes request
+ ↓
+Unexpected internal/external resource
+```
+
+Potential impact can include access to resources that should not be reachable from the user's location.
+
+### Prevention
+
+- Strict URL allowlists
+- Network segmentation
+- Restrict outbound access
+- Validate destination
+- Avoid unnecessary server-side fetching
+
+---
+
+# 34. Business Logic Vulnerabilities
+
+Not every vulnerability is a technical input flaw.
+
+A **business logic vulnerability** occurs when application rules can be abused in an unintended way.
+
+Example:
+
+```text
+Normal:
+Buy item
+ ↓
+Pay
+ ↓
+Order confirmed
+```
+
+If application logic allows:
+
+```text
+Order confirmed
+ ↓
+Payment bypassed
+```
+
+that is a business logic problem.
+
+### Key Point
+
+> Automated scanners may miss business logic vulnerabilities.
+
+---
+
+# 35. OWASP
+
+**OWASP = Open Worldwide Application Security Project**
+
+OWASP provides resources, standards, and guidance for application security.
+
+One of its best-known resources is the **OWASP Top 10**, which highlights major categories of web application security risks.
+
+For exams, remember major concepts such as:
+
+- Broken access control
+- Cryptographic failures
+- Injection
+- Security misconfiguration
+- Authentication failures
+- Vulnerable/outdated components
+- Identification and authentication weaknesses
+- Logging/monitoring problems
+- Server-side request forgery
+- Software/data integrity issues
+
+### Important
+
+OWASP categories and editions can change, so always use the version specified by your course/exam.
+
+---
+
+# 36. Application Testing Tools
+
+Common tools include:
+
+| Tool | Purpose |
+|---|---|
+| Burp Suite | Web application security testing |
+| OWASP ZAP | Web application security testing |
+| Browser DevTools | Inspect requests/responses/client behavior |
+| Nmap | Network/service discovery |
+| Nessus | Vulnerability assessment |
+| OpenVAS/GVM | Vulnerability assessment |
+| Postman | API development/testing |
+| curl | HTTP/API requests |
+
+### Important
+
+Tools assist the analyst; they do not replace understanding.
+
+---
+
+# 37. Burp Suite
+
+**Burp Suite** is commonly used for authorized web application security testing.
+
+It can help security testers:
+
+- Inspect HTTP requests
+- Inspect HTTP responses
+- Understand application behavior
+- Test parameters
+- Analyze cookies
+- Test authentication/authorization
+- Reproduce requests
+- Identify potential vulnerabilities
+
+Basic conceptual flow:
+
+```text
+Browser
+   ↓
+Burp Proxy
+   ↓
+Web Application
+```
+
+---
+
+# 38. OWASP ZAP
+
+**OWASP ZAP (Zed Attack Proxy)** is an open-source web application security testing tool.
+
+It can help with:
+
+- Proxying traffic
+- Crawling applications
+- Passive analysis
+- Active testing in authorized environments
+- Finding potential web vulnerabilities
+
+### Memory
+
+> **Burp = Web Security Testing**
+
+> **ZAP = Web Security Testing**
+
+---
+
+# 39. Browser Developer Tools
+
+Browser DevTools are useful for understanding:
+
+- HTTP requests
+- HTTP responses
+- Cookies
+- Headers
+- JavaScript
+- Storage
+- Network behavior
+
+Typical workflow:
+
+```text
+Open Browser
+ ↓
+Developer Tools
+ ↓
+Network Tab
+ ↓
+Perform Application Action
+ ↓
+Inspect Request/Response
+```
+
+This is especially useful for understanding APIs.
+
+---
+
+# 40. HTTP Request Analysis
+
+Example:
+
+```text
+POST /api/login HTTP/1.1
+Host: example.test
+Content-Type: application/json
+
+{
+  "username": "user",
+  "password": "********"
+}
+```
+
+An analyst may examine:
+
+- HTTP method
+- Endpoint
+- Headers
+- Authentication
+- Parameters
+- Response code
+- Response data
+- Cookies/tokens
+
+---
+
+# 41. HTTP Status Codes
+
+Important codes:
+
+| Code | Meaning |
+|---:|---|
+| 200 | OK |
+| 201 | Created |
+| 204 | No Content |
+| 301/302 | Redirect |
+| 400 | Bad Request |
+| 401 | Unauthorized / authentication required |
+| 403 | Forbidden |
+| 404 | Not Found |
+| 405 | Method Not Allowed |
+| 429 | Too Many Requests |
+| 500 | Internal Server Error |
+| 502 | Bad Gateway |
+| 503 | Service Unavailable |
+
+### Memory
+
+> **4xx = Client-side/request problem**
+
+> **5xx = Server-side problem**
+
+---
+
+# 42. 401 vs 403
+
+Very common exam question.
+
+### 401
+
+The request lacks valid authentication credentials or authentication is required.
+
+### 403
+
+The server understands the request but refuses to authorize it.
+
+### Memory
+
+> **401 = Who are you?**
+
+> **403 = I know you, but you're not allowed.**
+
+---
+
+# 43. Security Headers
+
+Important security-related HTTP headers include:
+
+- Content-Security-Policy
+- Strict-Transport-Security
+- X-Content-Type-Options
+- Referrer-Policy
+- Permissions-Policy
+
+Security headers can help reduce certain classes of attacks.
+
+### Important
+
+Missing a header does not automatically prove that an application is vulnerable.
+
+The actual risk depends on the application.
+
+---
+
+# 44. Vulnerability Validation
+
+A scanner or tool may report:
+
+```text
+Potential vulnerability detected.
+```
+
+The analyst should ask:
+
+1. Is the finding applicable?
+2. Is there supporting evidence?
+3. Is the affected component actually present?
+4. Is the issue exploitable in this environment?
+5. What is the impact?
+6. Is there a compensating control?
+7. Is it a false positive?
+
+### Memory
+
+> **Detect → Verify → Assess → Report**
+
+---
+
+# 45. Common Application Vulnerabilities
+
+| Vulnerability | Core Idea |
+|---|---|
+| SQL Injection | Input affects SQL logic |
+| XSS | Untrusted content executes in browser |
+| CSRF | User's browser performs unwanted action |
+| IDOR | Unauthorized access to another object |
+| Broken Access Control | Permissions not properly enforced |
+| Authentication Failure | Identity verification is weak |
+| Session Weakness | Session handling is insecure |
+| SSRF | Server makes unintended requests |
+| Path Traversal | Unauthorized filesystem path access |
+| Security Misconfiguration | Insecure settings |
+| Sensitive Data Exposure | Sensitive information improperly exposed |
+| File Upload Issue | Unsafe uploaded content handling |
+| Business Logic Flaw | Application rules can be abused |
+
+---
+
+# 46. Web Application Testing Checklist
+
+```text
+[ ] Identify application scope
+[ ] Map pages/endpoints
+[ ] Identify user roles
+[ ] Identify authentication
+[ ] Identify authorization
+[ ] Review inputs
+[ ] Review API endpoints
+[ ] Review session management
+[ ] Review cookies
+[ ] Review security headers
+[ ] Review error handling
+[ ] Review file uploads
+[ ] Review sensitive data exposure
+[ ] Review access control
+[ ] Validate findings
+[ ] Document evidence
+[ ] Recommend remediation
+[ ] Retest
+```
+
+---
+
+# 47. API Testing Checklist
+
+```text
+[ ] Identify API endpoints
+[ ] Identify HTTP methods
+[ ] Understand authentication
+[ ] Test authorization within approved accounts
+[ ] Review input validation
+[ ] Review output/data exposure
+[ ] Review error handling
+[ ] Review rate limiting
+[ ] Review token/session security
+[ ] Review HTTPS/TLS
+[ ] Check object-level authorization
+[ ] Check function-level authorization
+[ ] Document findings
+[ ] Retest fixes
+```
+
+---
+
+# 48. Example Scenario
+
+Suppose an application has:
+
+```text
+GET /api/orders/1001
+```
+
+User A is logged in.
+
+The application correctly verifies User A's authentication but fails to verify whether User A owns order 1001.
+
+### What is the problem?
+
+**Broken authorization / IDOR-type issue.**
+
+### Why?
+
+Authentication answers:
+
+> "Is User A logged in?"
+
+Authorization must answer:
+
+> "Is User A allowed to access order 1001?"
+
+---
+
+# 49. Another Scenario
+
+A login page returns:
+
+```text
+"User account exists but password is incorrect."
+```
+
+for existing users, but:
+
+```text
+"User does not exist."
+```
+
+for nonexistent users.
+
+This difference may allow **user/account enumeration**.
+
+### Lesson
+
+> Error messages can reveal useful information to attackers.
+
+A secure design should avoid unnecessarily revealing whether an account exists.
+
+---
+
+# 50. Another Scenario
+
+An API returns:
+
+```text
+{
+  "name": "Rahul",
+  "email": "example@example.com",
+  "role": "user",
+  "internal_id": "12345",
+  "password_hash": "..."
+}
+```
+
+Even though the password is hashed, unnecessarily returning the password hash is poor security practice.
+
+### Problem
+
+**Sensitive information exposure / excessive data exposure.**
+
+### Better
+
+Return only the fields required by the client.
+
+---
+
+# 51. Application Vulnerability Lifecycle
+
+```text
+Discover
+   ↓
+Analyze
+   ↓
+Validate
+   ↓
+Document
+   ↓
+Prioritize
+   ↓
+Remediate
+   ↓
+Retest
+```
+
+This is similar to vulnerability management from Day 15, but now the focus is specifically on applications and APIs.
+
+---
+
+# 52. Most Important Exam Differences
+
+### Authentication vs Authorization
+
+```text
+Authentication → Who are you?
+Authorization → What can you do?
+```
+
+### Vulnerability vs Exploit
+
+```text
+Vulnerability → Weakness
+Exploit → Method that takes advantage of weakness
+```
+
+### Scanner vs Manual Testing
+
+```text
+Scanner → Automated detection
+Manual testing → Human analysis/validation
+```
+
+### Web App vs API
+
+```text
+Web App → Human/browser interaction
+API → Programmatic interaction
+```
+
+### 401 vs 403
+
+```text
+401 → Authentication problem
+403 → Authorization/permission refusal
+```
+
+### CVE vs CVSS
+
+```text
+CVE → Vulnerability identifier
+CVSS → Severity score
+```
+
+---
+
+# 53. Hard Scenario-Based MCQs
+
+## Q1
+
+A user is successfully authenticated but can access another user's private records by changing an object identifier.
+
+What is the primary security issue?
+
+A. Authentication failure  
+B. Broken access control  
+C. DNS poisoning  
+D. Encryption failure
+
+**Answer: B. Broken access control**
+
+---
+
+## Q2
+
+An API requires a valid login token but does not check whether the user owns the requested resource.
+
+What security principle is missing?
+
+A. Authentication  
+B. Authorization  
+C. Encryption  
+D. Availability
+
+**Answer: B. Authorization**
+
+---
+
+## Q3
+
+A scanner reports a possible SQL injection, but manual validation shows that the application uses parameterized queries and the input cannot alter query logic.
+
+What is the likely result?
+
+A. Confirmed vulnerability  
+B. False positive  
+C. DDoS  
+D. Authentication bypass
+
+**Answer: B. False positive**
+
+---
+
+## Q4
+
+A web application stores user comments and later renders them unsafely in other users' browsers.
+
+What vulnerability should be investigated?
+
+A. Stored XSS  
+B. SSRF  
+C. CSRF  
+D. DNS enumeration
+
+**Answer: A. Stored XSS**
+
+---
+
+## Q5
+
+An application returns a detailed database stack trace to normal users.
+
+What is the main concern?
+
+A. Information disclosure/security misconfiguration  
+B. Strong authentication  
+C. Network segmentation  
+D. Rate limiting
+
+**Answer: A. Information disclosure/security misconfiguration**
+
+---
+
+## Q6
+
+A security tester receives HTTP 401 from an API when no valid authentication is supplied.
+
+What does this generally indicate?
+
+A. Authentication is required or invalid  
+B. The resource definitely does not exist  
+C. The server is compromised  
+D. The request succeeded
+
+**Answer: A**
+
+---
+
+## Q7
+
+An authenticated user receives HTTP 403 when attempting an administrator-only function.
+
+What does this generally indicate?
+
+A. The request was accepted  
+B. Access is forbidden  
+C. DNS failed  
+D. The user was successfully promoted
+
+**Answer: B**
+
+---
+
+## Q8
+
+A web application allows users to upload files. Which control is most important?
+
+A. Trust the filename extension  
+B. Validate uploaded content and safely handle storage/execution  
+C. Disable all logging  
+D. Allow unlimited file size
+
+**Answer: B**
+
+---
+
+## Q9
+
+An API returns significantly more user information than the client requires.
+
+What principle should be applied?
+
+A. Return all database columns  
+B. Minimize exposed data  
+C. Disable authentication  
+D. Remove authorization
+
+**Answer: B**
+
+---
+
+## Q10
+
+A vulnerability has a high CVSS score, but the affected server is isolated and contains no important data. Another medium-severity vulnerability affects an Internet-facing production system containing sensitive data.
+
+Which should the security team consider carefully before prioritizing?
+
+A. Only CVSS scores  
+B. Business context and exposure in addition to technical severity  
+C. Only the hostname  
+D. Only the number of open ports
+
+**Answer: B**
+
+---
+
+## Q11
+
+A developer says, "The admin button is hidden from normal users, so they cannot access the admin function."
+
+What is the correct security response?
+
+A. Hiding the button is sufficient authorization  
+B. The server must enforce authorization  
+C. JavaScript automatically prevents access  
+D. CSS provides security
+
+**Answer: B**
+
+---
+
+## Q12
+
+An API accepts a URL supplied by the user and the server fetches the URL. What vulnerability class should be considered?
+
+A. SSRF  
+B. XSS only  
+C. CSRF only  
+D. DNS enumeration
+
+**Answer: A. SSRF**
+
+---
+
+# ⭐ DAY 16 – MOST IMPORTANT EXAM POINTS
+
+1. **Application security protects applications from security weaknesses.**
+2. Web applications commonly communicate through HTTP/HTTPS.
+3. APIs allow software components to communicate.
+4. **Authentication = Who are you?**
+5. **Authorization = What are you allowed to do?**
+6. Broken access control occurs when permissions are not properly enforced.
+7. IDOR is commonly associated with improper object-level authorization.
+8. Input validation is important because applications process untrusted input.
+9. SQL injection involves untrusted input affecting SQL query logic.
+10. XSS involves unsafe handling of content that can execute in a user's browser.
+11. CSRF attempts to cause an authenticated user's browser to perform an unwanted action.
+12. SSRF involves a server making unintended requests.
+13. Security misconfiguration involves insecure or unnecessary settings.
+14. Sensitive information should not be unnecessarily exposed through APIs or errors.
+15. Passwords should be stored using dedicated password-hashing algorithms.
+16. Session management must protect authentication state.
+17. Secure, HttpOnly, and SameSite are important cookie attributes.
+18. APIs require both authentication **and** authorization.
+19. JWT payloads are generally encoded, not automatically encrypted.
+20. Rate limiting helps reduce abuse and excessive requests.
+21. File uploads require strict validation and safe handling.
+22. Business logic vulnerabilities may not be detected by automated scanners.
+23. Burp Suite and OWASP ZAP are common web application security testing tools.
+24. Browser DevTools can help analyze HTTP requests and responses.
+25. **401 generally relates to authentication; 403 generally means access is forbidden.**
+26. A scanner finding should be validated before being treated as a confirmed vulnerability.
+27. **CVE = vulnerability identifier; CVSS = severity score; CWE = weakness category.**
+28. Security testing must be performed only within authorized scope.
+29. Remediation should be followed by retesting.
+30. **Finding a vulnerability is only part of application security—the goal is to validate, fix, and verify it.**
+
+# 🧠 MASTER MEMORY MAP
+
+```text
+APPLICATION
+     ↓
+MAP ATTACK SURFACE
+     ↓
+AUTHENTICATION
+     ↓
+AUTHORIZATION
+     ↓
+INPUT VALIDATION
+     ↓
+SESSION SECURITY
+     ↓
+API SECURITY
+     ↓
+DATA PROTECTION
+     ↓
+CONFIGURATION
+     ↓
+VALIDATE
+     ↓
+REPORT
+     ↓
+REMEDIATE
+     ↓
+RETEST
+```
+
+# ⚡ ONE-LINE REVISION
+
+> **Application vulnerability assessment analyzes web applications and APIs for weaknesses in authentication, authorization, input handling, sessions, configuration, data protection, and business logic, then validates, reports, remediates, and retests the findings within an authorized scope.**

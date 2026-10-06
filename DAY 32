@@ -1,0 +1,2587 @@
+# DAY 32 – NETWORK SNIFFING
+
+## Wireshark • Packet Capture • Protocol Analysis • Filters • TCP/UDP/DNS/HTTP/ARP • Troubleshooting
+
+---
+
+# 1. DAY 32 OBJECTIVE
+
+Today you will learn:
+
+- What network sniffing is
+- What a packet is
+- How packet capture works
+- What Wireshark is
+- Promiscuous mode
+- Capture vs display filters
+- Ethernet, IP, TCP, UDP, ARP, DNS, HTTP and TLS analysis
+- TCP 3-way handshake
+- Following TCP/HTTP streams
+- Finding suspicious traffic
+- Detecting scans and anomalies
+- Basic PCAP investigation
+- Wireshark practical commands/filters
+- Scenario-based exam questions
+
+> **Lab rule:** Capture and analyze only traffic from systems/networks you own or are explicitly authorized to monitor.
+
+---
+
+# 2. WHAT IS NETWORK SNIFFING?
+
+**Network sniffing** is the process of capturing and analyzing network packets traveling through a network interface.
+
+Simple idea:
+
+```text
+Computer
+   ↓
+Network Interface
+   ↓
+Packets
+   ↓
+Sniffer
+   ↓
+Analysis
+```
+
+A sniffer can help security analysts understand:
+
+- Who is communicating
+- Which protocols are being used
+- Which ports are active
+- What destinations are contacted
+- Whether traffic is encrypted
+- Whether suspicious behavior is occurring
+
+---
+
+# 3. EXAM DEFINITION
+
+> **Network sniffing is the capture and analysis of network packets to understand communication, troubleshoot networks, or investigate security events.**
+
+---
+
+# 4. WHAT IS A PACKET?
+
+A **packet** is a unit of data transmitted across a network.
+
+A simplified packet:
+
+```text
+┌─────────────────────────────┐
+│ Ethernet Header             │
+├─────────────────────────────┤
+│ IP Header                   │
+├─────────────────────────────┤
+│ TCP/UDP Header              │
+├─────────────────────────────┤
+│ Application Data            │
+└─────────────────────────────┘
+```
+
+Different protocols add their own headers.
+
+---
+
+# 5. PACKET VS FRAME
+
+This is a common exam question.
+
+### Frame
+
+Usually associated with the **Data Link Layer**.
+
+Example:
+
+```text
+Ethernet Frame
+```
+
+### Packet
+
+Usually associated with the **Network Layer**.
+
+Example:
+
+```text
+IP Packet
+```
+
+### Segment
+
+Usually associated with TCP at the **Transport Layer**.
+
+### Datagram
+
+Commonly used for UDP.
+
+Simplified:
+
+```text
+Application → Data
+Transport   → Segment/Datagram
+Network     → Packet
+Data Link   → Frame
+```
+
+---
+
+# 6. WHAT IS WIRESHARK?
+
+**Wireshark** is a network protocol analyzer used to capture and inspect network traffic.
+
+It provides detailed information about packets and protocols.
+
+Common uses:
+
+- Network troubleshooting
+- Security investigation
+- Protocol analysis
+- Incident response
+- Malware traffic analysis
+- Performance analysis
+- Learning networking
+
+---
+
+# 7. WIRESHARK BASIC WORKFLOW
+
+```text
+Start Wireshark
+      ↓
+Select Interface
+      ↓
+Capture Traffic
+      ↓
+Stop Capture
+      ↓
+Apply Filters
+      ↓
+Inspect Packets
+      ↓
+Follow Streams
+      ↓
+Analyze
+      ↓
+Export/Report
+```
+
+---
+
+# 8. WIRESHARK INTERFACE
+
+The main areas are generally:
+
+```text
+┌──────────────────────────────────────────┐
+│ Packet List                              │
+├──────────────────────────────────────────┤
+│ Packet Details                           │
+├──────────────────────────────────────────┤
+│ Packet Bytes                             │
+└──────────────────────────────────────────┘
+```
+
+### Packet List
+
+Shows packets.
+
+### Packet Details
+
+Shows protocol fields.
+
+### Packet Bytes
+
+Shows raw packet bytes.
+
+---
+
+# 9. PACKET LIST
+
+A typical packet list contains columns such as:
+
+| Column | Meaning |
+|---|---|
+| No. | Packet number |
+| Time | Capture timestamp |
+| Source | Source address |
+| Destination | Destination address |
+| Protocol | Detected protocol |
+| Length | Packet length |
+| Info | Summary |
+
+Example:
+
+```text
+No.   Source       Destination    Protocol   Info
+1     192.168.1.5  192.168.1.1    ARP        Who has...
+2     192.168.1.1  192.168.1.5    ARP        Reply
+3     192.168.1.5  93.x.x.x       TCP        SYN
+```
+
+---
+
+# 10. PACKET DETAILS
+
+Click a packet and expand its protocol layers.
+
+For example:
+
+```text
+Frame
+Ethernet II
+Internet Protocol Version 4
+Transmission Control Protocol
+Hypertext Transfer Protocol
+```
+
+This allows you to inspect individual fields.
+
+---
+
+# 11. PACKET BYTES
+
+The bottom section displays the packet's raw bytes.
+
+You may see:
+
+```text
+0000  00 11 22 33 44 55 ...
+0010  45 00 00 3c ...
+```
+
+You generally don't need to manually decode every byte for basic analysis.
+
+---
+
+# 12. NETWORK INTERFACE
+
+Wireshark captures through a network interface.
+
+Examples:
+
+```text
+Ethernet
+Wi-Fi
+Loopback
+VPN
+Virtual adapters
+```
+
+Choose the interface carrying the traffic you want to analyze.
+
+---
+
+# 13. PROMISCUOUS MODE
+
+A network interface normally processes traffic intended for it.
+
+**Promiscuous mode** allows the interface to pass more Ethernet frames to the capture software for inspection.
+
+Important:
+
+> Promiscuous mode does **not** magically allow you to see all traffic on a switched network.
+
+Modern switched networks normally deliver unicast traffic only to the relevant port.
+
+---
+
+# 14. SWITCHED NETWORK
+
+Consider:
+
+```text
+PC-A ──┐
+PC-B ──┼── Switch
+PC-C ──┘
+```
+
+If PC-A communicates directly with PC-B, PC-C normally cannot simply capture all of that unicast traffic.
+
+Therefore:
+
+> Wireshark on an ordinary switched endpoint does not automatically reveal everybody else's traffic.
+
+---
+
+# 15. HOW CAN AUTHORIZED MONITORING SEE MORE TRAFFIC?
+
+Enterprise environments may use:
+
+- Port mirroring
+- SPAN
+- Network TAPs
+- Monitoring infrastructure
+- Capture points
+- Wireless monitoring mechanisms
+
+Example:
+
+```text
+Traffic
+   ↓
+Switch
+   ├── Normal destination
+   └── SPAN → Monitoring system
+```
+
+---
+
+# 16. CAPTURE FILTER VS DISPLAY FILTER
+
+This is **very important for exams**.
+
+### Capture Filter
+
+Controls what gets captured.
+
+### Display Filter
+
+Controls what is displayed from already captured packets.
+
+```text
+Capture Filter
+      ↓
+Packet Capture
+      ↓
+Display Filter
+      ↓
+Analysis
+```
+
+---
+
+# 17. DISPLAY FILTER EXAMPLES
+
+Show ARP:
+
+```text
+arp
+```
+
+Show DNS:
+
+```text
+dns
+```
+
+Show HTTP:
+
+```text
+http
+```
+
+Show TLS:
+
+```text
+tls
+```
+
+Show TCP:
+
+```text
+tcp
+```
+
+Show UDP:
+
+```text
+udp
+```
+
+---
+
+# 18. FILTER BY IP
+
+Show traffic involving a particular IP:
+
+```text
+ip.addr == 192.168.1.10
+```
+
+Source:
+
+```text
+ip.src == 192.168.1.10
+```
+
+Destination:
+
+```text
+ip.dst == 192.168.1.10
+```
+
+---
+
+# 19. FILTER BY PORT
+
+TCP port 80:
+
+```text
+tcp.port == 80
+```
+
+TCP port 443:
+
+```text
+tcp.port == 443
+```
+
+UDP port 53:
+
+```text
+udp.port == 53
+```
+
+---
+
+# 20. COMBINING FILTERS
+
+AND:
+
+```text
+ip.addr == 192.168.1.10 && tcp.port == 443
+```
+
+OR:
+
+```text
+dns || http
+```
+
+Example:
+
+```text
+ip.src == 192.168.1.10 && tcp.dstport == 443
+```
+
+---
+
+# 21. EXCLUDE TRAFFIC
+
+You can exclude a protocol:
+
+```text
+!arp
+```
+
+Exclude a specific host:
+
+```text
+ip.addr != 192.168.1.1
+```
+
+Use exclusions carefully because they can hide useful evidence.
+
+---
+
+# 22. ARP ANALYSIS
+
+Display:
+
+```text
+arp
+```
+
+Look for:
+
+```text
+ARP Request
+ARP Reply
+```
+
+Example:
+
+```text
+Who has 192.168.1.1?
+```
+
+Then:
+
+```text
+192.168.1.1 is at AA:BB:CC:DD:EE:FF
+```
+
+---
+
+# 23. ARP SPOOFING INVESTIGATION
+
+From Day 31:
+
+A suspicious situation could involve:
+
+```text
+Gateway IP
+     ↓
+unexpected MAC
+```
+
+You can investigate:
+
+```text
+arp
+```
+
+and examine:
+
+- Sender IP
+- Sender MAC
+- Target IP
+- Target MAC
+- Frequency of ARP changes
+
+---
+
+# 24. TCP ANALYSIS
+
+TCP is connection-oriented.
+
+The connection starts with the:
+
+> **TCP 3-way handshake**
+
+```text
+Client                    Server
+  │                         │
+  │──── SYN ───────────────>│
+  │<─── SYN, ACK ───────────│
+  │──── ACK ───────────────>│
+  │                         │
+  │      Connection         │
+```
+
+---
+
+# 25. TCP FLAGS
+
+Important TCP flags:
+
+| Flag | Meaning |
+|---|---|
+| SYN | Start/synchronize connection |
+| ACK | Acknowledge |
+| FIN | Graceful termination |
+| RST | Reset connection |
+| PSH | Push data |
+| URG | Urgent pointer |
+
+---
+
+# 26. FILTER TCP SYN
+
+Display packets with SYN set:
+
+```text
+tcp.flags.syn == 1
+```
+
+Only initial SYN packets, excluding SYN-ACK:
+
+```text
+tcp.flags.syn == 1 && tcp.flags.ack == 0
+```
+
+This can help investigate connection attempts.
+
+---
+
+# 27. TCP SCANNING INDICATOR
+
+Suppose one source sends many SYN packets:
+
+```text
+Attacker → Port 21
+Attacker → Port 22
+Attacker → Port 23
+Attacker → Port 25
+Attacker → Port 80
+Attacker → Port 443
+...
+```
+
+This may indicate:
+
+> Port scanning or service discovery.
+
+But:
+
+> A pattern alone is not proof of malicious activity.
+
+It needs context and validation.
+
+---
+
+# 28. TCP RESET
+
+A TCP RST can indicate:
+
+- Connection rejection
+- Application behavior
+- Closed service
+- Unexpected termination
+- Firewall behavior
+- Network problems
+
+Do not automatically label every RST as malicious.
+
+---
+
+# 29. UDP ANALYSIS
+
+UDP is connectionless.
+
+It does not use the TCP 3-way handshake.
+
+Common UDP protocols:
+
+- DNS
+- DHCP
+- NTP
+- Some streaming/real-time applications
+
+Filter:
+
+```text
+udp
+```
+
+---
+
+# 30. DNS ANALYSIS
+
+Filter:
+
+```text
+dns
+```
+
+Look for:
+
+```text
+DNS Query
+DNS Response
+```
+
+Example:
+
+```text
+Client → DNS Server
+Query: example.com
+```
+
+Response:
+
+```text
+example.com → IP address
+```
+
+---
+
+# 31. DNS QUESTIONS TO ASK
+
+During investigation:
+
+- Which client made the request?
+- Which DNS server was contacted?
+- What domain was queried?
+- What answer was returned?
+- How frequently?
+- Are there unusually long/random domains?
+- Are many unique domains being queried?
+
+---
+
+# 32. SUSPICIOUS DNS
+
+Potential indicators may include:
+
+```text
+Very long domain names
+Random-looking subdomains
+High query frequency
+Large numbers of unique domains
+Unexpected DNS servers
+Unusual record types
+```
+
+These are **indicators**, not automatic proof of malware.
+
+---
+
+# 33. HTTP ANALYSIS
+
+Filter:
+
+```text
+http
+```
+
+You may inspect:
+
+- HTTP method
+- Host
+- URI
+- User-Agent
+- Status code
+- Headers
+- Request/response data
+
+Common methods:
+
+```text
+GET
+POST
+PUT
+DELETE
+HEAD
+```
+
+---
+
+# 34. HTTP GET
+
+Example:
+
+```text
+GET /index.html HTTP/1.1
+Host: example.test
+```
+
+GET commonly requests a resource.
+
+---
+
+# 35. HTTP POST
+
+Example:
+
+```text
+POST /login HTTP/1.1
+Host: example.test
+```
+
+A POST request may contain data in the request body.
+
+In a controlled lab, this can help demonstrate why plaintext protocols are dangerous.
+
+---
+
+# 36. HTTP STATUS CODES
+
+| Code | Meaning |
+|---|---|
+| 200 | OK |
+| 301 | Permanent redirect |
+| 302 | Temporary redirect |
+| 400 | Bad request |
+| 401 | Unauthorized |
+| 403 | Forbidden |
+| 404 | Not found |
+| 500 | Server error |
+| 503 | Service unavailable |
+
+---
+
+# 37. HTTPS / TLS ANALYSIS
+
+Filter:
+
+```text
+tls
+```
+
+You may see:
+
+```text
+Client Hello
+Server Hello
+Certificate
+Encrypted Application Data
+```
+
+Modern TLS versions commonly protect application data.
+
+---
+
+# 38. IMPORTANT EXAM POINT
+
+If you see:
+
+```text
+TLS
+Encrypted Application Data
+```
+
+you generally cannot simply read the application content from the packet capture without the appropriate cryptographic/session keys and supported decryption setup.
+
+Therefore:
+
+> **Packet capture ≠ automatic plaintext visibility.**
+
+---
+
+# 39. TCP STREAM
+
+Wireshark can reconstruct packets belonging to a TCP conversation.
+
+Right-click a TCP packet and use:
+
+> **Follow → TCP Stream**
+
+This is extremely useful for analyzing a conversation in an authorized PCAP.
+
+---
+
+# 40. HTTP STREAM
+
+For supported HTTP traffic, you can similarly use:
+
+> **Follow → HTTP Stream**
+
+This helps reconstruct the application conversation.
+
+---
+
+# 41. WHY FOLLOW STREAM IS USEFUL
+
+Instead of examining:
+
+```text
+Packet 10
+Packet 14
+Packet 17
+Packet 21
+Packet 25
+...
+```
+
+Wireshark can reconstruct the conversation:
+
+```text
+Client → Request
+Server → Response
+Client → Request
+Server → Response
+```
+
+This makes analysis much easier.
+
+---
+
+# 42. TCP STREAM INDEX
+
+Wireshark can identify different TCP conversations using stream identifiers.
+
+A display filter such as:
+
+```text
+tcp.stream == 0
+```
+
+shows packets belonging to a particular TCP stream.
+
+Example:
+
+```text
+tcp.stream == 5
+```
+
+selects stream 5.
+
+---
+
+# 43. HTTP HOST FILTER
+
+To investigate a specific host header:
+
+```text
+http.host
+```
+
+A more specific filter:
+
+```text
+http.host == "example.test"
+```
+
+---
+
+# 44. HTTP METHOD FILTER
+
+GET:
+
+```text
+http.request.method == "GET"
+```
+
+POST:
+
+```text
+http.request.method == "POST"
+```
+
+---
+
+# 45. HTTP RESPONSE FILTER
+
+Example:
+
+```text
+http.response.code == 200
+```
+
+Find 404 responses:
+
+```text
+http.response.code == 404
+```
+
+---
+
+# 46. TLS FILTERS
+
+TLS packets:
+
+```text
+tls
+```
+
+Client Hello:
+
+```text
+tls.handshake.type == 1
+```
+
+Server Hello:
+
+```text
+tls.handshake.type == 2
+```
+
+Certificate-related handshake packets can also be investigated through the TLS handshake fields exposed by Wireshark.
+
+---
+
+# 47. ICMP
+
+ICMP is commonly used for network diagnostics.
+
+Example:
+
+```text
+ping
+```
+
+uses ICMP Echo Request and Echo Reply for IPv4.
+
+Filter:
+
+```text
+icmp
+```
+
+Example:
+
+```text
+Echo Request
+      ↓
+Echo Reply
+```
+
+---
+
+# 48. DHCP
+
+DHCP commonly uses UDP.
+
+The basic DHCP process is:
+
+> **DORA**
+
+```text
+Discover
+Offer
+Request
+ACK
+```
+
+Filter:
+
+```text
+dhcp
+```
+
+Depending on Wireshark/version, DHCP traffic may also appear under BOOTP-related protocol fields.
+
+---
+
+# 49. FTP
+
+FTP is traditionally plaintext.
+
+Common ports:
+
+```text
+TCP 21 → Control
+TCP 20 → Traditional data channel
+```
+
+A packet capture can expose application data when FTP is used without encryption.
+
+This demonstrates why secure alternatives are preferred.
+
+---
+
+# 50. TELNET
+
+Telnet traditionally provides plaintext remote terminal communication.
+
+Default port:
+
+```text
+TCP 23
+```
+
+A packet capture can potentially expose credentials and commands.
+
+Secure alternative:
+
+```text
+SSH
+```
+
+Default SSH port:
+
+```text
+TCP 22
+```
+
+---
+
+# 51. SSH
+
+SSH provides encrypted remote administration.
+
+Default:
+
+```text
+TCP 22
+```
+
+In a normal capture, you will see encrypted SSH traffic rather than readable commands/passwords.
+
+---
+
+# 52. COMMON PROTOCOL FILTER TABLE
+
+| Protocol | Wireshark filter |
+|---|---|
+| ARP | `arp` |
+| IPv4 | `ip` |
+| IPv6 | `ipv6` |
+| TCP | `tcp` |
+| UDP | `udp` |
+| DNS | `dns` |
+| HTTP | `http` |
+| TLS | `tls` |
+| ICMP | `icmp` |
+| DHCP | `dhcp` |
+| SSH | `ssh` |
+| FTP | `ftp` |
+
+---
+
+# 53. FILTER BY MAC ADDRESS
+
+Example:
+
+```text
+eth.addr == aa:bb:cc:dd:ee:ff
+```
+
+Source MAC:
+
+```text
+eth.src == aa:bb:cc:dd:ee:ff
+```
+
+Destination MAC:
+
+```text
+eth.dst == aa:bb:cc:dd:ee:ff
+```
+
+---
+
+# 54. FILTER BY TCP CONNECTION
+
+Example:
+
+```text
+tcp.stream == 3
+```
+
+Useful for isolating a particular conversation.
+
+---
+
+# 55. FINDING A SPECIFIC PACKET
+
+Wireshark supports packet searching.
+
+You can search for:
+
+- String
+- Hexadecimal value
+- Protocol field
+
+For example, within a controlled plaintext HTTP capture, searching for a known test string can help locate the relevant packet.
+
+---
+
+# 56. CONVERSATIONS
+
+Wireshark can summarize network conversations.
+
+Look under:
+
+> **Statistics → Conversations**
+
+This can help identify:
+
+- Top communicating hosts
+- TCP conversations
+- UDP conversations
+- Amount of traffic
+- Packet counts
+
+---
+
+# 57. ENDPOINTS
+
+Wireshark also provides endpoint information.
+
+Look under:
+
+> **Statistics → Endpoints**
+
+Useful for identifying:
+
+```text
+Source hosts
+Destination hosts
+MAC addresses
+IP addresses
+Traffic volume
+```
+
+---
+
+# 58. PROTOCOL HIERARCHY
+
+Look under:
+
+> **Statistics → Protocol Hierarchy**
+
+This gives an overview of protocols present in the capture.
+
+Example:
+
+```text
+Ethernet
+ └── IPv4
+      ├── TCP
+      │    ├── HTTP
+      │    └── TLS
+      └── UDP
+           └── DNS
+```
+
+---
+
+# 59. IO GRAPH
+
+Wireshark can graph packet activity over time.
+
+Useful for detecting:
+
+- Traffic spikes
+- Scanning bursts
+- Periodic communication
+- Performance problems
+- Possible beaconing patterns
+
+A graph is an indicator, not proof of malicious activity.
+
+---
+
+# 60. MALWARE TRAFFIC ANALYSIS
+
+In a controlled incident-response PCAP, analysts may investigate:
+
+```text
+1. Who communicated?
+2. When?
+3. With whom?
+4. Which protocols?
+5. Which ports?
+6. Which domains?
+7. Which IP addresses?
+8. Was data encrypted?
+9. Was there unusual DNS?
+10. Was there repeated periodic traffic?
+```
+
+---
+
+# 61. POSSIBLE C2 INDICATORS
+
+C2 = Command and Control.
+
+Potential network indicators include:
+
+- Repeated periodic connections
+- Unusual destinations
+- Suspicious domains
+- Unexpected protocols
+- Beacon-like timing
+- Unusual DNS behavior
+- Connections to rare external destinations
+
+Again:
+
+> One indicator alone does not prove C2.
+
+---
+
+# 62. NETWORK SCAN DETECTION
+
+Suppose:
+
+```text
+192.168.1.50
+      ↓
+22
+23
+25
+53
+80
+110
+139
+443
+445
+3389
+```
+
+Many connection attempts to different ports may indicate:
+
+> Port scanning.
+
+Useful filters include:
+
+```text
+tcp.flags.syn == 1 && tcp.flags.ack == 0
+```
+
+Then investigate the source/destination pattern.
+
+---
+
+# 63. POSSIBLE DATA EXFILTRATION
+
+Potential indicators:
+
+- Large outbound transfer
+- Unusual destination
+- Unexpected protocol
+- Unusual upload timing
+- Repeated transfers
+- Large DNS queries in unusual circumstances
+
+Do not conclude exfiltration from volume alone.
+
+---
+
+# 64. PACKET ANALYSIS METHODOLOGY
+
+Use:
+
+> **O-F-I-V-R**
+
+### O — Observe
+
+Understand the capture.
+
+### F — Filter
+
+Reduce noise.
+
+### I — Investigate
+
+Follow conversations.
+
+### V — Validate
+
+Check evidence and context.
+
+### R — Report
+
+Document findings.
+
+---
+
+# 65. PRACTICAL PCAP INVESTIGATION
+
+Suppose you receive:
+
+```text
+incident.pcapng
+```
+
+Start by opening it in Wireshark.
+
+Then:
+
+```text
+1. Statistics → Protocol Hierarchy
+2. Statistics → Endpoints
+3. Statistics → Conversations
+4. Review DNS
+5. Review HTTP/TLS
+6. Review unusual TCP connections
+7. Follow suspicious streams
+8. Identify suspicious patterns
+9. Validate
+10. Document
+```
+
+---
+
+# 66. FIRST FILTERS TO TRY
+
+```text
+arp
+```
+
+```text
+dns
+```
+
+```text
+http
+```
+
+```text
+tls
+```
+
+```text
+tcp
+```
+
+```text
+udp
+```
+
+```text
+icmp
+```
+
+This gives you a quick protocol overview.
+
+---
+
+# 67. INVESTIGATING A HOST
+
+Suppose suspicious host:
+
+```text
+192.168.1.50
+```
+
+Use:
+
+```text
+ip.addr == 192.168.1.50
+```
+
+Then investigate:
+
+```text
+DNS
+HTTP
+TLS
+TCP
+UDP
+ICMP
+```
+
+Ask:
+
+> What is this host communicating with?
+
+---
+
+# 68. INVESTIGATING A DESTINATION
+
+Suppose suspicious destination:
+
+```text
+203.0.113.50
+```
+
+Use:
+
+```text
+ip.addr == 203.0.113.50
+```
+
+Then examine:
+
+- Ports
+- Protocols
+- Frequency
+- DNS relationship
+- TCP streams
+- Packet sizes
+- Timing
+
+---
+
+# 69. FINDING DNS BEFORE HTTP
+
+A useful investigation sequence:
+
+```text
+DNS Query
+   ↓
+Resolved IP
+   ↓
+Connection
+   ↓
+TCP
+   ↓
+HTTP/TLS
+```
+
+This helps connect:
+
+```text
+Domain → IP → Connection → Application protocol
+```
+
+---
+
+# 70. EXAMPLE INVESTIGATION
+
+You observe:
+
+```text
+Host:
+192.168.1.20
+
+DNS:
+random-example.test
+
+Resolved IP:
+203.0.113.50
+
+Connection:
+TCP/443
+
+Frequency:
+Every 60 seconds
+```
+
+Possible interpretation:
+
+> The periodic outbound connection deserves investigation as a potential beaconing indicator.
+
+Do not immediately call it malware.
+
+---
+
+# 71. FALSE POSITIVES
+
+Periodic traffic can also be caused by:
+
+- Software updates
+- Antivirus
+- Cloud synchronization
+- Monitoring agents
+- Messaging applications
+- Time synchronization
+- Legitimate APIs
+
+Therefore:
+
+> **Pattern ≠ Proof**
+
+---
+
+# 72. WIRESHARK COLORING
+
+Wireshark uses coloring rules to make certain packets easier to identify.
+
+For example, different protocol or condition categories may appear with different colors.
+
+Do not rely solely on colors.
+
+Always inspect the actual packet fields.
+
+---
+
+# 73. TIME ANALYSIS
+
+Packet timestamps can help answer:
+
+```text
+When did the event begin?
+How long did it continue?
+How frequently did connections occur?
+What happened immediately before/after?
+```
+
+Time correlation is important in incident response.
+
+---
+
+# 74. PACKET LENGTH
+
+Packet size can provide clues.
+
+Example:
+
+```text
+Small repeated packets
+```
+
+may indicate periodic communication.
+
+Large outbound packets:
+
+```text
+Client → External server
+```
+
+may deserve investigation.
+
+But packet size alone does not prove the activity is malicious.
+
+---
+
+# 75. SOURCE AND DESTINATION
+
+Always ask:
+
+```text
+WHO → WHOM?
+```
+
+Then:
+
+```text
+WHAT protocol?
+WHAT port?
+WHEN?
+HOW OFTEN?
+HOW MUCH?
+```
+
+This is a very effective packet-analysis mindset.
+
+---
+
+# 76. NETWORK SNIFFING SECURITY RISKS
+
+Unencrypted traffic can expose:
+
+- Credentials
+- Session information
+- URLs
+- Commands
+- Application data
+
+Encrypted protocols reduce this risk.
+
+---
+
+# 77. DEFENSE AGAINST SNIFFING
+
+Use:
+
+- HTTPS/TLS
+- SSH
+- Secure VPNs
+- WPA2/WPA3 for Wi-Fi
+- Network segmentation
+- Switch security
+- Strong authentication
+- Secure application protocols
+- Network monitoring
+
+---
+
+# 78. WIRESHARK VS NMAP
+
+| Wireshark | Nmap |
+|---|---|
+| Captures/analyzes traffic | Actively probes hosts |
+| Packet analysis | Network discovery/scanning |
+| Protocol inspection | Port/service discovery |
+| Usually passive observation | Active interaction |
+| PCAP analysis | Target scanning |
+
+Memory:
+
+> **Nmap asks the network questions; Wireshark observes packets.**
+
+---
+
+# 79. WIRESHARK VS NIKTO
+
+| Wireshark | Nikto |
+|---|---|
+| Packet analysis | Web server scanning |
+| Network traffic | Web server checks |
+| Protocol inspection | Potential web-server issues |
+| PCAP investigation | HTTP server assessment |
+
+---
+
+# 80. WIRESHARK VS IDS
+
+### Wireshark
+
+Primarily an interactive packet-analysis tool.
+
+### IDS
+
+Designed to detect suspicious activity according to rules/models.
+
+Examples:
+
+```text
+Wireshark → Analyze
+IDS → Detect/Alert
+```
+
+They can complement each other.
+
+---
+
+# 81. SAFE PRACTICAL LAB
+
+Use:
+
+```text
+Kali/Linux
+     │
+     ├── Your test server
+     │
+     └── Your test client
+```
+
+Generate normal lab traffic:
+
+```text
+Ping
+DNS lookup
+HTTP test
+HTTPS test
+SSH test
+```
+
+Capture the traffic with Wireshark.
+
+---
+
+# 82. LAB: CAPTURE NORMAL TRAFFIC
+
+### Step 1
+
+Open Wireshark.
+
+### Step 2
+
+Select your authorized Ethernet/virtual interface.
+
+### Step 3
+
+Start capture.
+
+### Step 4
+
+Generate traffic from your test machine.
+
+For example:
+
+```bash
+ping <your-lab-host>
+```
+
+### Step 5
+
+Stop capture.
+
+### Step 6
+
+Apply:
+
+```text
+icmp
+```
+
+Observe Echo Request/Reply.
+
+---
+
+# 83. LAB: DNS
+
+Generate a DNS lookup against your authorized test environment.
+
+Then use:
+
+```text
+dns
+```
+
+Identify:
+
+```text
+Query
+Response
+Requested domain
+Returned address
+```
+
+---
+
+# 84. LAB: TCP HANDSHAKE
+
+Capture traffic to your own test server.
+
+Filter:
+
+```text
+tcp
+```
+
+Find:
+
+```text
+SYN
+SYN, ACK
+ACK
+```
+
+Remember:
+
+> **SYN → SYN/ACK → ACK**
+
+---
+
+# 85. LAB: HTTP
+
+If your isolated lab contains a test HTTP server:
+
+```text
+http
+```
+
+Then inspect:
+
+```text
+GET
+Host
+URI
+HTTP response
+```
+
+Use **Follow → HTTP Stream** to understand the conversation.
+
+---
+
+# 86. LAB: HTTPS
+
+Repeat the test using HTTPS.
+
+Filter:
+
+```text
+tls
+```
+
+Compare it with HTTP.
+
+Expected learning:
+
+```text
+HTTP
+→ application data may be visible
+
+HTTPS
+→ application data protected by TLS
+```
+
+---
+
+# 87. LAB: ARP
+
+Filter:
+
+```text
+arp
+```
+
+Identify:
+
+```text
+Request
+Reply
+Sender IP
+Sender MAC
+```
+
+Compare the observed mapping with your known lab configuration.
+
+---
+
+# 88. LAB: TCP STREAM
+
+Select a TCP packet.
+
+Right-click:
+
+```text
+Follow
+   ↓
+TCP Stream
+```
+
+Observe the reconstructed conversation.
+
+This is one of the most important Wireshark skills for exams and investigations.
+
+---
+
+# 89. LAB: CONVERSATIONS
+
+Open:
+
+```text
+Statistics → Conversations
+```
+
+Review:
+
+- IP conversations
+- TCP conversations
+- UDP conversations
+
+Ask:
+
+> Which hosts communicate most?
+
+---
+
+# 90. LAB: ENDPOINTS
+
+Open:
+
+```text
+Statistics → Endpoints
+```
+
+Review:
+
+- IPv4 addresses
+- IPv6 addresses
+- MAC addresses
+
+This helps establish the hosts present in the capture.
+
+---
+
+# 91. LAB: PROTOCOL HIERARCHY
+
+Open:
+
+```text
+Statistics → Protocol Hierarchy
+```
+
+Identify:
+
+```text
+Ethernet
+IPv4
+TCP/UDP
+DNS
+HTTP
+TLS
+```
+
+This is an excellent first step when receiving an unfamiliar PCAP.
+
+---
+
+# 92. BASIC PCAP INVESTIGATION CHECKLIST
+
+```text
+□ Identify capture duration
+□ Identify endpoints
+□ Identify protocols
+□ Identify top conversations
+□ Review ARP
+□ Review DNS
+□ Review TCP
+□ Review HTTP
+□ Review TLS
+□ Look for unusual destinations
+□ Look for repeated connections
+□ Follow suspicious streams
+□ Correlate timestamps
+□ Validate findings
+□ Document evidence
+```
+
+---
+
+# 93. COMMON WIRESHARK MISTAKES
+
+### Mistake 1
+
+Assuming every packet is malicious.
+
+### Mistake 2
+
+Ignoring context.
+
+### Mistake 3
+
+Confusing capture and display filters.
+
+### Mistake 4
+
+Assuming encrypted traffic is readable.
+
+### Mistake 5
+
+Calling every DNS anomaly malware.
+
+### Mistake 6
+
+Ignoring timestamps.
+
+### Mistake 7
+
+Looking at individual packets without reconstructing conversations.
+
+### Mistake 8
+
+Assuming promiscuous mode captures all switched-network traffic.
+
+---
+
+# 94. HARD SCENARIO MCQs
+
+## Q1
+
+A security analyst wants to examine only DNS packets from an existing capture.
+
+Which display filter should they use?
+
+A. `dns`  
+B. `http`  
+C. `tcp`  
+D. `arp`
+
+**Answer: A**
+
+---
+
+## Q2
+
+A client sends:
+
+```text
+SYN
+```
+
+The server replies:
+
+```text
+SYN, ACK
+```
+
+What should happen next?
+
+A. FIN  
+B. RST  
+C. ACK  
+D. DNS
+
+**Answer: C**
+
+---
+
+## Q3
+
+Which sequence represents the TCP 3-way handshake?
+
+A. ACK → SYN → FIN  
+B. SYN → SYN/ACK → ACK  
+C. FIN → ACK → SYN  
+D. SYN → FIN → ACK
+
+**Answer: B**
+
+---
+
+## Q4
+
+An analyst wants traffic involving `192.168.1.10`.
+
+Which filter is appropriate?
+
+A. `ip.addr == 192.168.1.10`  
+B. `tcp.port == 192.168.1.10`  
+C. `dns == 192.168.1.10`  
+D. `arp.port == 192.168.1.10`
+
+**Answer: A**
+
+---
+
+## Q5
+
+What is the primary purpose of **Follow TCP Stream**?
+
+A. Scan all ports  
+B. Reconstruct a TCP conversation  
+C. Change the MAC address  
+D. Encrypt TCP
+
+**Answer: B**
+
+---
+
+## Q6
+
+An analyst sees TLS Application Data in a capture.
+
+What can they conclude?
+
+A. The traffic is definitely malicious  
+B. The application data is necessarily plaintext  
+C. The traffic is TLS-protected at that point, subject to the protocol/session configuration  
+D. The traffic is DNS
+
+**Answer: C**
+
+---
+
+## Q7
+
+Which protocol is commonly used for DNS?
+
+A. TCP only  
+B. UDP commonly, with TCP also used in certain situations  
+C. ICMP only  
+D. ARP
+
+**Answer: B**
+
+---
+
+## Q8
+
+A host sends SYN packets to many different ports on another system.
+
+What might this indicate?
+
+A. Port scanning  
+B. DNS poisoning automatically  
+C. XSS  
+D. File compression
+
+**Answer: A**
+
+---
+
+## Q9
+
+What does promiscuous mode do?
+
+A. Automatically decrypts TLS  
+B. Allows the interface to pass more frames to the capture software  
+C. Makes Wi-Fi faster  
+D. Disables TCP
+
+**Answer: B**
+
+---
+
+## Q10
+
+Why doesn't promiscuous mode automatically show all unicast traffic on a switched network?
+
+A. The switch normally forwards unicast frames only toward the appropriate port  
+B. Wireshark cannot capture packets  
+C. TCP prevents sniffing  
+D. DNS blocks it
+
+**Answer: A**
+
+---
+
+# 95. HARDER SCENARIO MCQs
+
+## Q11
+
+A PCAP shows a host querying hundreds of unusual domains with random-looking subdomains.
+
+What should the analyst do?
+
+A. Immediately declare it malware  
+B. Investigate the DNS pattern as a potential indicator and correlate with other evidence  
+C. Ignore it  
+D. Delete the PCAP
+
+**Answer: B**
+
+---
+
+## Q12
+
+A network analyst wants to capture only traffic from a specific host rather than capture everything.
+
+Which concept is relevant?
+
+A. Capture filtering  
+B. TCP handshake  
+C. DNS recursion  
+D. HTTP status code
+
+**Answer: A**
+
+---
+
+## Q13
+
+An analyst applies `http` to an already captured PCAP.
+
+What does this do?
+
+A. Captures only future HTTP packets  
+B. Displays packets identified as HTTP from the existing capture  
+C. Deletes non-HTTP packets  
+D. Converts HTTP to HTTPS
+
+**Answer: B**
+
+---
+
+## Q14
+
+A user says:
+
+> "I enabled promiscuous mode, so I can now see every computer's traffic."
+
+What is wrong?
+
+A. Switched networks normally do not send all unicast traffic to that interface  
+B. Promiscuous mode disables Ethernet  
+C. TCP encrypts Ethernet  
+D. DNS prevents packet capture
+
+**Answer: A**
+
+---
+
+## Q15
+
+A suspicious PC makes a connection every 60 seconds to the same external destination.
+
+What is the best conclusion?
+
+A. It is definitely malware  
+B. It is potentially beacon-like and requires further investigation  
+C. It is definitely DNS  
+D. It cannot be investigated
+
+**Answer: B**
+
+---
+
+## Q16
+
+A packet capture contains FTP traffic.
+
+Why might the analyst be concerned?
+
+A. Traditional FTP can transmit application data without encryption  
+B. FTP automatically encrypts everything  
+C. FTP uses ARP  
+D. FTP cannot be captured
+
+**Answer: A**
+
+---
+
+## Q17
+
+A capture shows:
+
+```text
+Client → SYN
+Server → SYN/ACK
+Client → ACK
+```
+
+What has occurred?
+
+A. TCP connection establishment  
+B. DNS resolution  
+C. ARP poisoning  
+D. TLS decryption
+
+**Answer: A**
+
+---
+
+## Q18
+
+An analyst sees a large outbound transfer to an unusual external IP.
+
+What is the best response?
+
+A. Automatically classify it as data theft  
+B. Investigate destination, protocol, timing, volume, host role, and application context  
+C. Ignore it  
+D. Delete the packets
+
+**Answer: B**
+
+---
+
+## Q19
+
+Which sequence is generally most useful when starting an unfamiliar PCAP?
+
+A. Delete packets → run exploit → report  
+B. Protocol hierarchy → endpoints → conversations → focused filters → streams  
+C. Immediately inspect packet 1 only  
+D. Disable TLS
+
+**Answer: B**
+
+---
+
+## Q20
+
+A Wireshark analyst wants to investigate all traffic belonging to one TCP conversation.
+
+Which filter is useful?
+
+A. `tcp.stream == N`  
+B. `dns == N`  
+C. `arp.stream == N`  
+D. `http.stream == N`
+
+**Answer: A**
+
+---
+
+# 96. EXAM TRAPS
+
+### Trap 1
+
+**"Wireshark is a vulnerability scanner."**
+
+❌ False.
+
+Wireshark is primarily a packet/protocol analyzer.
+
+---
+
+### Trap 2
+
+**"Promiscuous mode lets you see all switched traffic."**
+
+❌ False.
+
+Switch forwarding behavior still matters.
+
+---
+
+### Trap 3
+
+**"HTTP and HTTPS are equally visible in Wireshark."**
+
+❌ False.
+
+HTTPS/TLS protects application content.
+
+---
+
+### Trap 4
+
+**"Every SYN means an attack."**
+
+❌ False.
+
+SYN is a normal TCP connection mechanism.
+
+---
+
+### Trap 5
+
+**"Every unusual DNS query is malware."**
+
+❌ False.
+
+It is an indicator requiring investigation.
+
+---
+
+### Trap 6
+
+**"A packet capture always contains readable passwords."**
+
+❌ False.
+
+Encryption can protect application data.
+
+---
+
+# 97. WIRESHARK MASTER FILTER SHEET
+
+```text
+arp
+dns
+http
+tls
+tcp
+udp
+icmp
+ssh
+ftp
+```
+
+### IP
+
+```text
+ip.addr == 192.168.1.10
+ip.src == 192.168.1.10
+ip.dst == 192.168.1.10
+```
+
+### TCP
+
+```text
+tcp.port == 443
+tcp.flags.syn == 1
+tcp.flags.syn == 1 && tcp.flags.ack == 0
+tcp.stream == 0
+```
+
+### UDP
+
+```text
+udp.port == 53
+```
+
+### HTTP
+
+```text
+http.request.method == "GET"
+http.request.method == "POST"
+http.response.code == 200
+http.response.code == 404
+```
+
+### TLS
+
+```text
+tls
+tls.handshake.type == 1
+tls.handshake.type == 2
+```
+
+---
+
+# 98. DAY 32 MEMORY TRICKS
+
+## Wireshark Workflow
+
+> **C-F-A-R**
+
+```text
+Capture
+Filter
+Analyze
+Report
+```
+
+## Investigation
+
+> **O-F-I-V-R**
+
+```text
+Observe
+Filter
+Investigate
+Validate
+Report
+```
+
+## TCP
+
+> **S-S-A**
+
+```text
+SYN
+SYN/ACK
+ACK
+```
+
+## DNS
+
+> **Q-R**
+
+```text
+Query
+Response
+```
+
+## Packet Thinking
+
+> **WHO → WHOM → WHAT → WHEN → HOW MUCH**
+
+```text
+WHO       = Source
+WHOM      = Destination
+WHAT      = Protocol
+WHEN      = Timestamp
+HOW MUCH  = Packet/data volume
+```
+
+---
+
+# 99. MOST IMPORTANT EXAM QUESTIONS
+
+### What is network sniffing?
+
+Capturing and analyzing network packets.
+
+### What is Wireshark?
+
+A network protocol analyzer used to capture and inspect network traffic.
+
+### What is a display filter?
+
+A filter used to control which already-captured packets are displayed.
+
+### What is a capture filter?
+
+A filter that determines which packets are captured.
+
+### What is promiscuous mode?
+
+A mode that allows a network interface to pass more received Ethernet frames to the capture software for inspection.
+
+### What is the TCP 3-way handshake?
+
+```text
+SYN → SYN/ACK → ACK
+```
+
+### What is `tcp.stream`?
+
+A Wireshark field used to identify packets belonging to a particular TCP conversation.
+
+### What is Follow TCP Stream?
+
+A feature that reconstructs a TCP conversation for easier analysis.
+
+### What does `arp` show?
+
+ARP packets.
+
+### What does `dns` show?
+
+DNS traffic.
+
+### What does `http` show?
+
+HTTP traffic identified by Wireshark.
+
+### What does `tls` show?
+
+TLS protocol traffic.
+
+---
+
+# 100. DAY 32 FINAL REVISION
+
+```text
+NETWORK SNIFFING
+       ↓
+CAPTURE PACKETS
+       ↓
+WIRESHARK
+       ↓
+FILTER
+       ↓
+┌────────┬────────┬────────┬────────┐
+ARP      DNS      TCP      UDP
+│        │        │        │
+IP/MAC   Name/IP  Reliable  Datagram
+                  │
+                  ↓
+              HANDSHAKE
+              SYN
+               ↓
+            SYN/ACK
+               ↓
+              ACK
+```
+
+Then investigate:
+
+```text
+HTTP
+TLS
+DNS
+TCP
+UDP
+ARP
+ICMP
+```
+
+And finally:
+
+```text
+Observe
+   ↓
+Filter
+   ↓
+Investigate
+   ↓
+Follow Streams
+   ↓
+Validate
+   ↓
+Report
+```
+
+# ⭐ ONE-LINE EXAM ANSWER
+
+> **Wireshark is a network protocol analyzer used to capture and inspect packets, allowing analysts to investigate protocols, hosts, connections, and suspicious network behavior; however, encryption such as TLS can prevent captured application data from being directly read.**
+
+# 🏆 DAY 32 GOLDEN RULE
+
+> **Don't analyze packets one by one without context. First identify the hosts and protocols, then filter, reconstruct conversations, correlate timestamps, validate the evidence, and report the finding.**

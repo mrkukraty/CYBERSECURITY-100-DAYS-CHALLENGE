@@ -1,0 +1,974 @@
+# DAY 7 – INTRODUCTION TO PENETRATION TESTING
+## Understand the Phases of Penetration Testing
+
+---
+
+# 1. What is Penetration Testing?
+
+**Penetration Testing (Pentesting)** is an authorized security assessment in which security professionals simulate attacks against a system, network, application, or organization to identify and validate security weaknesses.
+
+### Simple Definition
+
+> **Pentesting = Authorized simulated attack to find security vulnerabilities before real attackers do.**
+
+The main goal is not simply to find vulnerabilities, but to determine whether they can actually be exploited and what impact they could have.
+
+---
+
+# 2. Why is Penetration Testing Important?
+
+Penetration testing helps organizations:
+
+- Find security vulnerabilities
+- Validate security controls
+- Identify exploitable weaknesses
+- Understand potential attack paths
+- Measure security risk
+- Improve security defenses
+- Meet security/compliance requirements
+- Reduce the chance of successful real-world attacks
+
+---
+
+# 3. Vulnerability Assessment vs Penetration Testing
+
+This is an important exam question.
+
+### Vulnerability Assessment (VA)
+
+Focuses mainly on:
+
+> **Finding and identifying vulnerabilities**
+
+### Penetration Testing (PT)
+
+Focuses on:
+
+> **Finding, validating, and safely exploiting vulnerabilities to determine real impact**
+
+| Vulnerability Assessment | Penetration Testing |
+|---|---|
+| Finds vulnerabilities | Validates vulnerabilities |
+| Usually broader coverage | Usually deeper testing |
+| Often automated | Manual + automated |
+| Does not necessarily exploit | May safely exploit |
+| Produces vulnerability list | Shows attack paths and impact |
+
+### Easy Memory
+
+> **VA = Find**
+
+> **Pentest = Find + Validate**
+
+---
+
+# 4. Vulnerability, Exploit and Risk
+
+### Vulnerability
+
+A weakness in a system.
+
+Example:
+
+> Outdated software contains a known security weakness.
+
+### Exploit
+
+A technique or code that takes advantage of a vulnerability.
+
+### Risk
+
+The potential impact resulting from a threat exploiting a vulnerability.
+
+### Relationship
+
+```text
+Threat
+   ↓
+Exploits
+   ↓
+Vulnerability
+   ↓
+Impact
+   ↓
+Risk
+```
+
+A more useful mental model is:
+
+```text
+Threat + Vulnerability
+        ↓
+    Exploitation
+        ↓
+      Impact
+        ↓
+       Risk
+```
+
+---
+
+# 5. Pentesting vs Real Hacking
+
+| Ethical Pentesting | Malicious Hacking |
+|---|---|
+| Authorized | Unauthorized |
+| Defined scope | No legitimate scope |
+| Controlled | Potentially destructive |
+| Documented | Usually concealed |
+| Goal is security improvement | Goal may be theft, disruption, or unauthorized access |
+
+### Important
+
+> **Authorization is what separates an authorized penetration test from illegal unauthorized hacking.**
+
+---
+
+# 6. Rules of Engagement (RoE)
+
+Before testing begins, the tester and organization should agree on the **Rules of Engagement**.
+
+RoE defines how testing will be performed.
+
+It can specify:
+
+- Target systems
+- IP addresses/domains
+- Applications
+- Testing dates and times
+- Allowed techniques
+- Prohibited techniques
+- Testing locations
+- Emergency contacts
+- Incident handling
+- Data-handling requirements
+- Stop conditions
+
+---
+
+# 7. Scope
+
+**Scope** defines what the penetration tester is allowed to test.
+
+### Example
+
+```text
+IN SCOPE:
+192.168.10.0/24
+test.example.com
+
+OUT OF SCOPE:
+Production database
+Third-party systems
+Employee personal devices
+```
+
+### Golden Rule
+
+> **Never test a system simply because you can reach it. Test only what is authorized and in scope.**
+
+---
+
+# 8. Types of Penetration Testing
+
+## 8.1 Black Box Testing
+
+The tester has little or no internal information about the target.
+
+```text
+Tester → Target
+   ↓
+Limited Information
+```
+
+### Similar to:
+
+> External attacker perspective.
+
+---
+
+## 8.2 White Box Testing
+
+The tester receives extensive information about the target.
+
+Information may include:
+
+- Source code
+- Architecture
+- Credentials
+- Network diagrams
+- Application documentation
+
+### Similar to:
+
+> Internal/fully informed security assessment.
+
+---
+
+## 8.3 Gray Box Testing
+
+The tester receives some internal information but not everything.
+
+```text
+Black Box → Gray Box → White Box
+Less information              More information
+```
+
+---
+
+# 9. External vs Internal Penetration Testing
+
+### External Pentest
+
+Tests systems exposed to the Internet.
+
+Examples:
+
+- Public web applications
+- Public APIs
+- External network services
+- Internet-facing infrastructure
+
+### Internal Pentest
+
+Simulates an attacker who already has some level of access to the internal environment.
+
+Examples:
+
+- Internal network
+- Internal services
+- Workstations
+- Internal applications
+
+---
+
+# 10. Common Pentesting Areas
+
+Penetration testing can be performed against:
+
+- Web applications
+- Mobile applications
+- APIs
+- Networks
+- Wireless networks
+- Cloud environments
+- Active Directory environments
+- Servers
+- Endpoints
+- IoT systems
+
+---
+
+# 11. Phases of Penetration Testing
+
+A commonly used penetration-testing workflow is:
+
+```text
+1. Pre-Engagement / Planning
+          ↓
+2. Reconnaissance
+          ↓
+3. Scanning & Enumeration
+          ↓
+4. Vulnerability Analysis
+          ↓
+5. Exploitation
+          ↓
+6. Post-Exploitation
+          ↓
+7. Reporting
+          ↓
+8. Remediation / Retesting
+```
+
+Different methodologies may combine, rename, or reorder some activities, but the overall process is similar.
+
+---
+
+# 12. Phase 1 – Pre-Engagement / Planning
+
+This is the preparation stage.
+
+The tester and organization establish:
+
+- Authorization
+- Scope
+- Objectives
+- Rules of Engagement
+- Testing schedule
+- Allowed techniques
+- Prohibited actions
+- Communication procedure
+- Emergency contacts
+
+### Main Question
+
+> **What are we allowed to test and how are we allowed to test it?**
+
+---
+
+# 13. Phase 2 – Reconnaissance
+
+**Reconnaissance** means gathering information about the target.
+
+It can be:
+
+### Passive Reconnaissance
+
+Information is collected without directly interacting with the target in a way that probes its systems.
+
+Examples:
+
+- Public websites
+- Public documents
+- DNS information
+- Publicly available organizational information
+- Search engines
+
+### Active Reconnaissance
+
+The tester directly interacts with the authorized target.
+
+Examples:
+
+- Sending probes
+- Checking available services
+- Interacting with target infrastructure
+
+### Memory Trick
+
+> **Recon = Know the Target**
+
+---
+
+# 14. Phase 3 – Scanning and Enumeration
+
+After reconnaissance, testers identify technical details about the authorized target.
+
+### Scanning
+
+Determines information such as:
+
+- Live hosts
+- Open ports
+- Available services
+- Potential security weaknesses
+
+### Enumeration
+
+Goes deeper to identify details about services and resources.
+
+Examples:
+
+- Service versions
+- Usernames where legitimately exposed
+- Network shares
+- Application endpoints
+- Domain information
+
+### Difference
+
+> **Scanning = Discover**
+
+> **Enumeration = Identify details**
+
+---
+
+# 15. Phase 4 – Vulnerability Analysis
+
+The tester analyzes discovered information to identify possible vulnerabilities.
+
+Examples:
+
+- Outdated software
+- Weak configurations
+- Authentication weaknesses
+- Access-control problems
+- Injection vulnerabilities
+- Security misconfigurations
+
+The tester determines:
+
+- Is the vulnerability real?
+- Is it exploitable?
+- What is its severity?
+- What could be the impact?
+
+---
+
+# 16. Phase 5 – Exploitation
+
+**Exploitation** is the controlled attempt to demonstrate that a vulnerability can actually be used to achieve an unauthorized action within the approved scope.
+
+Example concept:
+
+```text
+Vulnerability
+     ↓
+Controlled Exploitation
+     ↓
+Proof of Impact
+```
+
+### Important
+
+A professional tester should avoid unnecessary damage.
+
+The objective is:
+
+> **Prove the security weakness, not destroy the system.**
+
+---
+
+# 17. Phase 6 – Post-Exploitation
+
+After gaining authorized access during a test, the tester determines the potential impact and extent of the compromise.
+
+Activities can include determining:
+
+- What access was obtained
+- What privileges were obtained
+- What sensitive resources could potentially be accessed
+- Whether access could be extended
+- What security controls prevented or failed to prevent further access
+
+### Main Question
+
+> **If an attacker gets in, how far could they potentially go?**
+
+---
+
+# 18. Privilege Escalation
+
+Privilege escalation means obtaining higher privileges than originally available.
+
+### Two Main Types
+
+### Vertical Privilege Escalation
+
+Low-privileged user → High-privileged user
+
+```text
+Normal User
+     ↓
+Administrator/Root
+```
+
+### Horizontal Privilege Escalation
+
+One user accesses resources belonging to another user with a similar privilege level.
+
+```text
+User A
+  ↓
+User B's Resources
+```
+
+---
+
+# 19. Lateral Movement
+
+**Lateral movement** means moving from one compromised system/account/resource to another within an environment.
+
+Simplified:
+
+```text
+System A
+   ↓
+System B
+   ↓
+System C
+```
+
+In authorized testing, this is performed only when explicitly allowed by the scope.
+
+---
+
+# 20. Phase 7 – Reporting
+
+Reporting is one of the most important parts of a penetration test.
+
+A good report should communicate:
+
+- What was tested
+- What vulnerabilities were found
+- Evidence
+- Severity
+- Business/technical impact
+- Affected assets
+- Recommendations
+- Remediation priorities
+
+---
+
+# 21. Typical Finding Structure
+
+A vulnerability report may contain:
+
+```text
+Finding
+↓
+Description
+↓
+Affected Asset
+↓
+Evidence
+↓
+Risk/Severity
+↓
+Impact
+↓
+Recommendation
+```
+
+Example:
+
+```text
+Finding:
+Weak Authentication Control
+
+Severity:
+High
+
+Impact:
+Unauthorized account access may be possible.
+
+Recommendation:
+Implement stronger authentication controls.
+```
+
+---
+
+# 22. Severity Levels
+
+Organizations commonly classify findings as:
+
+- Critical
+- High
+- Medium
+- Low
+- Informational
+
+### General Meaning
+
+| Severity | Meaning |
+|---|---|
+| Critical | Extremely serious impact |
+| High | Significant security risk |
+| Medium | Moderate risk |
+| Low | Limited impact |
+| Informational | Useful security observation |
+
+Severity should be based on the actual technical and business impact, not simply on how interesting a vulnerability appears.
+
+---
+
+# 23. Remediation
+
+**Remediation** means fixing the identified security weakness.
+
+Examples:
+
+- Apply security patches
+- Correct configurations
+- Improve access controls
+- Fix vulnerable code
+- Strengthen authentication
+- Remove unnecessary services
+- Improve monitoring
+
+---
+
+# 24. Retesting
+
+After remediation, the tester checks whether the vulnerability has actually been fixed.
+
+```text
+Finding
+   ↓
+Fix
+   ↓
+Retest
+   ↓
+Fixed / Still Vulnerable
+```
+
+### Important
+
+> **A vulnerability should not be considered closed simply because someone says it was fixed. It should be verified where appropriate.**
+
+---
+
+# 25. Pentesting Methodology
+
+Common penetration-testing methodologies/frameworks include:
+
+- PTES – Penetration Testing Execution Standard
+- NIST SP 800-115
+- OWASP Testing Guide
+- OSSTMM
+
+For exams, remember that methodologies can use different terminology and phase structures.
+
+---
+
+# 26. Tools Used in Pentesting
+
+Different phases use different categories of tools.
+
+### Reconnaissance
+
+- Nmap
+- Amass
+- WHOIS/DNS tools
+
+### Web Testing
+
+- Burp Suite
+- OWASP ZAP
+
+### Vulnerability Assessment
+
+- Nessus
+- OpenVAS/Greenbone
+
+### Exploitation
+
+- Metasploit Framework
+
+### Network Analysis
+
+- Wireshark
+
+### Password Auditing
+
+- Hashcat
+- John the Ripper
+
+**Use these only on systems you own or are explicitly authorized to test.**
+
+---
+
+# 27. Nmap
+
+**Nmap = Network Mapper**
+
+Used for network discovery and security auditing.
+
+It can help identify:
+
+- Hosts
+- Open ports
+- Services
+- Service versions
+- Operating-system information in appropriate circumstances
+
+### Memory
+
+> **Nmap = Network Discovery + Enumeration**
+
+---
+
+# 28. Burp Suite
+
+Burp Suite is widely used for **web application security testing**.
+
+It can help testers inspect and manipulate HTTP/HTTPS requests and responses in an authorized test environment.
+
+Common components/features include:
+
+- Proxy
+- Repeater
+- Intruder
+- Scanner (depending on edition)
+
+### Memory
+
+> **Burp = Web Application Testing**
+
+---
+
+# 29. Metasploit
+
+**Metasploit Framework** is a penetration-testing framework used to develop, test, and demonstrate exploits and security weaknesses in authorized environments.
+
+### Memory
+
+> **Metasploit = Exploitation Framework**
+
+---
+
+# 30. Wireshark
+
+**Wireshark** is a network protocol analyzer.
+
+It allows security professionals to inspect network packets and protocols.
+
+### Memory
+
+> **Wireshark = See Network Traffic**
+
+---
+
+# 31. Typical Pentest Workflow Example
+
+Suppose an organization authorizes testing of a lab web server.
+
+```text
+Authorization
+     ↓
+Reconnaissance
+     ↓
+Discover Target
+     ↓
+Scan Services
+     ↓
+Enumerate
+     ↓
+Identify Vulnerability
+     ↓
+Validate Vulnerability
+     ↓
+Measure Impact
+     ↓
+Document Evidence
+     ↓
+Report
+     ↓
+Fix
+     ↓
+Retest
+```
+
+---
+
+# 32. Pentesting vs Vulnerability Assessment vs Security Audit
+
+| Pentest | Vulnerability Assessment | Security Audit |
+|---|---|---|
+| Simulates attacks | Identifies vulnerabilities | Checks compliance/controls |
+| Validates exploitability | Usually prioritizes findings | Checks whether requirements are met |
+| Can demonstrate impact | Usually broader scanning | Evidence/documentation focused |
+| Offensive perspective | Detection perspective | Compliance/control perspective |
+
+---
+
+# 33. Common Exam Question
+
+### Q: What is the correct order?
+
+A. Exploitation → Recon → Reporting → Scanning  
+B. Recon → Scanning/Enumeration → Vulnerability Analysis → Exploitation → Reporting  
+C. Reporting → Exploitation → Recon → Scanning  
+D. Scanning → Reporting → Recon → Exploitation
+
+### Answer:
+
+**B**
+
+---
+
+# 34. Reconnaissance vs Enumeration
+
+### Reconnaissance
+
+> Collect information about the target.
+
+### Enumeration
+
+> Extract detailed information from discovered services/resources.
+
+### Memory:
+
+**Recon = What exists?**
+
+**Enumeration = What details can I identify about it?**
+
+---
+
+# 35. Exploitation vs Post-Exploitation
+
+### Exploitation
+
+> Gain or demonstrate access by exploiting a vulnerability.
+
+### Post-Exploitation
+
+> Determine what can be achieved after that access.
+
+### Memory:
+
+**Exploit = Get in**
+
+**Post-exploit = What can I do after getting in?**
+
+---
+
+# 36. Reporting vs Remediation
+
+### Reporting
+
+> Explain the problem and recommend a solution.
+
+### Remediation
+
+> Actually fix the problem.
+
+### Retesting
+
+> Verify the fix.
+
+```text
+Report → Fix → Retest
+```
+
+---
+
+# 37. Important Terms for Exams
+
+### Attack Surface
+
+The total set of possible points through which an attacker could attempt to interact with a system.
+
+### Attack Vector
+
+The method/path used to reach or exploit a target.
+
+### Exploit
+
+A technique/code that takes advantage of a vulnerability.
+
+### Payload
+
+The action or data delivered as part of an exploit.
+
+### Proof of Concept (PoC)
+
+A demonstration showing that a vulnerability or security issue is real.
+
+### False Positive
+
+A tool reports a vulnerability, but investigation shows it is not actually present.
+
+### False Negative
+
+A vulnerability exists, but the tool/test fails to detect it.
+
+---
+
+# 38. Pentesting Golden Rules
+
+1. **Get authorization first.**
+2. **Define the scope.**
+3. **Follow the Rules of Engagement.**
+4. **Do not attack out-of-scope systems.**
+5. **Avoid unnecessary damage.**
+6. **Protect collected data.**
+7. **Document evidence.**
+8. **Report findings clearly.**
+9. **Recommend remediation.**
+10. **Retest after fixes.**
+
+---
+
+# 39. DAY 7 QUICK REVISION
+
+```text
+Pentesting
+    ↓
+Authorized simulated attack
+    ↓
+Planning
+    ↓
+Reconnaissance
+    ↓
+Scanning & Enumeration
+    ↓
+Vulnerability Analysis
+    ↓
+Exploitation
+    ↓
+Post-Exploitation
+    ↓
+Reporting
+    ↓
+Remediation
+    ↓
+Retesting
+```
+
+### One-line definitions
+
+**Pentesting:** Authorized security testing.
+
+**Scope:** What can be tested.
+
+**RoE:** How testing should be performed.
+
+**Recon:** Information gathering.
+
+**Scanning:** Discover hosts/services/ports.
+
+**Enumeration:** Gather detailed service/resource information.
+
+**Vulnerability Analysis:** Identify and validate weaknesses.
+
+**Exploitation:** Safely demonstrate a vulnerability's impact.
+
+**Post-Exploitation:** Determine potential impact after access.
+
+**Privilege Escalation:** Gain higher privileges.
+
+**Lateral Movement:** Move between systems/resources.
+
+**Reporting:** Document findings and recommendations.
+
+**Remediation:** Fix vulnerabilities.
+
+**Retesting:** Verify the fixes.
+
+---
+
+# 🔥 DAY 7 MEMORY TRICK
+
+Remember:
+
+## **P-R-S-V-E-P-R-R**
+
+**P** → Planning  
+**R** → Reconnaissance  
+**S** → Scanning  
+**V** → Vulnerability Analysis  
+**E** → Exploitation  
+**P** → Post-Exploitation  
+**R** → Reporting  
+**R** → Retesting
+
+### Easy sentence:
+
+> **“Plan, Recon, Scan, Verify, Exploit, Post-exploit, Report, Retest.”**
+
+---
+
+# ⭐ MOST IMPORTANT EXAM POINTS
+
+1. **Pentesting requires authorization.**
+2. **Scope defines what can be tested.**
+3. **Reconnaissance = information gathering.**
+4. **Scanning = discovering hosts, ports and services.**
+5. **Enumeration = gathering detailed information.**
+6. **Vulnerability analysis = identify and validate weaknesses.**
+7. **Exploitation = controlled demonstration of impact.**
+8. **Post-exploitation = determine potential impact after access.**
+9. **Privilege escalation = obtain higher privileges.**
+10. **Lateral movement = move between systems/resources.**
+11. **Reporting documents findings and recommendations.**
+12. **Remediation fixes vulnerabilities.**
+13. **Retesting verifies the fix.**
+14. **Black box = little/no internal information.**
+15. **White box = extensive internal information.**
+16. **Gray box = partial information.**
+17. **VA finds vulnerabilities; pentesting validates them.**
+18. **Private key signs; public key verifies.**
+19. **Encryption protects confidentiality; hashing supports integrity.**
+20. **Never test systems outside the authorized scope.**

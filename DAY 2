@@ -1,0 +1,708 @@
+# DAY 2 – NETWORKING BASICS
+
+## 1. What is Computer Networking?
+
+A **computer network** is a group of connected devices that communicate and share data and resources.
+
+### Examples
+- Computers connected through a LAN
+- Internet
+- Wi-Fi network
+- Corporate network
+- Data center network
+
+### Main Components
+
+- **Client** – Requests a service.
+- **Server** – Provides a service.
+- **Router** – Connects different networks.
+- **Switch** – Connects devices within a network.
+- **Firewall** – Controls network traffic.
+- **Access Point** – Provides wireless network access.
+
+---
+
+# 2. IP Address
+
+An **IP address** uniquely identifies a device/interface on an IP network.
+
+### IPv4
+
+IPv4 uses **32 bits** and is written as four decimal numbers.
+
+Example:
+
+`192.168.1.10`
+
+Each number can range from **0–255**.
+
+### IPv6
+
+IPv6 uses **128 bits**.
+
+Example:
+
+`2001:db8::1`
+
+IPv6 was developed partly because IPv4 addresses are limited.
+
+---
+
+# 3. Private IP Addresses
+
+Private IPv4 ranges commonly used inside local networks:
+
+| Range | Private Network |
+|---|---|
+| `10.0.0.0/8` | 10.0.0.0 – 10.255.255.255 |
+| `172.16.0.0/12` | 172.16.0.0 – 172.31.255.255 |
+| `192.168.0.0/16` | 192.168.0.0 – 192.168.255.255 |
+
+Example:
+
+`192.168.1.100`
+
+is normally a private IP address.
+
+---
+
+# 4. MAC Address
+
+A **MAC address** is a hardware/link-layer address associated with a network interface.
+
+Example:
+
+`00:1A:2B:3C:4D:5E`
+
+### IP vs MAC
+
+**IP address** → Used for logical network communication.
+
+**MAC address** → Used for communication on the local network/link.
+
+---
+
+# 5. TCP/IP Model
+
+The **TCP/IP model** describes how network communication takes place.
+
+### Four Main Layers
+
+1. **Application**
+2. **Transport**
+3. **Internet**
+4. **Network Access**
+
+### Easy Trick
+
+**A T I N**
+
+**A**pplication  
+**T**ransport  
+**I**nternet  
+**N**etwork Access
+
+---
+
+# 6. Application Layer
+
+Provides network services directly to applications.
+
+### Common protocols
+
+- HTTP
+- HTTPS
+- DNS
+- FTP
+- SMTP
+- SSH
+- DHCP
+
+---
+
+# 7. Transport Layer
+
+Responsible for communication between applications/processes.
+
+The two major protocols are:
+
+### TCP – Transmission Control Protocol
+
+- Connection-oriented
+- Reliable
+- Uses acknowledgements
+- Provides ordered delivery
+- Retransmits lost data
+
+### UDP – User Datagram Protocol
+
+- Connectionless
+- Faster and lightweight
+- No guarantee of delivery
+- No built-in retransmission
+
+### Easy Difference
+
+**TCP = Reliable**
+
+**UDP = Fast/Lightweight**
+
+---
+
+# 8. TCP Three-Way Handshake
+
+TCP establishes a connection using a three-way handshake.
+
+### Steps
+
+**1. SYN**
+
+Client → Server
+
+Requests to establish a connection.
+
+**2. SYN-ACK**
+
+Server → Client
+
+Acknowledges the request and responds.
+
+**3. ACK**
+
+Client → Server
+
+Acknowledges the response.
+
+### Remember:
+
+**SYN → SYN-ACK → ACK**
+
+---
+
+# 9. Port Numbers
+
+A **port number** identifies a network service/application endpoint.
+
+Port numbers range from:
+
+**0 – 65535**
+
+### Important Ports
+
+| Port | Protocol/Service |
+|---:|---|
+| 20/21 | FTP |
+| 22 | SSH |
+| 23 | Telnet |
+| 25 | SMTP |
+| 53 | DNS |
+| 67/68 | DHCP |
+| 80 | HTTP |
+| 110 | POP3 |
+| 143 | IMAP |
+| 443 | HTTPS |
+| 445 | SMB |
+| 3389 | RDP |
+
+### Important for Cybersecurity
+
+When performing authorized network assessment, identifying open ports can help determine which services are exposed.
+
+---
+
+# 10. DNS – Domain Name System
+
+**DNS** converts domain names into IP addresses.
+
+Example:
+
+`www.example.com`
+
+↓
+
+DNS
+
+↓
+
+`IP address`
+
+Instead of remembering an IP address, users can use a domain name.
+
+### Common DNS Record Types
+
+| Record | Purpose |
+|---|---|
+| A | Maps domain to IPv4 address |
+| AAAA | Maps domain to IPv6 address |
+| CNAME | Alias for another domain |
+| MX | Mail server |
+| NS | Authoritative name server |
+| TXT | Text information, often used for verification/security policies |
+
+### DNS Port
+
+**Port 53**
+
+DNS commonly uses **UDP**, while **TCP** is also used in specific situations.
+
+---
+
+# 11. HTTP
+
+**HTTP = Hypertext Transfer Protocol**
+
+It is commonly used for communication between web browsers and web servers.
+
+Default port:
+
+**80**
+
+### Basic Communication
+
+**Client → HTTP Request → Server**
+
+**Server → HTTP Response → Client**
+
+### Common HTTP Methods
+
+- **GET** – Retrieve data
+- **POST** – Submit data
+- **PUT** – Replace/update a resource
+- **PATCH** – Partially modify a resource
+- **DELETE** – Delete a resource
+
+---
+
+# 12. HTTPS
+
+**HTTPS = HTTP Secure**
+
+HTTPS uses **TLS** to protect HTTP communication.
+
+Default port:
+
+**443**
+
+### HTTPS provides
+
+- **Confidentiality** – Helps prevent others from reading traffic.
+- **Integrity** – Helps detect unauthorized modification.
+- **Authentication** – TLS certificates help authenticate the server.
+
+### HTTP vs HTTPS
+
+**HTTP → Usually port 80 → Not encrypted by TLS**
+
+**HTTPS → Usually port 443 → HTTP protected with TLS**
+
+---
+
+# 13. FTP
+
+**FTP = File Transfer Protocol**
+
+Used for transferring files between systems.
+
+Common ports:
+
+- **21** – Control connection
+- **20** – Traditional FTP data connection
+
+### Security Problem
+
+Traditional FTP does not provide encryption for credentials and data.
+
+For secure file transfer, alternatives such as **SFTP** or **FTPS** may be used.
+
+---
+
+# 14. SSH
+
+**SSH = Secure Shell**
+
+Used for secure remote administration and other secure communications.
+
+Default port:
+
+**22**
+
+SSH provides encrypted communication and can use:
+
+- Password authentication
+- Public-key authentication
+
+### Important
+
+**SSH → 22**
+
+**Telnet → 23**
+
+SSH is preferred over Telnet because Telnet does not provide equivalent encryption.
+
+---
+
+# 15. SMTP
+
+**SMTP = Simple Mail Transfer Protocol**
+
+Used primarily for **sending and relaying email**.
+
+Common ports:
+
+- **25** – SMTP relay
+- **587** – Message submission
+- **465** – Commonly used for SMTP over TLS
+
+---
+
+# 16. POP3
+
+**POP3 = Post Office Protocol version 3**
+
+Used to retrieve email from a mail server.
+
+Common ports:
+
+- **110** – POP3
+- **995** – POP3 over TLS
+
+---
+
+# 17. IMAP
+
+**IMAP = Internet Message Access Protocol**
+
+Used to access and synchronize email stored on a mail server.
+
+Common ports:
+
+- **143** – IMAP
+- **993** – IMAP over TLS
+
+### POP3 vs IMAP
+
+**POP3 → Primarily downloads/retrieves mail**
+
+**IMAP → Synchronizes mail with the server**
+
+---
+
+# 18. DHCP
+
+**DHCP = Dynamic Host Configuration Protocol**
+
+Automatically provides network configuration to devices.
+
+It can provide:
+
+- IP address
+- Subnet mask
+- Default gateway
+- DNS server
+
+### DHCP Ports
+
+**UDP 67 → Server**
+
+**UDP 68 → Client**
+
+### DHCP Process
+
+Remember:
+
+**DORA**
+
+**D – Discover**  
+**O – Offer**  
+**R – Request**  
+**A – Acknowledgement**
+
+---
+
+# 19. ARP
+
+**ARP = Address Resolution Protocol**
+
+In IPv4 local networks, ARP helps determine the MAC address associated with an IPv4 address.
+
+Example:
+
+Device knows:
+
+`192.168.1.20`
+
+but needs the corresponding MAC address.
+
+ARP is used to resolve the local IPv4 address to a MAC address.
+
+---
+
+# 20. ICMP
+
+**ICMP = Internet Control Message Protocol**
+
+Used for network diagnostics and control/error messages.
+
+Example:
+
+**Ping** commonly uses ICMP Echo Request and Echo Reply.
+
+ICMP does **not use TCP or UDP port numbers**.
+
+---
+
+# 21. Router
+
+A **router** connects different networks and forwards packets between them.
+
+Example:
+
+**LAN → Router → Internet**
+
+---
+
+# 22. Switch
+
+A **network switch** connects devices within a local network.
+
+Example:
+
+**PC → Switch → PC**
+
+Switches primarily operate at the **Network Access/Data Link level**, using MAC addresses for local forwarding.
+
+---
+
+# 23. Firewall
+
+A **firewall** controls network traffic according to security rules.
+
+It can allow or block traffic based on factors such as:
+
+- Source IP
+- Destination IP
+- Port
+- Protocol
+- Application/context, depending on firewall type
+
+Example:
+
+`Block inbound TCP port 23`
+
+This could prevent Telnet connections.
+
+---
+
+# 24. Subnet Mask
+
+A subnet mask determines which portion of an IPv4 address represents the network and which portion represents the host.
+
+Example:
+
+IP:
+
+`192.168.1.10`
+
+Subnet mask:
+
+`255.255.255.0`
+
+CIDR notation:
+
+`192.168.1.10/24`
+
+---
+
+# 25. Default Gateway
+
+A **default gateway** is normally the router/interface a device uses to reach destinations outside its local network.
+
+Example:
+
+PC:
+
+`192.168.1.10`
+
+Gateway:
+
+`192.168.1.1`
+
+When the PC communicates with another network, it can send the traffic to the default gateway.
+
+---
+
+# 26. Network Protocol
+
+A **protocol** is a set of rules that defines how devices communicate.
+
+Examples:
+
+- TCP
+- UDP
+- HTTP
+- HTTPS
+- DNS
+- DHCP
+- SSH
+- FTP
+- SMTP
+- IMAP
+- ICMP
+- ARP
+
+---
+
+# 27. Important Protocols – Quick Table
+
+| Protocol | Purpose | Common Port |
+|---|---|---:|
+| HTTP | Web communication | 80 |
+| HTTPS | Secure web communication | 443 |
+| DNS | Domain name resolution | 53 |
+| SSH | Secure remote access | 22 |
+| FTP | File transfer | 20/21 |
+| SMTP | Email sending/relay | 25/587 |
+| POP3 | Email retrieval | 110 |
+| IMAP | Email access/synchronization | 143 |
+| DHCP | Automatic network configuration | 67/68 |
+| Telnet | Remote access | 23 |
+| SMB | File/printer sharing | 445 |
+| RDP | Remote desktop | 3389 |
+
+---
+
+# 28. TCP vs UDP
+
+| TCP | UDP |
+|---|---|
+| Connection-oriented | Connectionless |
+| Reliable delivery | No delivery guarantee |
+| Ordered delivery | No built-in ordering |
+| Uses acknowledgements | No TCP-style acknowledgements |
+| Retransmits lost data | No built-in retransmission |
+| More overhead | Lower overhead |
+| Example: HTTPS | Example: DNS commonly uses UDP |
+
+---
+
+# 29. How a Website Works
+
+When you enter:
+
+`https://example.com`
+
+a simplified process is:
+
+**1. DNS**
+→ Finds the server's IP address.
+
+**2. TCP**
+→ Establishes a connection when TCP is used.
+
+**3. TLS**
+→ Establishes secure encryption for HTTPS.
+
+**4. HTTP**
+→ Browser sends an HTTP request.
+
+**5. Server**
+→ Processes the request.
+
+**6. HTTP Response**
+→ Server sends the requested content.
+
+**7. Browser**
+→ Displays the webpage.
+
+### Easy Flow
+
+**Domain → DNS → IP → TCP → TLS → HTTP → Response**
+
+---
+
+# 30. Cybersecurity Importance of Networking
+
+Networking knowledge is essential for ethical hacking because attackers and defenders interact with:
+
+- IP addresses
+- MAC addresses
+- Ports
+- Protocols
+- Services
+- DNS
+- Firewalls
+- Routers
+- Servers
+- Network traffic
+
+Understanding networking helps security professionals identify **how systems communicate and where security controls or weaknesses may exist**.
+
+---
+
+# QUICK REVISION
+
+### Must Remember
+
+**TCP/IP Layers:**
+
+**Application → Transport → Internet → Network Access**
+
+**TCP:**
+
+**Reliable + Connection-oriented**
+
+**UDP:**
+
+**Connectionless + Lightweight**
+
+**TCP Handshake:**
+
+**SYN → SYN-ACK → ACK**
+
+**DNS:**
+
+**Domain → IP**
+
+**HTTP:**
+
+**Port 80**
+
+**HTTPS:**
+
+**Port 443**
+
+**SSH:**
+
+**Port 22**
+
+**FTP:**
+
+**Ports 20/21**
+
+**DNS:**
+
+**Port 53**
+
+**DHCP:**
+
+**Ports 67/68**
+
+**RDP:**
+
+**Port 3389**
+
+**SMB:**
+
+**Port 445**
+
+**DHCP process:**
+
+**DORA → Discover → Offer → Request → Acknowledgement**
+
+**CIA:**
+
+**Confidentiality → Integrity → Availability**
+
+### One-line memory trick:
+
+> **DNS finds the server, TCP/UDP carries the data, HTTP/HTTPS communicates with the web service, and ports identify the service.**

@@ -1,0 +1,1484 @@
+# DAY 19 – PATCH MANAGEMENT
+
+## Patching • Updates • Vulnerability Remediation • Patch Lifecycle • Risk • Testing • Verification
+
+---
+
+# 1. What is Patch Management?
+
+**Patch Management** is the process of identifying, testing, deploying, and verifying software updates that fix vulnerabilities, bugs, or other issues.
+
+### Simple Definition
+
+> **Patch management = Finding required updates, safely applying them, and verifying that systems are protected afterward.**
+
+---
+
+# 2. Why Is Patch Management Important?
+
+Unpatched software can contain known vulnerabilities.
+
+Example:
+
+```text
+Vulnerability discovered
+        ↓
+Vendor releases patch
+        ↓
+Organization delays patching
+        ↓
+System remains vulnerable
+```
+
+Attackers may target publicly known vulnerabilities after patches become available.
+
+Therefore:
+
+> **A vulnerability that has a patch available should not simply remain unaddressed without a risk-based reason.**
+
+---
+
+# 3. What is a Patch?
+
+A **patch** is a software update designed to fix a specific issue.
+
+A patch may fix:
+
+- Security vulnerabilities
+- Software bugs
+- Stability problems
+- Performance issues
+- Compatibility problems
+
+### Security Patch
+
+A **security patch** specifically addresses a security weakness or vulnerability.
+
+---
+
+# 4. Patch vs Update vs Upgrade
+
+These terms are related but not identical.
+
+| Term | Meaning |
+|---|---|
+| Patch | Usually a targeted fix |
+| Update | Change that improves/fixes existing software |
+| Upgrade | Movement to a newer major/minor version |
+| Hotfix | Targeted fix often released urgently |
+| Firmware update | Update to device firmware |
+
+### Example
+
+```text
+Application 3.2
+     ↓
+Security Patch
+     ↓
+Application 3.2.1
+```
+
+Whereas:
+
+```text
+Application 3.x
+     ↓
+Major Upgrade
+     ↓
+Application 4.x
+```
+
+---
+
+# 5. Patch Management Lifecycle
+
+A typical lifecycle is:
+
+```text
+1. Asset Inventory
+        ↓
+2. Identify Software
+        ↓
+3. Identify Vulnerabilities
+        ↓
+4. Check Available Patches
+        ↓
+5. Prioritize
+        ↓
+6. Test
+        ↓
+7. Approve
+        ↓
+8. Deploy
+        ↓
+9. Verify
+        ↓
+10. Document
+        ↓
+11. Rescan
+```
+
+### Memory
+
+> **I-I-F-P-P-T-A-D-V-R**
+
+Inventory → Identify → Find → Prioritize → Test → Approve → Deploy → Verify → Rescan
+
+---
+
+# 6. Step 1 – Asset Inventory
+
+Before patching, you need to know what exists.
+
+Inventory may include:
+
+- Servers
+- Workstations
+- Laptops
+- Network devices
+- Applications
+- Databases
+- Operating systems
+- Firmware
+- Cloud systems
+- Containers
+
+Example:
+
+| Asset | OS | Application | Version |
+|---|---|---|---|
+| Server-01 | Windows | IIS | Version X |
+| Server-02 | Linux | Apache | Version Y |
+| PC-01 | Windows | Browser | Version Z |
+
+### Key Principle
+
+> **You cannot reliably patch what you do not know exists.**
+
+---
+
+# 7. Software Inventory
+
+Organizations should track:
+
+- Software name
+- Version
+- Vendor
+- Installation date
+- Supported/unsupported status
+- Dependencies
+- Criticality
+
+This is sometimes called **Software Inventory** or **Software Asset Inventory**.
+
+---
+
+# 8. Vulnerability Identification
+
+Patch management is closely connected to vulnerability management.
+
+Example:
+
+```text
+Vulnerability Scanner
+        ↓
+Old Software Detected
+        ↓
+CVE Identified
+        ↓
+Vendor Patch Available
+        ↓
+Patch Management
+```
+
+### Important
+
+A vulnerability scanner identifies a potential weakness.
+
+Patch management helps remediate it.
+
+---
+
+# 9. CVE and Patch Management
+
+Recall:
+
+**CVE = Common Vulnerabilities and Exposures**
+
+Example:
+
+```text
+Software
+   ↓
+Known vulnerability
+   ↓
+CVE identifier
+   ↓
+Vendor releases fix
+   ↓
+Organization applies update
+```
+
+### Memory
+
+> **CVE tells you about the vulnerability; the vendor patch may provide the fix.**
+
+---
+
+# 10. Patch Prioritization
+
+Organizations may have hundreds or thousands of updates.
+
+They cannot always deploy everything simultaneously.
+
+Prioritize based on:
+
+- Severity
+- Exploitability
+- Internet exposure
+- Asset importance
+- Sensitive data
+- Availability requirements
+- Active exploitation
+- Business impact
+- Existing security controls
+
+---
+
+# 11. CVSS and Patch Priority
+
+**CVSS** provides a standardized way to communicate vulnerability severity.
+
+Example:
+
+```text
+CVSS 9.8
+```
+
+is generally more severe than:
+
+```text
+CVSS 4.3
+```
+
+But:
+
+> **CVSS alone should not determine patch priority.**
+
+Business context matters.
+
+---
+
+# 12. Risk-Based Patch Management
+
+Consider two vulnerabilities:
+
+### Vulnerability A
+
+```text
+CVSS: 9.8
+Internal test server
+No sensitive data
+Not externally reachable
+```
+
+### Vulnerability B
+
+```text
+CVSS: 8.0
+Internet-facing production server
+Sensitive customer information
+Known exploitation activity
+```
+
+Even though A has a higher CVSS score, B may deserve more immediate attention.
+
+### Memory
+
+> **Severity ≠ Complete Risk**
+
+Risk also depends on:
+
+```text
+Exposure
++
+Asset Importance
++
+Exploitability
++
+Impact
++
+Threat Environment
+```
+
+---
+
+# 13. Patch Testing
+
+Never assume that a patch will work perfectly in every environment.
+
+Before large-scale deployment:
+
+```text
+Patch
+ ↓
+Test Environment
+ ↓
+Application Testing
+ ↓
+Compatibility Testing
+ ↓
+Approval
+ ↓
+Production
+```
+
+Testing may check:
+
+- Application functionality
+- Performance
+- Dependencies
+- Authentication
+- Network connectivity
+- Business processes
+
+---
+
+# 14. Why Patch Testing Matters
+
+A patch can unintentionally cause:
+
+- Application failure
+- Compatibility problems
+- Service interruption
+- Driver problems
+- Dependency conflicts
+
+Therefore:
+
+> **Security improvement must be balanced with operational stability.**
+
+---
+
+# 15. Patch Deployment Strategies
+
+Common approaches include:
+
+### Pilot Deployment
+
+Patch a small group first.
+
+```text
+Patch
+ ↓
+10 systems
+ ↓
+Monitor
+ ↓
+No issue?
+ ↓
+Deploy more broadly
+```
+
+### Phased Deployment
+
+Deploy in stages.
+
+```text
+Stage 1 → Test systems
+Stage 2 → Small production group
+Stage 3 → Larger group
+Stage 4 → Remaining systems
+```
+
+### Emergency Deployment
+
+Used when the risk is unusually high and waiting for the normal cycle creates unacceptable exposure.
+
+---
+
+# 16. Maintenance Window
+
+A **maintenance window** is an approved period during which updates or other maintenance activities can be performed.
+
+Example:
+
+```text
+Friday
+23:00 – 01:00
+```
+
+During the window:
+
+- Services may restart
+- Systems may reboot
+- Patches may be deployed
+- Validation can occur
+
+### Why?
+
+To reduce disruption to users and business operations.
+
+---
+
+# 17. Patch Rollback
+
+Sometimes a patch causes an unexpected problem.
+
+A rollback plan allows the organization to return to the previous known-good state where technically feasible.
+
+Concept:
+
+```text
+Patch
+ ↓
+Problem
+ ↓
+Rollback
+ ↓
+Restore service
+ ↓
+Investigate
+```
+
+### Important
+
+Rollback capability should be considered **before** large-scale deployment.
+
+---
+
+# 18. Backup Before Patching
+
+For critical systems, appropriate backups or recovery mechanisms should be available before major changes.
+
+Example:
+
+```text
+Backup/Snapshot
+      ↓
+Patch
+      ↓
+Problem?
+      ↓
+Recovery
+```
+
+### Important
+
+A backup is useful only if it can actually be restored.
+
+> **Backup testing is important.**
+
+---
+
+# 19. Patch Verification
+
+After deployment, don't assume the patch succeeded.
+
+Verify:
+
+- Correct version installed
+- Service running
+- Application working
+- Security configuration intact
+- Vulnerability no longer present
+
+Example:
+
+```text
+Patch deployed
+     ↓
+Version check
+     ↓
+Service check
+     ↓
+Application test
+     ↓
+Security rescan
+```
+
+---
+
+# 20. Rescanning After Patching
+
+This connects directly with Day 15.
+
+Before patch:
+
+```text
+Scanner
+ ↓
+Vulnerability detected
+```
+
+After patch:
+
+```text
+Patch
+ ↓
+Scanner
+ ↓
+Vulnerability no longer detected
+```
+
+### Important
+
+> **Rescanning provides evidence that remediation worked.**
+
+---
+
+# 21. Patch Compliance
+
+**Patch compliance** measures whether systems meet the organization's patch requirements.
+
+Example:
+
+```text
+100 systems
+80 patched
+20 unpatched
+```
+
+Patch compliance:
+
+```text
+80%
+```
+
+A dashboard might show:
+
+```text
+Critical patches: 98%
+High patches:     95%
+Medium patches:   88%
+```
+
+---
+
+# 22. Patch Management Metrics
+
+Useful metrics include:
+
+### Patch Compliance
+
+Percentage of systems successfully patched.
+
+### Mean Time to Patch (MTTP)
+
+Average time required to deploy a patch.
+
+### Mean Time to Remediate (MTTR)
+
+Average time required to remediate a vulnerability.
+
+### Patch Failure Rate
+
+Percentage of patch deployments that fail.
+
+### Vulnerability Age
+
+How long a vulnerability remains unresolved.
+
+---
+
+# 23. MTTR vs MTTP
+
+### MTTR
+
+**Mean Time to Remediate**
+
+Measures how long it takes to resolve a security issue.
+
+### MTTP
+
+**Mean Time to Patch**
+
+Measures how long it takes to deploy required patches.
+
+### Memory
+
+> **MTTP = Patch**
+
+> **MTTR = Remediate**
+
+---
+
+# 24. Patch Management Tools
+
+Organizations may use:
+
+- Windows Update / Windows Update for Business
+- Microsoft Configuration Manager
+- Intune
+- Linux package managers
+- Enterprise patch-management platforms
+- Vulnerability-management platforms
+- Vendor update mechanisms
+
+The exact tool depends on the environment.
+
+---
+
+# 25. Linux Package Updates
+
+Linux distributions commonly use package managers.
+
+For Debian/Ubuntu systems:
+
+```bash
+sudo apt update
+sudo apt upgrade
+```
+
+For Fedora/RHEL-family systems, depending on distribution/version:
+
+```bash
+sudo dnf check-update
+sudo dnf upgrade
+```
+
+### Important
+
+Commands vary between distributions.
+
+Use them only on systems you administer or are authorized to maintain.
+
+---
+
+# 26. Windows Updates
+
+Windows provides built-in mechanisms for receiving security and quality updates.
+
+Organizations may centrally manage updates through enterprise management systems.
+
+Basic concept:
+
+```text
+Microsoft
+   ↓
+Update
+   ↓
+Organization policy
+   ↓
+Managed systems
+   ↓
+Installation
+   ↓
+Verification
+```
+
+---
+
+# 27. Automatic vs Manual Patching
+
+### Automatic Patching
+
+Updates are deployed automatically according to policy.
+
+Advantages:
+
+- Faster
+- Less manual work
+- Consistent
+
+Risks:
+
+- Unexpected compatibility issues
+- Reboots
+- Operational disruption
+
+### Manual Patching
+
+Administrators control deployment.
+
+Advantages:
+
+- Greater control
+- More testing opportunities
+
+Disadvantages:
+
+- Slower
+- More administrative effort
+- Greater risk of missing systems
+
+---
+
+# 28. Patch Management vs Vulnerability Management
+
+These are related but different.
+
+### Vulnerability Management
+
+Broad process:
+
+```text
+Discover
+ ↓
+Assess
+ ↓
+Prioritize
+ ↓
+Remediate
+ ↓
+Verify
+```
+
+### Patch Management
+
+Focuses on applying software/firmware updates as a remediation method.
+
+```text
+Vulnerability
+ ↓
+Patch available
+ ↓
+Test
+ ↓
+Deploy
+ ↓
+Verify
+```
+
+### Memory
+
+> **Vulnerability Management = Bigger process**
+
+> **Patch Management = One major remediation process**
+
+---
+
+# 29. Patch Management vs Configuration Management
+
+### Patch Management
+
+Focus:
+
+> Keeping software updated.
+
+### Configuration Management
+
+Focus:
+
+> Keeping system settings in the desired secure state.
+
+Example:
+
+```text
+Patch Management
+→ Update Apache version
+
+Configuration Management
+→ Disable directory listing
+```
+
+Both may be required to secure a system.
+
+---
+
+# 30. Unsupported Software
+
+Software may eventually reach **End of Life (EOL)**.
+
+After EOL:
+
+- Security updates may stop
+- Vendor support may end
+- Vulnerability risk can increase
+
+Example:
+
+```text
+Supported Software
+       ↓
+End of Support
+       ↓
+No security updates
+       ↓
+Increasing risk
+```
+
+### Best Practice
+
+Migrate or upgrade to a supported version where feasible.
+
+---
+
+# 31. Zero-Day Vulnerability
+
+A **zero-day vulnerability** is a vulnerability that is unknown to the vendor or lacks an available patch at the time of concern/discovery.
+
+Important distinction:
+
+> **Zero-day does not mean "no security response is possible."**
+
+Organizations may use compensating controls.
+
+---
+
+# 32. Compensating Controls
+
+If a patch is unavailable or cannot immediately be deployed, organizations may reduce risk using controls such as:
+
+- Firewall restrictions
+- Network segmentation
+- Disabling vulnerable functionality
+- Access restrictions
+- Web application firewall rules
+- Monitoring
+- Temporary service isolation
+
+Concept:
+
+```text
+Vulnerability
+      ↓
+Patch unavailable
+      ↓
+Compensating control
+      ↓
+Risk reduced
+      ↓
+Patch when available
+```
+
+---
+
+# 33. Patch Exception
+
+Sometimes a system cannot be patched immediately.
+
+A **patch exception** is a formally documented decision to delay patching.
+
+It should include:
+
+- Reason
+- Affected system
+- Risk
+- Compensating controls
+- Owner
+- Approval
+- Expiration/review date
+
+### Important
+
+> **"We can't patch it right now" should not mean "ignore it forever."**
+
+---
+
+# 34. Emergency Patch Management
+
+An emergency patch may be required when:
+
+- Vulnerability is actively exploited
+- Critical vulnerability affects exposed systems
+- Vendor recommends urgent deployment
+- Security risk is exceptionally high
+
+Workflow:
+
+```text
+Critical Vulnerability
+       ↓
+Risk Assessment
+       ↓
+Emergency Test
+       ↓
+Approval
+       ↓
+Rapid Deployment
+       ↓
+Verification
+```
+
+---
+
+# 35. Patch Tuesday
+
+Microsoft historically releases many security updates on a regular monthly schedule commonly known as **Patch Tuesday**.
+
+Organizations often use such vendor release cycles to plan update management.
+
+### Exam Point
+
+> **Patch Tuesday is associated with Microsoft's regular monthly security-update release cycle.**
+
+---
+
+# 36. Dependency Patching
+
+Modern applications depend on third-party libraries.
+
+Example:
+
+```text
+Application
+├── Framework
+├── Database driver
+├── Logging library
+├── Authentication library
+└── JavaScript packages
+```
+
+A vulnerability in one dependency can affect the application.
+
+Therefore:
+
+> **Patch management must include application dependencies, not only operating systems.**
+
+---
+
+# 37. Firmware Patching
+
+Patching is not limited to applications and operating systems.
+
+It may also involve:
+
+- Routers
+- Switches
+- Firewalls
+- BIOS/UEFI
+- Storage systems
+- IoT devices
+- Security appliances
+
+Firmware updates should be carefully tested because failure can affect device availability.
+
+---
+
+# 38. Cloud Patch Management
+
+Cloud environments introduce additional considerations.
+
+Depending on the service model:
+
+### IaaS
+
+The organization may be responsible for patching the operating system and applications.
+
+### PaaS
+
+The cloud provider may manage more of the underlying platform.
+
+### SaaS
+
+The provider generally manages the underlying application infrastructure.
+
+### Important
+
+> **Patch responsibility depends on the cloud service model and shared-responsibility arrangement.**
+
+---
+
+# 39. Patch Management and Change Management
+
+Patching is often a form of **change** to a production system.
+
+A change-management process may include:
+
+```text
+Change Request
+ ↓
+Risk Assessment
+ ↓
+Testing
+ ↓
+Approval
+ ↓
+Maintenance Window
+ ↓
+Deployment
+ ↓
+Validation
+ ↓
+Documentation
+```
+
+This helps organizations balance security and operational stability.
+
+---
+
+# 40. Common Patch Management Mistakes
+
+## Mistake 1: Patching without inventory
+
+You may miss systems.
+
+## Mistake 2: Installing everything blindly
+
+Updates can cause compatibility issues.
+
+## Mistake 3: No testing
+
+Production problems may occur.
+
+## Mistake 4: No rollback/recovery plan
+
+Recovery becomes difficult.
+
+## Mistake 5: No verification
+
+You don't know whether remediation worked.
+
+## Mistake 6: Ignoring applications
+
+Only patching the OS is insufficient.
+
+## Mistake 7: Ignoring firmware
+
+Network/security devices can also have vulnerabilities.
+
+## Mistake 8: Ignoring EOL software
+
+Unsupported software can remain vulnerable.
+
+## Mistake 9: Using only CVSS for priority
+
+Business risk and exposure also matter.
+
+## Mistake 10: No documentation
+
+You cannot easily demonstrate compliance or track exceptions.
+
+---
+
+# 41. Complete Patch Management Workflow
+
+```text
+┌──────────────────────┐
+│ Asset Inventory      │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ Software Inventory   │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ Vulnerability Scan   │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ Identify Patch       │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ Risk Prioritization  │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ Test Patch           │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ Approve              │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ Deploy               │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ Verify               │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ Rescan               │
+└──────────┬───────────┘
+           ↓
+┌──────────────────────┐
+│ Document             │
+└──────────────────────┘
+```
+
+---
+
+# 42. Example Scenario
+
+A vulnerability scanner finds:
+
+```text
+Critical vulnerability
+Software: Web Server
+Patch: Available
+Asset: Internet-facing production server
+```
+
+Correct response:
+
+```text
+Identify vulnerability
+        ↓
+Assess risk
+        ↓
+Check vendor patch
+        ↓
+Test patch
+        ↓
+Deploy using approved process
+        ↓
+Verify service
+        ↓
+Rescan
+        ↓
+Document
+```
+
+---
+
+# 43. Example: Patch Causes a Problem
+
+Suppose:
+
+```text
+Patch deployed
+      ↓
+Application stops working
+```
+
+Correct response:
+
+```text
+Investigate
+   ↓
+Use rollback/recovery plan if required
+   ↓
+Restore service
+   ↓
+Analyze compatibility issue
+   ↓
+Coordinate with vendor/application team
+   ↓
+Retest patch
+   ↓
+Deploy corrected approach
+```
+
+### Exam Point
+
+> Patch management is a controlled process, not simply "install update."
+
+---
+
+# 44. Day 15 → Day 19 Connection
+
+```text
+DAY 15
+Vulnerability Scanning
+        ↓
+Find Weakness
+        ↓
+DAY 16
+Application Security
+        ↓
+Understand Vulnerability
+        ↓
+DAY 17
+Automation
+        ↓
+Automate Detection
+        ↓
+DAY 18
+Web Server Scanning
+        ↓
+Find Web-Server Issues
+        ↓
+DAY 19
+Patch Management
+        ↓
+Remediate
+        ↓
+Rescan
+```
+
+### Master Security Cycle
+
+> **Discover → Assess → Prioritize → Fix → Verify**
+
+---
+
+# 45. Hard Scenario-Based MCQs
+
+## Q1
+
+A vulnerability scanner identifies a critical vulnerability on an Internet-facing production server. A vendor patch is available.
+
+What should happen first?
+
+A. Ignore the finding  
+B. Assess and prioritize the risk, then plan controlled remediation  
+C. Immediately delete the server  
+D. Disable all security controls
+
+**Answer: B**
+
+---
+
+## Q2
+
+An administrator installs a patch directly on 500 production servers without testing.
+
+What major process was skipped?
+
+A. Asset inventory  
+B. Patch testing  
+C. Vulnerability discovery  
+D. Logging
+
+**Answer: B**
+
+---
+
+## Q3
+
+A patch was successfully deployed, but the vulnerability scanner still reports the vulnerability.
+
+What should the team do?
+
+A. Assume the scanner is wrong  
+B. Verify patch version/configuration and investigate the finding  
+C. Delete the scan  
+D. Ignore the issue
+
+**Answer: B**
+
+---
+
+## Q4
+
+A company has a critical vulnerability but the vendor has not released a patch.
+
+What is an appropriate temporary response?
+
+A. Ignore the vulnerability  
+B. Consider compensating controls and monitor for the vendor fix  
+C. Publish the vulnerability publicly  
+D. Disable all monitoring
+
+**Answer: B**
+
+---
+
+## Q5
+
+A patch has a high CVSS score, but the system is isolated and contains no important data. Another lower-scored issue affects an Internet-facing critical business system.
+
+What should influence prioritization?
+
+A. CVSS only  
+B. Business context, exposure, asset criticality, and exploitability  
+C. Hostname length  
+D. Operating-system color scheme
+
+**Answer: B**
+
+---
+
+## Q6
+
+An organization does not maintain an inventory of installed software.
+
+What is a major patch-management problem?
+
+A. It may not know which systems require updates  
+B. Updates become automatically secure  
+C. Vulnerabilities disappear  
+D. Logging becomes unnecessary
+
+**Answer: A**
+
+---
+
+## Q7
+
+A security team patches an application but does not perform a follow-up scan.
+
+What important activity is missing?
+
+A. Verification  
+B. Authentication  
+C. Encryption  
+D. DNS resolution
+
+**Answer: A**
+
+---
+
+## Q8
+
+A critical server cannot be patched during business hours because downtime would cause major operational disruption.
+
+What should the organization consider?
+
+A. Risk-based scheduling and an approved maintenance window  
+B. Never patching it  
+C. Removing all backups  
+D. Disabling monitoring
+
+**Answer: A**
+
+---
+
+## Q9
+
+A patch causes an important application to fail.
+
+What capability is most useful?
+
+A. Rollback/recovery plan  
+B. Removing logs  
+C. Disabling authentication  
+D. Ignoring the failure
+
+**Answer: A**
+
+---
+
+## Q10
+
+An application uses a vulnerable third-party library, while the operating system itself is fully patched.
+
+Is the application considered fully secure?
+
+A. Yes  
+B. No, dependency vulnerabilities must also be addressed  
+C. Yes, because only OS patches matter  
+D. Yes, if the firewall is enabled
+
+**Answer: B**
+
+---
+
+## Q11
+
+A company has an unsupported operating system that no longer receives security updates.
+
+What is the best long-term approach?
+
+A. Continue using it indefinitely  
+B. Upgrade or migrate to a supported platform  
+C. Disable logging  
+D. Remove antivirus
+
+**Answer: B**
+
+---
+
+## Q12
+
+An organization delays a patch because compatibility testing is incomplete. The system is protected temporarily by network restrictions and monitoring.
+
+What is this an example of?
+
+A. Compensating control  
+B. False positive  
+C. Authentication  
+D. Encryption
+
+**Answer: A**
+
+---
+
+# ⭐ DAY 19 – MOST IMPORTANT EXAM POINTS
+
+1. **Patch management is the process of identifying, testing, deploying, and verifying updates.**
+2. Security patches fix security vulnerabilities.
+3. Asset inventory is the foundation of effective patch management.
+4. You cannot reliably patch assets you do not know exist.
+5. Vulnerability management is broader than patch management.
+6. Patch management is one important remediation method.
+7. CVE identifies a known vulnerability.
+8. CVSS communicates vulnerability severity.
+9. **CVSS alone should not determine patch priority.**
+10. Business impact and exposure must also be considered.
+11. Test patches before broad production deployment where practical.
+12. Pilot and phased deployment can reduce operational risk.
+13. Maintenance windows help minimize business disruption.
+14. Critical systems should have appropriate recovery/rollback planning.
+15. Backups should be tested, not merely created.
+16. After patching, verify the installation.
+17. **Rescanning confirms whether the vulnerability was actually remediated.**
+18. Patch compliance measures how well systems meet patch requirements.
+19. MTTP = Mean Time to Patch.
+20. MTTR = Mean Time to Remediate.
+21. Unsupported/EOL software creates increased security risk.
+22. Applications and third-party dependencies also require patch management.
+23. Firmware may require security updates too.
+24. Zero-day vulnerabilities may not have an available vendor patch.
+25. Compensating controls can temporarily reduce risk when patching is not immediately possible.
+26. Patch exceptions should be documented, approved, and reviewed.
+27. Emergency patches may be required for actively exploited/high-risk vulnerabilities.
+28. Patch management should be integrated with change management.
+29. Automatic patching improves speed but can create compatibility/availability risks.
+30. **Patch → Verify → Rescan** is essential.
+31. A patch being installed does not automatically prove that the vulnerability is fixed.
+32. Security and operational stability must both be considered.
+33. **The ultimate goal of patch management is to reduce vulnerability risk while maintaining reliable system operation.**
+
+---
+
+# 🧠 MASTER MEMORY TRICK
+
+Remember:
+
+## **I-P-T-D-V-R**
+
+**I** → Inventory  
+**P** → Prioritize  
+**T** → Test  
+**D** → Deploy  
+**V** → Verify  
+**R** → Rescan
+
+### One-line memory:
+
+> **"Inventory → Prioritize → Test → Deploy → Verify → Rescan."**
+
+---
+
+# ⚡ DAY 19 QUICK REVISION
+
+| Term | Meaning |
+|---|---|
+| Patch | Software fix/update |
+| Security Patch | Fix for security issue |
+| CVE | Vulnerability identifier |
+| CVSS | Severity scoring system |
+| EOL | End of Life |
+| Maintenance Window | Approved time for maintenance |
+| Rollback | Return to previous state |
+| Patch Compliance | Percentage meeting patch requirements |
+| MTTP | Mean Time to Patch |
+| MTTR | Mean Time to Remediate |
+| Compensating Control | Temporary risk-reduction measure |
+| Patch Exception | Approved delay in patching |
+| Rescan | Verify vulnerability remediation |
+
+---
+
+# 🔥 FINAL EXAM FORMULA
+
+```text
+Vulnerability Found
+        ↓
+Risk Assessment
+        ↓
+Patch Available?
+   ↙            ↘
+ YES             NO
+ ↓                ↓
+Test          Compensating
+ ↓             Controls
+Approve           ↓
+ ↓            Monitor
+Deploy             ↓
+ ↓             Patch Later
+Verify
+ ↓
+Rescan
+ ↓
+Close Finding
+```
+
+# ⚡ ONE-LINE REVISION
+
+> **Patch management is a risk-based lifecycle of inventorying assets, identifying required updates, prioritizing and testing patches, deploying them safely, verifying the result, and rescanning to confirm that vulnerabilities have been remediated.**

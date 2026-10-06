@@ -1,0 +1,2014 @@
+# DAY 36 – METASPLOIT BASICS
+## Using Metasploit for Authorized Vulnerability Exploitation
+
+---
+
+# 1. DAY 36 OBJECTIVES
+
+By the end of this day, you should understand:
+
+- What Metasploit is
+- What the Metasploit Framework contains
+- Modules
+- Exploits
+- Payloads
+- Auxiliary modules
+- Encoders
+- NOPs
+- Post-exploitation modules
+- `msfconsole`
+- Searching for modules
+- Selecting modules
+- Viewing module information
+- Setting options
+- Choosing a payload
+- Running an exploit in an authorized lab
+- Sessions
+- Meterpreter basics
+- Exploit vs payload
+- Vulnerability → exploit → payload → session
+- Safe exploitation methodology
+- Reporting exploitation results
+
+> **Important:** Use Metasploit only against systems you own or have explicit permission to test. The commands in this lesson are intended for an isolated training lab.
+
+---
+
+# 2. WHAT IS METASPLOIT?
+
+**Metasploit Framework** is a penetration-testing framework used to research, test, validate, and demonstrate security vulnerabilities.
+
+It provides modules for:
+
+- Exploitation
+- Vulnerability validation
+- Service testing
+- Payload delivery
+- Post-exploitation
+- Auxiliary security tasks
+
+Think of Metasploit as a:
+
+> **Framework for controlled security testing**
+
+It is not simply a "hacking tool."
+
+---
+
+# 3. METASPLOIT FRAMEWORK
+
+The framework contains many components.
+
+A simplified structure is:
+
+```text
+Metasploit Framework
+│
+├── Exploits
+├── Payloads
+├── Auxiliary
+├── Post
+├── Encoders
+├── NOPs
+└── Modules / libraries
+```
+
+---
+
+# 4. THE MOST IMPORTANT CONCEPT
+
+Memorize:
+
+> **Exploit = takes advantage of the vulnerability**
+
+> **Payload = code/action delivered after successful exploitation**
+
+Example:
+
+```text
+Vulnerability
+      ↓
+Exploit
+      ↓
+Payload
+      ↓
+Session
+```
+
+This distinction is extremely important in exams.
+
+---
+
+# 5. EXPLOIT
+
+An **exploit** is code or a technique that takes advantage of a vulnerability.
+
+Conceptually:
+
+```text
+Vulnerable Service
+       ↓
+Exploit
+       ↓
+Unexpected/unauthorized behavior
+```
+
+The exploit is the mechanism used to trigger the vulnerability.
+
+---
+
+# 6. PAYLOAD
+
+A **payload** is what is executed or delivered after exploitation succeeds.
+
+Examples of payload categories include:
+
+- Command shell
+- Meterpreter
+- Reverse connection
+- Bind connection
+
+Conceptually:
+
+```text
+Exploit
+   ↓
+Successful exploitation
+   ↓
+Payload executes
+   ↓
+Session
+```
+
+---
+
+# 7. EXPLOIT VS PAYLOAD
+
+| Exploit | Payload |
+|---|---|
+| Takes advantage of vulnerability | Performs an action after exploitation |
+| Targets the weakness | Provides functionality |
+| "How do I trigger the weakness?" | "What happens after it works?" |
+
+### Memory trick
+
+> **Exploit = Entry**
+
+> **Payload = Action**
+
+---
+
+# 8. AUXILIARY MODULES
+
+Auxiliary modules perform tasks that generally aren't direct exploitation.
+
+They can be used for things such as:
+
+- Service enumeration
+- Scanning
+- Information gathering
+- Protocol testing
+- Authentication testing in authorized environments
+
+Think:
+
+> **Auxiliary = supporting tools**
+
+---
+
+# 9. POST MODULES
+
+Post-exploitation modules are used **after a session has been established**.
+
+They can assist with authorized activities such as:
+
+- System information gathering
+- Session analysis
+- Evidence collection
+- Configuration assessment
+
+Memory:
+
+> **Post = After access**
+
+---
+
+# 10. ENCODERS
+
+Encoders transform payload representations.
+
+Historically, encoders were used for reasons such as avoiding problematic characters or meeting payload constraints.
+
+Important exam point:
+
+> **Encoding does NOT make malware or a payload inherently undetectable.**
+
+Modern security controls can detect many encoded or transformed payloads.
+
+---
+
+# 11. NOP
+
+NOP means:
+
+> **No Operation**
+
+NOP modules historically help with payload placement/alignment requirements in certain exploitation scenarios.
+
+For basic Metasploit learning:
+
+> **NOP = No Operation**
+
+---
+
+# 12. METERPRETER
+
+**Meterpreter** is a Metasploit payload/session environment designed for authorized post-exploitation activities.
+
+It provides an interactive session with capabilities appropriate to the compromised lab system.
+
+Conceptually:
+
+```text
+Exploit
+   ↓
+Payload
+   ↓
+Meterpreter Session
+   ↓
+Post-exploitation
+```
+
+---
+
+# 13. METASPLOIT MODULE TYPES
+
+Remember:
+
+> **E-A-P-E-N**
+
+```text
+E = Exploit
+A = Auxiliary
+P = Payload
+E = Encoder
+N = NOP
+```
+
+And:
+
+> **Post** = post-exploitation modules.
+
+---
+
+# 14. METASPLOIT CONSOLE
+
+The primary command-line interface is:
+
+```text
+msfconsole
+```
+
+After starting it, you may see:
+
+```text
+msf6 >
+```
+
+This is the Metasploit console.
+
+---
+
+# 15. STARTING METASPLOIT
+
+On Kali Linux:
+
+```bash
+msfconsole
+```
+
+You should receive the Metasploit console prompt.
+
+Example:
+
+```text
+msf6 >
+```
+
+---
+
+# 16. GETTING HELP
+
+Inside Metasploit:
+
+```text
+help
+```
+
+or:
+
+```text
+?
+```
+
+This displays available commands.
+
+---
+
+# 17. SEARCHING FOR MODULES
+
+Use:
+
+```text
+search <keyword>
+```
+
+For example, in a lab:
+
+```text
+search vsftpd
+```
+
+The search results may show matching modules.
+
+---
+
+# 18. MODULE INFORMATION
+
+After identifying a module, use:
+
+```text
+info <module>
+```
+
+This is extremely important.
+
+Before using a module, examine:
+
+- Description
+- References
+- Targets
+- Required options
+- Available payloads
+- Supported platforms
+- Reliability information
+
+---
+
+# 19. SELECTING A MODULE
+
+Use:
+
+```text
+use <module>
+```
+
+Example structure:
+
+```text
+use exploit/<category>/<module>
+```
+
+The prompt changes to indicate the selected module.
+
+---
+
+# 20. VIEWING OPTIONS
+
+Use:
+
+```text
+show options
+```
+
+This displays configurable parameters.
+
+Typical fields may include:
+
+```text
+Name
+Current Setting
+Required
+Description
+```
+
+---
+
+# 21. REQUIRED VS OPTIONAL
+
+Example:
+
+```text
+Name       Current Setting    Required
+RHOSTS                        yes
+RPORT      21                 yes
+```
+
+If `RHOSTS` is required but empty:
+
+> The module is not ready to run.
+
+---
+
+# 22. RHOSTS
+
+`RHOSTS` means:
+
+> **Remote Hosts**
+
+It specifies the authorized target system(s).
+
+Example in a lab:
+
+```text
+set RHOSTS 192.168.56.101
+```
+
+Use only your intentionally vulnerable lab target.
+
+---
+
+# 23. RPORT
+
+`RPORT` means:
+
+> **Remote Port**
+
+It identifies the service port being tested.
+
+Example:
+
+```text
+set RPORT 21
+```
+
+The correct port depends on the vulnerable service.
+
+---
+
+# 24. LHOST
+
+`LHOST` means:
+
+> **Local Host**
+
+For payloads that create a connection back to the tester, this identifies the tester's appropriate lab IP address.
+
+Conceptually:
+
+```text
+Lab Target
+    ↓
+connects back to
+    ↓
+Kali
+```
+
+---
+
+# 25. LPORT
+
+`LPORT` means:
+
+> **Local Port**
+
+It is the local port associated with a payload connection.
+
+---
+
+# 26. RHOSTS VS LHOST
+
+This is a common exam question.
+
+| Option | Meaning |
+|---|---|
+| RHOSTS | Remote target |
+| RPORT | Remote target service port |
+| LHOST | Local/tester host |
+| LPORT | Local/tester port |
+
+### Memory
+
+> **R = Remote**
+
+> **L = Local**
+
+---
+
+# 27. SHOW PAYLOADS
+
+After selecting an exploit:
+
+```text
+show payloads
+```
+
+This displays compatible payloads.
+
+---
+
+# 28. SETTING A PAYLOAD
+
+Conceptually:
+
+```text
+set payload <compatible-payload>
+```
+
+Then verify:
+
+```text
+show options
+```
+
+---
+
+# 29. CHECK
+
+Some Metasploit modules support:
+
+```text
+check
+```
+
+`check` attempts to determine whether the target appears vulnerable without performing the full exploit.
+
+Important:
+
+> **Check result ≠ guaranteed exploitation.**
+
+A scanner or check can produce false positives or false negatives.
+
+---
+
+# 30. RUN / EXPLOIT
+
+Depending on the module, the commands may include:
+
+```text
+run
+```
+
+or:
+
+```text
+exploit
+```
+
+These execute the selected module.
+
+In a real authorized assessment, this step must be within the approved scope and rules of engagement.
+
+---
+
+# 31. BASIC METASPLOIT WORKFLOW
+
+Memorize:
+
+> **S-I-U-O-S-P-C-E**
+
+```text
+Search
+   ↓
+Info
+   ↓
+Use
+   ↓
+Options
+   ↓
+Set
+   ↓
+Payload
+   ↓
+Check
+   ↓
+Exploit
+```
+
+This is one of the most important Day 36 sequences.
+
+---
+
+# 32. COMPLETE LAB FLOW
+
+For an intentionally vulnerable lab:
+
+```text
+1. Start isolated lab
+       ↓
+2. Identify target IP
+       ↓
+3. Identify service
+       ↓
+4. Search Metasploit
+       ↓
+5. Read module information
+       ↓
+6. Select module
+       ↓
+7. Review options
+       ↓
+8. Configure authorized target
+       ↓
+9. Select compatible payload
+       ↓
+10. Check if supported
+       ↓
+11. Run exploit
+       ↓
+12. Observe session
+       ↓
+13. Perform limited post-exploitation
+       ↓
+14. Document
+       ↓
+15. Reset lab
+```
+
+---
+
+# 33. METASPLOIT AND NMAP
+
+These tools complement each other.
+
+### Nmap
+
+Answers:
+
+> "What is running?"
+
+Example:
+
+```text
+Port 21
+FTP
+Version X
+```
+
+### Metasploit
+
+Can help answer:
+
+> "Can this known vulnerability be validated in my authorized lab?"
+
+Therefore:
+
+```text
+Nmap
+ ↓
+Discovery
+ ↓
+Service/version
+ ↓
+Metasploit
+ ↓
+Controlled validation
+```
+
+---
+
+# 34. METASPLOIT AND VULNERABILITY SCANNERS
+
+| Tool | Main purpose |
+|---|---|
+| Nmap | Discovery/enumeration |
+| Nessus | Vulnerability assessment |
+| OpenVAS/GVM | Vulnerability assessment |
+| Metasploit | Controlled exploit validation and security testing |
+| Wireshark | Packet analysis |
+
+---
+
+# 35. SESSION
+
+When an exploit succeeds and establishes an interactive connection, Metasploit may create a:
+
+> **Session**
+
+Conceptually:
+
+```text
+Exploit
+ ↓
+Payload
+ ↓
+Session
+```
+
+A session allows authorized interaction with the lab target.
+
+---
+
+# 36. SESSION MANAGEMENT
+
+Metasploit provides commands for managing sessions.
+
+A common command is:
+
+```text
+sessions
+```
+
+It can display available sessions.
+
+---
+
+# 37. SESSION ID
+
+Sessions can have IDs.
+
+Example concept:
+
+```text
+1
+2
+3
+```
+
+You can then interact with the appropriate session using Metasploit's session-management commands.
+
+---
+
+# 38. BACKGROUNDING A SESSION
+
+A session can be placed in the background so you can return to the Metasploit console.
+
+Concept:
+
+```text
+Active session
+      ↓
+Background
+      ↓
+msfconsole
+```
+
+The session remains available for authorized testing.
+
+---
+
+# 39. METERPRETER VS SHELL
+
+### Shell
+
+Usually provides command-line interaction with the target operating system.
+
+### Meterpreter
+
+Provides a richer Metasploit session environment.
+
+| Shell | Meterpreter |
+|---|---|
+| Basic command interface | Rich session environment |
+| OS command interaction | Additional Metasploit functionality |
+| Simpler | More feature-rich |
+
+---
+
+# 40. EXPLOITATION IS NOT THE END
+
+A professional penetration test does not end with:
+
+> "I got a shell."
+
+You must determine:
+
+- What vulnerability was exploited?
+- What conditions allowed exploitation?
+- What access was obtained?
+- What is the impact?
+- What evidence supports the finding?
+- How should it be fixed?
+- Can remediation be verified?
+
+---
+
+# 41. EXPLOITATION CHAIN
+
+Memorize:
+
+> **V → E → P → S → I → R**
+
+```text
+Vulnerability
+      ↓
+Exploit
+      ↓
+Payload
+      ↓
+Session
+      ↓
+Impact
+      ↓
+Report
+```
+
+This is the complete conceptual chain.
+
+---
+
+# 42. EXAMPLE SCENARIO
+
+Suppose an intentionally vulnerable lab server contains a known vulnerable service.
+
+You discover:
+
+```text
+Target
+ ↓
+Open service
+ ↓
+Known vulnerable version
+```
+
+Then:
+
+```text
+Metasploit search
+ ↓
+Matching exploit module
+ ↓
+Module information
+ ↓
+Configure lab target
+ ↓
+Compatible payload
+ ↓
+Controlled exploitation
+ ↓
+Session
+```
+
+The finding should then be documented.
+
+---
+
+# 43. WHAT IF THE EXPLOIT FAILS?
+
+Do NOT immediately assume:
+
+> "The target is not vulnerable."
+
+Possible causes include:
+
+- Incorrect target version
+- Wrong module
+- Wrong target configuration
+- Incorrect options
+- Network connectivity
+- Firewall
+- Payload incompatibility
+- Service changed
+- Patch applied
+- Exploit reliability
+- Incorrect architecture
+
+Therefore:
+
+> **Exploit failure ≠ proof that the vulnerability does not exist.**
+
+---
+
+# 44. CHECK VS EXPLOIT
+
+| Check | Exploit |
+|---|---|
+| Attempts to determine vulnerability status | Attempts controlled exploitation |
+| Usually lower impact | Potentially changes system state |
+| May not be available for every module | Depends on exploit module |
+| Safer validation step | Higher-risk step |
+
+---
+
+# 45. WHY READ `INFO` FIRST?
+
+Before executing a module, `info` can reveal:
+
+- What vulnerability it targets
+- Affected software
+- Required options
+- Compatible targets
+- References
+- Available payloads
+- Module behavior
+
+Exam answer:
+
+> **Always understand the module and its requirements before execution.**
+
+---
+
+# 46. METASPLOIT DATABASE
+
+Metasploit may use a database to help manage:
+
+- Hosts
+- Services
+- Vulnerabilities
+- Credentials
+- Loot
+- Workspace information
+
+The exact setup depends on the Metasploit/Kali environment.
+
+---
+
+# 47. WORKSPACES
+
+Workspaces help separate assessment data.
+
+For example:
+
+```text
+Project-A
+Project-B
+Lab
+```
+
+This is useful because data from different assessments should not become mixed.
+
+---
+
+# 48. REPORTING
+
+A professional exploitation finding should contain:
+
+### Finding
+
+What vulnerability was identified?
+
+### Target
+
+Which authorized system?
+
+### Service
+
+Which service was affected?
+
+### Evidence
+
+What confirmed the issue?
+
+### Exploit validation
+
+Was controlled exploitation successful?
+
+### Impact
+
+What could an attacker potentially achieve?
+
+### Recommendation
+
+How should it be fixed?
+
+### Retest
+
+Was remediation verified?
+
+---
+
+# 49. EXAMPLE FINDING
+
+```text
+Finding:
+Vulnerable service on authorized lab server
+
+Target:
+192.168.56.101
+
+Evidence:
+Service/version matched a known vulnerability.
+
+Validation:
+Controlled exploitation succeeded in the isolated lab.
+
+Impact:
+The vulnerability allowed unauthorized code execution in the lab environment.
+
+Recommendation:
+Upgrade/patch the affected software and restrict unnecessary service exposure.
+
+Retest:
+Repeat vulnerability validation after remediation.
+```
+
+---
+
+# 50. IMPORTANT METASPLOIT COMMANDS
+
+| Command | Purpose |
+|---|---|
+| `msfconsole` | Start Metasploit |
+| `help` | Show help |
+| `search` | Search modules |
+| `info` | Module information |
+| `use` | Select module |
+| `show options` | Display options |
+| `show payloads` | Display payloads |
+| `set` | Set option |
+| `unset` | Remove option |
+| `setg` | Set global option |
+| `show targets` | Show supported targets |
+| `check` | Check vulnerability if supported |
+| `run` | Execute module |
+| `exploit` | Execute exploit |
+| `sessions` | Manage/list sessions |
+| `back` | Leave current module |
+| `search` | Find modules |
+| `exit` | Exit Metasploit |
+
+---
+
+# 51. COMMAND MEMORY TRICK
+
+Remember:
+
+> **S-I-U-O-S-P-C-E**
+
+### S
+Search
+
+### I
+Info
+
+### U
+Use
+
+### O
+Options
+
+### S
+Set
+
+### P
+Payload
+
+### C
+Check
+
+### E
+Exploit
+
+---
+
+# 52. COMMON BEGINNER MISTAKES
+
+### Mistake 1
+
+Thinking:
+
+> Exploit = payload
+
+Incorrect.
+
+```text
+Exploit ≠ Payload
+```
+
+---
+
+### Mistake 2
+
+Running `exploit` before checking options.
+
+Better:
+
+```text
+info
+show options
+set required options
+show payloads
+check
+then controlled exploit
+```
+
+---
+
+### Mistake 3
+
+Assuming exploit failure means patched system.
+
+Incorrect.
+
+Investigate:
+
+- Version
+- Target
+- Configuration
+- Network
+- Payload
+- Module compatibility
+
+---
+
+### Mistake 4
+
+Using Metasploit against random Internet systems.
+
+Never do this.
+
+---
+
+### Mistake 5
+
+Treating a successful shell as the final result.
+
+Professional testing requires:
+
+```text
+Evidence
++
+Impact
++
+Recommendation
++
+Retest
+```
+
+---
+
+# 53. METASPLOIT SAFETY MODEL
+
+Before exploitation ask:
+
+### 1. Authorization?
+
+Do I have permission?
+
+### 2. Scope?
+
+Is this target explicitly included?
+
+### 3. Impact?
+
+Could exploitation disrupt the system?
+
+### 4. Rules of engagement?
+
+What actions are permitted?
+
+### 5. Evidence?
+
+How will I document the result?
+
+---
+
+# 54. SAFE LAB ARCHITECTURE
+
+Recommended educational setup:
+
+```text
+             Host PC
+                │
+        Isolated Virtual Network
+                │
+       ┌────────┴────────┐
+       │                 │
+     Kali             Lab Target
+  Metasploit          Metasploitable
+```
+
+Recommended:
+
+- Host-only network
+- Internal network
+- Intentionally vulnerable target
+- Snapshots
+- No unnecessary Internet exposure
+
+---
+
+# 55. DAY 36 PRACTICAL LAB
+
+## Step 1 — Start Kali
+
+Open a terminal.
+
+Check your network configuration:
+
+```bash
+ip addr
+```
+
+Check routes:
+
+```bash
+ip route
+```
+
+---
+
+## Step 2 — Identify Your Lab Target
+
+Use your known intentionally vulnerable lab target.
+
+For example:
+
+```text
+192.168.56.101
+```
+
+Do not substitute an arbitrary Internet target.
+
+---
+
+## Step 3 — Start Metasploit
+
+```bash
+msfconsole
+```
+
+---
+
+## Step 4 — Search
+
+Search for a service/vulnerability that exists on your lab target:
+
+```text
+search <service-or-vulnerability>
+```
+
+---
+
+## Step 5 — Read Information
+
+```text
+info <module>
+```
+
+Review:
+
+- Description
+- References
+- Options
+- Targets
+- Payloads
+
+---
+
+## Step 6 — Select the Module
+
+```text
+use <module>
+```
+
+---
+
+## Step 7 — Review Options
+
+```text
+show options
+```
+
+Identify:
+
+```text
+RHOSTS
+RPORT
+```
+
+and any module-specific required settings.
+
+---
+
+## Step 8 — Configure ONLY Your Lab
+
+Example:
+
+```text
+set RHOSTS 192.168.56.101
+```
+
+If needed:
+
+```text
+set RPORT <lab-service-port>
+```
+
+---
+
+## Step 9 — Review Payloads
+
+```text
+show payloads
+```
+
+Select only a compatible payload appropriate for your isolated lab.
+
+---
+
+## Step 10 — Check
+
+If supported:
+
+```text
+check
+```
+
+Record the result.
+
+---
+
+## Step 11 — Controlled Exploitation
+
+Only if:
+
+- The target is yours/authorized
+- The exploit is appropriate
+- The lab is isolated
+- The action is within your rules
+
+Then execute the selected module.
+
+---
+
+## Step 12 — Observe Session
+
+If successful:
+
+```text
+sessions
+```
+
+Document the session and stop when the exercise is complete.
+
+---
+
+## Step 13 — Reset Lab
+
+Restore your snapshot or reset the vulnerable environment.
+
+---
+
+# 56. PRACTICAL LAB REPORT
+
+Use:
+
+```text
+Target:
+Service:
+Port:
+Vulnerability:
+Metasploit Module:
+Module Reference:
+Check Result:
+Exploit Result:
+Payload Type:
+Session:
+Impact:
+Evidence:
+Recommendation:
+Retest Result:
+```
+
+---
+
+# 57. METASPLOIT DECISION TREE
+
+```text
+Do I have authorization?
+        │
+       NO ──→ STOP
+        │
+       YES
+        ↓
+Is target in scope?
+        │
+       NO ──→ STOP
+        │
+       YES
+        ↓
+Identify service/version
+        ↓
+Search Metasploit
+        ↓
+Read module information
+        ↓
+Check compatibility
+        ↓
+Configure target
+        ↓
+Check if supported
+        ↓
+Controlled exploitation
+        ↓
+Document
+        ↓
+Remediate
+        ↓
+Retest
+```
+
+---
+
+# 58. HARD SCENARIO-BASED MCQs
+
+## Q1
+
+A penetration tester finds a vulnerable service and wants to use Metasploit.
+
+What should be done first?
+
+A. Run exploit  
+B. Read module information and verify scope/target  
+C. Select random payload  
+D. Start post-exploitation
+
+**Answer: B**
+
+---
+
+## Q2
+
+What is the primary difference between an exploit and a payload?
+
+A. Exploit identifies the network; payload scans it  
+B. Exploit takes advantage of a vulnerability; payload provides the post-exploitation action/functionality  
+C. They are identical  
+D. Payload is always encryption
+
+**Answer: B**
+
+---
+
+## Q3
+
+Which option identifies the remote target in Metasploit?
+
+A. LHOST  
+B. LPORT  
+C. RHOSTS  
+D. RPORT
+
+**Answer: C**
+
+---
+
+## Q4
+
+What does `RPORT` normally represent?
+
+A. Local listening port  
+B. Remote service port  
+C. Remote IP address  
+D. Payload type
+
+**Answer: B**
+
+---
+
+## Q5
+
+A tester runs `check` and receives a result indicating the target appears vulnerable.
+
+What does this prove?
+
+A. Successful exploitation  
+B. A session already exists  
+C. The module believes the target may be vulnerable  
+D. The target is compromised
+
+**Answer: C**
+
+---
+
+## Q6
+
+A Metasploit exploit fails.
+
+What is the best conclusion?
+
+A. The vulnerability definitely does not exist  
+B. The system is definitely patched  
+C. Investigate compatibility, version, configuration, options and exploit reliability  
+D. Run the exploit repeatedly against random systems
+
+**Answer: C**
+
+---
+
+## Q7
+
+Which command displays module configuration requirements?
+
+A. `show options`  
+B. `sessions`  
+C. `exit`  
+D. `back`
+
+**Answer: A**
+
+---
+
+## Q8
+
+What does `search` do?
+
+A. Exploits every matching target  
+B. Searches available Metasploit modules  
+C. Deletes modules  
+D. Starts Meterpreter
+
+**Answer: B**
+
+---
+
+## Q9
+
+A tester selects a module and runs:
+
+```text
+show options
+```
+
+`RHOSTS` is marked required but is empty.
+
+What should the tester do?
+
+A. Exploit immediately  
+B. Configure the authorized target  
+C. Ignore it  
+D. Change the payload randomly
+
+**Answer: B**
+
+---
+
+## Q10
+
+Which module type is primarily intended for post-exploitation activities?
+
+A. Auxiliary  
+B. Post  
+C. Encoder  
+D. NOP
+
+**Answer: B**
+
+---
+
+# 59. HARDER SCENARIO QUESTIONS
+
+## Q11
+
+Nmap identifies an old service version. A Metasploit module exists for a vulnerability associated with that version.
+
+What is the best next step?
+
+A. Assume compromise  
+B. Read the module information and validate whether the target is actually affected  
+C. Immediately exploit every machine on the network  
+D. Delete the service
+
+**Answer: B**
+
+---
+
+## Q12
+
+A tester receives a Meterpreter session on an authorized lab machine.
+
+What does this demonstrate?
+
+A. The selected exploitation chain successfully established the session  
+B. Every machine on the network is vulnerable  
+C. The vulnerability exists everywhere  
+D. Encryption has been broken
+
+**Answer: A**
+
+---
+
+## Q13
+
+A payload requires `LHOST`. What does this generally represent?
+
+A. Target IP  
+B. Tester/local host address used by the payload connection  
+C. Target service port  
+D. DNS server
+
+**Answer: B**
+
+---
+
+## Q14
+
+Which workflow is most appropriate?
+
+A. Exploit → Search → Authorization  
+B. Search → Info → Use → Options → Configure → Check → Controlled Exploit  
+C. Payload → Exploit → Scope  
+D. Session → Search → Authorization
+
+**Answer: B**
+
+---
+
+## Q15
+
+A tester successfully exploits a lab system but does not document the vulnerability, evidence, or remediation.
+
+What is missing?
+
+A. Professional reporting  
+B. Encryption  
+C. DNS  
+D. ARP
+
+**Answer: A**
+
+---
+
+## Q16
+
+Which statement about Metasploit is most accurate?
+
+A. It is only a password cracker  
+B. It is a penetration-testing framework containing multiple types of modules  
+C. It is only a packet analyzer  
+D. It is only an antivirus
+
+**Answer: B**
+
+---
+
+## Q17
+
+A module has several compatible payloads. What should determine the choice?
+
+A. Random selection  
+B. Compatibility, test objective, network configuration and rules of engagement  
+C. Largest payload  
+D. Most dangerous payload
+
+**Answer: B**
+
+---
+
+## Q18
+
+A tester has permission to scan a server but the rules of engagement prohibit exploitation.
+
+Can the tester run a Metasploit exploit?
+
+A. Yes, because scanning permission includes everything  
+B. Yes, if the exploit is safe  
+C. No, exploitation is outside the authorized scope  
+D. Yes, if no session is created
+
+**Answer: C**
+
+---
+
+## Q19
+
+Why should a penetration tester use a lab snapshot?
+
+A. To make attacks faster  
+B. To restore the environment after potentially disruptive testing  
+C. To bypass authentication  
+D. To hide evidence
+
+**Answer: B**
+
+---
+
+## Q20
+
+Which sequence best represents professional exploitation?
+
+A. Exploit → Hide → Delete logs  
+B. Identify → Validate → Controlled exploit → Assess impact → Report → Remediate → Retest  
+C. Scan → Attack everything  
+D. Payload → Random target → Exploit
+
+**Answer: B**
+
+---
+
+# 60. VERY HARD SCENARIO
+
+### Scenario
+
+A tester scans an authorized lab server and discovers:
+
+```text
+Service: Vulnerable service
+Version: Known affected version
+```
+
+The tester finds a Metasploit module matching the service.
+
+The tester runs:
+
+```text
+info <module>
+```
+
+The module documentation shows that the target version is supported.
+
+The tester then runs:
+
+```text
+show options
+```
+
+and notices that `RHOSTS` is empty.
+
+### Question
+
+What should happen next?
+
+A. Run `exploit`  
+B. Set the authorized lab target in `RHOSTS`, review all required options and proceed only within scope  
+C. Use a random IP  
+D. Select every payload
+
+### Answer
+
+**B**
+
+---
+
+# 61. ANOTHER HARD SCENARIO
+
+A vulnerability scanner reports:
+
+> "Potential vulnerable service."
+
+The tester selects a Metasploit module associated with the reported vulnerability.
+
+The exploit fails.
+
+What is the most professional interpretation?
+
+A. The scanner was definitely wrong  
+B. The target is definitely secure  
+C. The finding requires further validation because exploit failure alone does not prove absence of vulnerability  
+D. The tester should attack another system
+
+**Answer: C**
+
+---
+
+# 62. EXAM TRAPS
+
+### Trap 1
+
+> "Metasploit = exploit."
+
+Incomplete.
+
+Metasploit is a **framework**.
+
+---
+
+### Trap 2
+
+> "Exploit = payload."
+
+Wrong.
+
+```text
+Exploit → triggers vulnerability
+Payload → provides functionality
+```
+
+---
+
+### Trap 3
+
+> "Successful check = successful exploitation."
+
+Wrong.
+
+```text
+Check ≠ Exploit
+```
+
+---
+
+### Trap 4
+
+> "Exploit failed = vulnerability doesn't exist."
+
+Wrong.
+
+Other factors may cause failure.
+
+---
+
+### Trap 5
+
+> "Meterpreter is an exploit."
+
+Wrong.
+
+Meterpreter is a **payload/session environment**.
+
+---
+
+# 63. DAY 36 QUICK REVISION
+
+```text
+Metasploit
+    ↓
+Penetration-testing framework
+
+Exploit
+    ↓
+Takes advantage of vulnerability
+
+Payload
+    ↓
+Provides action/functionality
+
+Session
+    ↓
+Interactive result of successful exploitation
+
+Meterpreter
+    ↓
+Feature-rich Metasploit session environment
+
+Auxiliary
+    ↓
+Supporting tasks
+
+Post
+    ↓
+Post-exploitation modules
+
+Encoder
+    ↓
+Transforms payload representation
+
+NOP
+    ↓
+No Operation
+```
+
+---
+
+# 64. COMMAND CHEAT SHEET
+
+```text
+msfconsole
+
+help
+
+search <keyword>
+
+info <module>
+
+use <module>
+
+show options
+
+show payloads
+
+show targets
+
+set RHOSTS <authorized-lab-IP>
+
+set RPORT <authorized-lab-port>
+
+set payload <compatible-payload>
+
+check
+
+run
+
+exploit
+
+sessions
+
+back
+
+exit
+```
+
+---
+
+# 65. MASTER MEMORY TRICKS
+
+## Metasploit Components
+
+> **E-A-P-P-E-N**
+
+```text
+E = Exploit
+A = Auxiliary
+P = Payload
+P = Post
+E = Encoder
+N = NOP
+```
+
+## Exploitation Flow
+
+> **V-E-P-S-I-R**
+
+```text
+V = Vulnerability
+E = Exploit
+P = Payload
+S = Session
+I = Impact
+R = Report
+```
+
+## Console Workflow
+
+> **S-I-U-O-S-P-C-E**
+
+```text
+Search
+Info
+Use
+Options
+Set
+Payload
+Check
+Exploit
+```
+
+## Network Options
+
+> **R = Remote, L = Local**
+
+```text
+RHOSTS → Remote host
+RPORT  → Remote port
+LHOST  → Local host
+LPORT  → Local port
+```
+
+---
+
+# 66. ONE-LINE EXAM ANSWER
+
+> **Metasploit is a penetration-testing framework that provides modules for vulnerability validation, controlled exploitation, payload delivery, and post-exploitation activities in authorized security assessments.**
+
+---
+
+# 67. DAY 36 GOLDEN RULE
+
+> **Never start with "Which exploit should I run?"**
+
+Start with:
+
+```text
+What is the target?
+       ↓
+What service/version is running?
+       ↓
+What vulnerability exists?
+       ↓
+Is it in scope?
+       ↓
+Which Metasploit module matches?
+       ↓
+What does the module do?
+       ↓
+What options are required?
+       ↓
+Can it be safely validated?
+       ↓
+What evidence was obtained?
+       ↓
+How is it remediated?
+```
+
+That is the **professional penetration-testing mindset**.
+
+# ⭐ DAY 36 MASTER FORMULA
+
+```text
+DISCOVER
+   ↓
+IDENTIFY
+   ↓
+VALIDATE
+   ↓
+SEARCH
+   ↓
+SELECT MODULE
+   ↓
+CONFIGURE
+   ↓
+CHECK
+   ↓
+CONTROLLED EXPLOIT
+   ↓
+SESSION
+   ↓
+IMPACT
+   ↓
+REPORT
+   ↓
+REMEDIATE
+   ↓
+RETEST
+```

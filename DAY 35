@@ -1,0 +1,1583 @@
+# DAY 35 – REVIEW AND PRACTICE
+## Wireless & Network Security Consolidation
+
+### Coverage
+- Day 29 — Wireless Network Basics
+- Day 30 — WEP/WPA/WPA2 Security & Aircrack-ng Concepts
+- Day 31 — MITM & ARP Spoofing
+- Day 32 — Network Sniffing & Wireshark
+- Day 33 — Developing a Packet Sniffer
+- Day 34 — Wireless Intrusion Detection
+
+> **Lab rule:** Perform packet capture, wireless testing, sniffing, and attack simulation only on systems, networks, and devices you own or are explicitly authorized to test.
+
+---
+
+# 1. DAY 35 OBJECTIVE
+
+By the end of this review you should be able to:
+
+- Explain Wi-Fi architecture and security
+- Differentiate WEP, WPA, WPA2 and WPA3
+- Explain PSK and Enterprise authentication
+- Understand Wi-Fi attack concepts
+- Explain ARP spoofing and MITM
+- Analyze packets in Wireshark
+- Understand packet-sniffer architecture
+- Identify suspicious wireless activity
+- Detect Rogue APs and Evil Twins
+- Recognize deauthentication anomalies
+- Correlate network evidence
+- Distinguish attacks that are frequently confused in exams
+
+---
+
+# 2. MASTER NETWORK SECURITY FLOW
+
+Remember:
+
+> **D → R → S → A → V → D**
+
+```text
+Discover
+   ↓
+Reconnaissance
+   ↓
+Sniff / Capture
+   ↓
+Analyze
+   ↓
+Validate
+   ↓
+Defend
+```
+
+For an authorized security assessment:
+
+```text
+Recon
+ ↓
+Discovery
+ ↓
+Enumeration
+ ↓
+Capture/Analysis
+ ↓
+Vulnerability Assessment
+ ↓
+Controlled Validation
+ ↓
+Reporting
+ ↓
+Remediation
+```
+
+---
+
+# 3. DAY 29 — WIRELESS BASICS
+
+## Wi-Fi
+
+Wi-Fi is a wireless networking technology based on the IEEE 802.11 family of standards.
+
+Important components:
+
+```text
+Client/Station
+      ↓
+Access Point
+      ↓
+Network
+```
+
+### Important terms
+
+| Term | Meaning |
+|---|---|
+| AP | Access Point |
+| STA | Wireless station/client |
+| SSID | Network name |
+| BSSID | Identifier of an AP/radio |
+| Channel | Radio channel |
+| RSSI | Signal-strength indicator |
+| WIDS | Wireless Intrusion Detection |
+| WIPS | Wireless Intrusion Prevention |
+
+---
+
+# 4. SSID VS BSSID
+
+### SSID
+
+Human-readable network name.
+
+Example:
+
+```text
+NAVLAN-WIFI
+```
+
+### BSSID
+
+Typically the MAC address identifying a particular AP radio.
+
+Example:
+
+```text
+AA:BB:CC:DD:EE:FF
+```
+
+### Exam trap
+
+> Two APs can have the same SSID.
+
+Therefore:
+
+```text
+Same SSID ≠ automatically Evil Twin
+```
+
+---
+
+# 5. FREQUENCY BANDS
+
+Common Wi-Fi bands include:
+
+- 2.4 GHz
+- 5 GHz
+- 6 GHz
+
+General characteristics:
+
+### 2.4 GHz
+- Longer range
+- More congestion
+- Fewer non-overlapping channels in many deployments
+
+### 5 GHz
+- More channels
+- Generally less crowded than 2.4 GHz
+- Shorter range than 2.4 GHz in many environments
+
+### 6 GHz
+- Additional spectrum for supported Wi-Fi generations
+- Requires compatible equipment
+
+---
+
+# 6. WIRELESS SECURITY EVOLUTION
+
+Basic progression:
+
+```text
+WEP
+ ↓
+WPA
+ ↓
+WPA2
+ ↓
+WPA3
+```
+
+General security lesson:
+
+> Newer generations provide stronger security mechanisms than legacy WEP.
+
+---
+
+# 7. WEP
+
+**WEP = Wired Equivalent Privacy**
+
+WEP is an obsolete and insecure wireless security mechanism.
+
+Major weakness:
+
+> Its cryptographic design allows attackers to recover key material under suitable conditions.
+
+Therefore:
+
+> **WEP should not be used for modern secure networks.**
+
+---
+
+# 8. WPA
+
+**WPA = Wi-Fi Protected Access**
+
+WPA was introduced as an improvement over WEP.
+
+It was designed as an interim improvement while stronger standards were developed.
+
+---
+
+# 9. WPA2
+
+WPA2 significantly improved Wi-Fi security.
+
+Common security mechanism:
+
+> **AES-CCMP**
+
+Two major deployment models:
+
+```text
+WPA2-Personal
+WPA2-Enterprise
+```
+
+---
+
+# 10. WPA3
+
+WPA3 provides improved security over WPA2 in supported deployments.
+
+Important:
+
+> WPA3 does not mean "the entire network is automatically secure."
+
+Secure configuration, authentication, updates, segmentation, and monitoring are still required.
+
+---
+
+# 11. PERSONAL VS ENTERPRISE
+
+### Personal
+
+Usually uses:
+
+> PSK / password-based authentication
+
+Example:
+
+```text
+Wi-Fi password
+```
+
+### Enterprise
+
+Usually uses:
+
+> 802.1X + authentication server such as RADIUS
+
+Conceptually:
+
+```text
+Client
+  ↓
+AP
+  ↓
+Authentication system
+  ↓
+RADIUS
+```
+
+---
+
+# 12. WIRELESS SECURITY MEMORY
+
+Remember:
+
+> **WEP → WPA → WPA2 → WPA3**
+
+Think:
+
+> **Weak → Better → Strong → Stronger**
+
+---
+
+# 13. DAY 30 — WI-FI ATTACK CONCEPTS
+
+Common wireless security topics:
+
+- Weak legacy encryption
+- Weak passwords
+- Rogue AP
+- Evil Twin
+- Deauthentication
+- Authentication attacks
+- Misconfiguration
+- Unauthorized devices
+
+---
+
+# 14. AIRCRACK-NG
+
+Aircrack-ng is a wireless security assessment toolkit.
+
+It contains tools for tasks such as:
+
+- Wireless monitoring
+- Packet capture
+- Analysis
+- Security assessment
+- Authorized testing
+
+Important:
+
+> The tool itself is not the vulnerability.
+
+The security issue may be:
+
+- Weak protocol
+- Weak password
+- Poor configuration
+- Poor network design
+
+---
+
+# 15. WPA/WPA2 PASSWORD SECURITY
+
+For PSK-based Wi-Fi, security depends heavily on the strength of the password/passphrase.
+
+Conceptually:
+
+```text
+Captured authentication material
+          ↓
+Offline password testing
+          ↓
+Candidate password
+          ↓
+Cryptographic verification
+```
+
+A weak password is much more vulnerable to guessing than a strong random one.
+
+---
+
+# 16. DEFENSE AGAINST PASSWORD GUESSING
+
+Use:
+
+- Strong random passphrases
+- WPA2/WPA3
+- Enterprise authentication where appropriate
+- Avoid shared credentials when practical
+- Monitoring
+- Credential rotation according to policy
+
+---
+
+# 17. DAY 31 — MITM
+
+## MITM = Man-in-the-Middle
+
+An attacker positions themselves between two communicating parties.
+
+Normal:
+
+```text
+Client ─────────→ Server
+```
+
+MITM:
+
+```text
+Client
+   ↓
+Attacker
+   ↓
+Server
+```
+
+Potential consequences:
+
+- Observe traffic
+- Modify traffic
+- Redirect traffic
+- Drop traffic
+- Inject traffic
+
+Actual impact depends on protocol protections.
+
+---
+
+# 18. ARP
+
+ARP maps:
+
+> **IPv4 address → MAC address**
+
+Example:
+
+```text
+192.168.1.1
+     ↓
+AA:BB:CC:DD:EE:FF
+```
+
+ARP does not provide strong authentication of ARP replies.
+
+---
+
+# 19. ARP SPOOFING
+
+Concept:
+
+```text
+Victim believes:
+
+Gateway IP → Attacker MAC
+```
+
+The attacker attempts to position traffic through themselves.
+
+Potential flow:
+
+```text
+Victim
+  ↓
+Attacker
+  ↓
+Gateway
+```
+
+---
+
+# 20. ARP SPOOFING DOES NOT AUTOMATICALLY MEAN FULL MITM
+
+For transparent interception:
+
+```text
+Victim → Attacker → Gateway
+Gateway → Attacker → Victim
+```
+
+Traffic forwarding is important.
+
+Without proper forwarding, the result may simply be disruption rather than a transparent MITM.
+
+---
+
+# 21. MITM DEFENSE
+
+Important defenses:
+
+- HTTPS/TLS
+- Certificate validation
+- HSTS
+- Secure network segmentation
+- Dynamic ARP Inspection
+- DHCP Snooping
+- Monitoring
+- Protected network infrastructure
+
+---
+
+# 22. ARP SPOOFING VS DNS SPOOFING
+
+| ARP Spoofing | DNS Spoofing |
+|---|---|
+| Attacks IP-to-MAC mapping | Manipulates DNS resolution |
+| Local network technique | DNS resolution attack |
+| Can facilitate MITM | Can redirect users |
+| Targets ARP behavior | Targets name resolution |
+
+---
+
+# 23. DAY 32 — NETWORK SNIFFING
+
+## Packet Sniffing
+
+Packet sniffing is the capture and analysis of network traffic.
+
+Concept:
+
+```text
+Network Traffic
+      ↓
+Capture
+      ↓
+Packets
+      ↓
+Analyze
+```
+
+---
+
+# 24. WIRESHARK
+
+Wireshark is a network protocol analyzer.
+
+It can help you:
+
+- Capture traffic
+- Inspect packets
+- Follow conversations
+- Analyze protocols
+- Filter traffic
+- Investigate suspicious activity
+- Troubleshoot networks
+
+---
+
+# 25. WIRESHARK INVESTIGATION FLOW
+
+Remember:
+
+> **C-F-I-V-R**
+
+```text
+C = Capture
+F = Filter
+I = Inspect
+V = Validate
+R = Report
+```
+
+---
+
+# 26. COMMON WIRESHARK FILTERS
+
+Examples:
+
+```text
+arp
+```
+
+Shows ARP traffic.
+
+```text
+dns
+```
+
+Shows DNS traffic.
+
+```text
+http
+```
+
+Shows HTTP traffic.
+
+```text
+tls
+```
+
+Shows TLS-related traffic.
+
+```text
+icmp
+```
+
+Shows ICMP.
+
+```text
+tcp
+```
+
+Shows TCP.
+
+---
+
+# 27. TCP STREAM ANALYSIS
+
+When investigating TCP traffic, following a TCP stream can help reconstruct the conversation between endpoints.
+
+Concept:
+
+```text
+Packet 1
+Packet 2
+Packet 3
+Packet 4
+   ↓
+Follow conversation
+   ↓
+Understand communication
+```
+
+---
+
+# 28. WIRESHARK AND MITM INVESTIGATION
+
+Possible indicators:
+
+```text
+Repeated ARP replies
+Unexpected IP/MAC mapping
+Gateway MAC changes
+Unusual ARP activity
+Unexpected hosts
+```
+
+Example:
+
+```text
+Gateway IP
+   ↓
+Expected MAC = AA:AA:AA:AA:AA:AA
+
+Observed MAC = BB:BB:BB:BB:BB:BB
+```
+
+This deserves investigation.
+
+---
+
+# 29. WIRESHARK LIMITATION
+
+A packet capture does not automatically tell you:
+
+> "This is malicious."
+
+You must interpret:
+
+- Protocol
+- Source
+- Destination
+- Timing
+- Frequency
+- Context
+- Baseline
+- Related traffic
+
+---
+
+# 30. DAY 33 — PACKET SNIFFER
+
+A packet sniffer is software that captures and processes network packets.
+
+Architecture:
+
+```text
+Network Interface
+       ↓
+Packet Capture
+       ↓
+Packet Parser
+       ↓
+Protocol Identification
+       ↓
+Analysis
+       ↓
+Output
+```
+
+---
+
+# 31. PYTHON PACKET SNIFFER
+
+A basic educational sniffer can be built using appropriate packet-capture libraries.
+
+Conceptual components:
+
+```text
+Interface
+ ↓
+Capture packet
+ ↓
+Read headers
+ ↓
+Identify protocol
+ ↓
+Extract metadata
+ ↓
+Display/store result
+```
+
+Possible information:
+
+- Source IP
+- Destination IP
+- Protocol
+- Source port
+- Destination port
+- Packet length
+- Timestamp
+
+---
+
+# 32. PACKET SNIFFER VS WIRESHARK
+
+| Packet Sniffer | Wireshark |
+|---|---|
+| General concept/tool | Complete protocol analyzer |
+| Can be custom-built | Full-featured GUI/CLI analysis |
+| Usually limited features | Extensive protocol support |
+| Can automate specific tasks | Powerful manual investigation |
+
+---
+
+# 33. PACKET SNIFFER SECURITY RULE
+
+A packet sniffer should not automatically collect sensitive information unnecessarily.
+
+A responsible implementation should use:
+
+- Authorization
+- Scope restrictions
+- Minimal collection
+- Secure storage
+- Appropriate retention
+- Privacy protection
+
+---
+
+# 34. DAY 34 — WIRELESS INTRUSION DETECTION
+
+## WIDS
+
+Wireless Intrusion Detection System.
+
+Main purpose:
+
+> Detect suspicious wireless activity.
+
+---
+
+# 35. WIDS VS WIPS
+
+| WIDS | WIPS |
+|---|---|
+| Detection | Detection + prevention |
+| Generates alerts | Can take configured protective action |
+| Primarily monitoring | Monitoring + response |
+
+Memory:
+
+> **IDS = Detect**  
+> **IPS = Detect + Prevent**
+
+---
+
+# 36. ROGUE AP
+
+A Rogue AP is an unauthorized AP.
+
+Example:
+
+```text
+Authorized:
+CORP-WIFI
+BSSID-A
+
+Unknown:
+CORP-WIFI
+BSSID-X
+```
+
+The unknown AP should be investigated.
+
+---
+
+# 37. EVIL TWIN
+
+An Evil Twin attempts to imitate a legitimate wireless network.
+
+Indicators may include:
+
+```text
+Same SSID
++
+Unexpected BSSID
++
+Different security
++
+Unexpected location
++
+Suspicious client behavior
+```
+
+Remember:
+
+> Same SSID alone is not enough.
+
+---
+
+# 38. DEAUTHENTICATION DETECTION
+
+A sudden increase in deauthentication activity may indicate:
+
+- Attack
+- RF problem
+- AP/client issue
+- Configuration problem
+
+Therefore:
+
+> **Deauth spike = investigate.**
+
+Not:
+
+> **Deauth spike = guaranteed attack.**
+
+---
+
+# 39. WIRELESS BASELINE
+
+Record normal:
+
+```text
+APs
+SSIDs
+BSSIDs
+Channels
+Security
+Client counts
+Signal levels
+Authentication behavior
+```
+
+Then compare future observations against the baseline.
+
+---
+
+# 40. WIRELESS ANOMALY
+
+Example:
+
+### Normal
+
+```text
+5 APs
+30 clients
+Normal authentication
+```
+
+### Observed
+
+```text
+6 APs
+45 clients
+Unexpected BSSID
+Authentication failures increased
+Deauth events increased
+```
+
+The combination is more important than any single event.
+
+---
+
+# 41. CORRELATION
+
+One event:
+
+```text
+Unknown AP
+```
+
+may be harmless.
+
+Several events:
+
+```text
+Unknown AP
++
+Same corporate SSID
++
+Different security
++
+Strong signal
++
+Clients connecting
++
+Authentication anomalies
+```
+
+are much more suspicious.
+
+---
+
+# 42. NETWORK ATTACK COMPARISON
+
+| Attack | Main Target |
+|---|---|
+| ARP spoofing | Local IP→MAC mapping |
+| DNS spoofing | Name resolution |
+| MITM | Communication path |
+| Packet sniffing | Traffic observation |
+| Rogue AP | Wireless infrastructure |
+| Evil Twin | Wireless identity/deception |
+| Deauth | Wireless connectivity |
+| SQL Injection | Database/application |
+| XSS | Browser |
+| CSRF | Authenticated state-changing request |
+| Directory Traversal | Filesystem |
+
+---
+
+# 43. MOST IMPORTANT COMPARISON
+
+Remember:
+
+```text
+SQLi       → DATABASE
+XSS        → BROWSER
+Traversal  → FILESYSTEM
+CSRF       → REQUEST
+ARP Spoof  → IP/MAC
+DNS Spoof  → NAME RESOLUTION
+MITM       → COMMUNICATION PATH
+Sniffing   → TRAFFIC
+Evil Twin  → WIRELESS IDENTITY
+Deauth     → CONNECTION
+```
+
+---
+
+# 44. DETECTION VS EXPLOITATION
+
+This is a very important exam distinction.
+
+### Detection
+
+Question:
+
+> "Is something suspicious happening?"
+
+### Exploitation
+
+Question:
+
+> "Can the suspected weakness actually be abused?"
+
+Example:
+
+```text
+WIDS:
+Unknown AP detected
+
+```
+
+This is a detection finding.
+
+It does not automatically prove:
+
+> Evil Twin attack.
+
+---
+
+# 45. VULNERABILITY VS ATTACK INDICATOR
+
+### Vulnerability
+
+A weakness that could be exploited.
+
+Example:
+
+> Legacy insecure wireless configuration.
+
+### Indicator
+
+Evidence suggesting suspicious activity.
+
+Example:
+
+> Sudden deauthentication spike.
+
+### Attack
+
+Actual malicious activity.
+
+These should not be confused.
+
+---
+
+# 46. MASTER INCIDENT ANALYSIS
+
+Suppose Wireshark shows:
+
+```text
+Many ARP replies
+     +
+Gateway MAC changes
+     +
+Victim traffic changes
+```
+
+Possible hypothesis:
+
+> ARP spoofing / MITM.
+
+But validate against:
+
+- Network topology
+- DHCP
+- Switch information
+- Known gateway
+- Timestamps
+- Other hosts
+
+---
+
+# 47. WIRELESS INCIDENT
+
+Suppose WIDS reports:
+
+```text
+Unknown BSSID
+Same SSID as corporate Wi-Fi
+Different security
+Strong signal
+Multiple clients connecting
+```
+
+Best conclusion:
+
+> Potential Evil Twin / Rogue AP requiring investigation.
+
+Not:
+
+> "100% confirmed Evil Twin."
+
+---
+
+# 48. INCIDENT RESPONSE
+
+Remember:
+
+> **D-V-I-C-E-R**
+
+```text
+D = Detect
+V = Validate
+I = Investigate
+C = Contain
+E = Eradicate
+R = Recover
+```
+
+Then perform lessons learned.
+
+---
+
+# 49. DEFENSIVE CONTROLS MASTER TABLE
+
+| Threat | Important Defense |
+|---|---|
+| Weak Wi-Fi password | Strong password |
+| Legacy WEP | WPA2/WPA3 |
+| Rogue AP | WIDS/WIPS + AP inventory |
+| Evil Twin | AP validation + Enterprise authentication + certificate validation |
+| ARP spoofing | DAI + DHCP Snooping + segmentation |
+| MITM | TLS + certificate validation |
+| Deauth attacks | PMF where supported + monitoring |
+| Packet interception | Encryption |
+| Unauthorized devices | Network access control/monitoring |
+| Weak segmentation | VLAN/network segmentation |
+
+---
+
+# 50. HARD SCENARIO-BASED EXAM
+
+## Q1
+
+An analyst sees an AP broadcasting the organization's SSID. The BSSID is different from all approved APs.
+
+What is the best first conclusion?
+
+A. Confirmed Evil Twin  
+B. Potential unauthorized AP requiring validation  
+C. Confirmed MITM  
+D. Confirmed DNS poisoning
+
+**Answer: B**
+
+---
+
+## Q2
+
+A network uses multiple APs with the same SSID. One AP has a different BSSID.
+
+What should the analyst check?
+
+A. Only the SSID  
+B. AP inventory, BSSID, security configuration and location  
+C. Only the IP address  
+D. Only the hostname
+
+**Answer: B**
+
+---
+
+## Q3
+
+A Wireshark capture shows frequent ARP replies claiming that the gateway IP belongs to an unexpected MAC address.
+
+What is the strongest hypothesis?
+
+A. DNS spoofing  
+B. ARP spoofing  
+C. XSS  
+D. SQL injection
+
+**Answer: B**
+
+---
+
+## Q4
+
+A victim loses network connectivity after ARP manipulation, but the attacker does not forward traffic.
+
+What is the most likely effect?
+
+A. Transparent MITM  
+B. Network disruption/DoS-like effect  
+C. SQL injection  
+D. DNS resolution
+
+**Answer: B**
+
+---
+
+## Q5
+
+Why is TLS important during a potential MITM?
+
+A. It can protect the confidentiality/integrity of properly authenticated communications  
+B. It disables ARP  
+C. It prevents all network attacks  
+D. It replaces Wi-Fi authentication
+
+**Answer: A**
+
+---
+
+## Q6
+
+A WIDS reports a deauthentication spike. What should the analyst do?
+
+A. Immediately declare a confirmed attack  
+B. Correlate timing, affected clients, AP logs and other evidence  
+C. Delete the logs  
+D. Disable all wireless networks
+
+**Answer: B**
+
+---
+
+## Q7
+
+A packet sniffer records source IP, destination IP, protocol and timestamp. What is this?
+
+A. Packet metadata  
+B. Password cracking  
+C. Encryption  
+D. Authentication
+
+**Answer: A**
+
+---
+
+## Q8
+
+Which tool is primarily a full-featured graphical protocol analyzer?
+
+A. Wireshark  
+B. RADIUS  
+C. DHCP  
+D. ARP
+
+**Answer: A**
+
+---
+
+## Q9
+
+An organization detects an unknown AP outside the building with a weak signal. What is the best conclusion?
+
+A. Guaranteed Evil Twin  
+B. Requires investigation; it may simply be a neighboring network  
+C. Guaranteed MITM  
+D. Guaranteed malware
+
+**Answer: B**
+
+---
+
+## Q10
+
+Which technology is associated with enterprise Wi-Fi authentication?
+
+A. RADIUS  
+B. ARP  
+C. DNS  
+D. ICMP
+
+**Answer: A**
+
+---
+
+# 51. HARDER SCENARIOS
+
+## Q11
+
+A corporate SSID appears from two APs:
+
+```text
+AP-1:
+Authorized BSSID
+WPA2-Enterprise
+
+AP-2:
+Unknown BSSID
+Open security
+Strong signal
+```
+
+What is the strongest assessment?
+
+A. Normal operation  
+B. Potential Evil Twin/Rogue AP requiring immediate investigation  
+C. DNS problem  
+D. DHCP problem
+
+**Answer: B**
+
+---
+
+## Q12
+
+A WIDS sees an unknown AP, but the organization's IT team confirms it installed the AP that morning.
+
+What was the alert?
+
+A. False positive  
+B. False negative  
+C. Confirmed attack  
+D. MITM
+
+**Answer: A**
+
+---
+
+## Q13
+
+A wireless network normally has 10 authentication failures per hour. It suddenly records 1,500.
+
+Which approach is best?
+
+A. Automatically declare compromise  
+B. Investigate the anomaly and correlate with clients, APs, timing and authentication logs  
+C. Ignore it  
+D. Delete the authentication logs
+
+**Answer: B**
+
+---
+
+## Q14
+
+A packet capture contains encrypted HTTPS traffic during a suspected MITM.
+
+What does HTTPS imply?
+
+A. MITM is impossible  
+B. Proper TLS authentication and encryption can protect the communication from transparent interception/modification  
+C. ARP cannot occur  
+D. Wi-Fi is automatically secure
+
+**Answer: B**
+
+---
+
+## Q15
+
+An analyst sees one unusual probe request.
+
+What is the correct conclusion?
+
+A. Confirmed wireless attack  
+B. Potentially normal wireless behavior; more context is needed  
+C. Confirmed Evil Twin  
+D. Confirmed deauthentication attack
+
+**Answer: B**
+
+---
+
+## Q16
+
+Which combination is strongest evidence of a possible ARP spoofing incident?
+
+A. One ARP request  
+B. Repeated conflicting gateway mappings + unexpected MAC + affected traffic  
+C. One DNS query  
+D. One ICMP packet
+
+**Answer: B**
+
+---
+
+## Q17
+
+What is the main weakness of WEP?
+
+A. It is based on a legacy cryptographic design with serious security weaknesses  
+B. It uses TLS  
+C. It requires RADIUS  
+D. It cannot transmit packets
+
+**Answer: A**
+
+---
+
+## Q18
+
+A security team wants to reduce the risk of unauthorized APs.
+
+Which combination is strongest?
+
+A. AP inventory + WIDS/WIPS + network controls + physical security  
+B. DNS only  
+C. Stronger usernames only  
+D. Disabling logging
+
+**Answer: A**
+
+---
+
+## Q19
+
+A WIDS produces 20,000 alerts, 99% of which are harmless neighboring networks.
+
+What is the major operational problem?
+
+A. Alert fatigue and excessive false positives  
+B. Perfect detection  
+C. Encryption failure  
+D. Packet loss
+
+**Answer: A**
+
+---
+
+## Q20
+
+Which statement is most accurate?
+
+A. Every anomaly is an attack  
+B. Every unknown AP is malicious  
+C. Detection identifies suspicious activity; validation determines whether the activity is actually a security incident  
+D. Wireshark automatically identifies attackers
+
+**Answer: C**
+
+---
+
+# 52. VERY HARD SCENARIO
+
+### Scenario
+
+A company reports intermittent wireless disconnections.
+
+The security analyst finds:
+
+```text
+1. Corporate SSID is operating normally.
+2. An unknown BSSID uses the same SSID.
+3. The unknown BSSID has a stronger signal near the reception area.
+4. Several clients have recently associated with it.
+5. Authentication failures increased.
+6. Deauthentication events increased.
+7. The unknown BSSID is not in the AP inventory.
+```
+
+### Question
+
+What is the best assessment?
+
+A. Normal Wi-Fi behavior  
+B. Confirmed DNS spoofing  
+C. Strong evidence of a potential Rogue AP/Evil Twin incident requiring investigation and containment  
+D. SQL injection
+
+### Answer
+
+**C**
+
+### Why?
+
+Multiple independent indicators correlate:
+
+```text
+Unknown BSSID
++
+Same SSID
++
+Strong local signal
++
+Client associations
++
+Authentication anomalies
++
+Deauthentication activity
++
+Not in inventory
+```
+
+The combination creates significantly stronger evidence than any single indicator.
+
+---
+
+# 53. FINAL EXAM COMPARISON
+
+| If you see... | Think... |
+|---|---|
+| IP → MAC manipulation | ARP spoofing |
+| Name → IP manipulation | DNS spoofing |
+| Traffic passing through attacker | MITM |
+| Capturing packets | Sniffing |
+| Same SSID + suspicious AP | Evil Twin possibility |
+| Unauthorized AP | Rogue AP |
+| Many disconnects/deauth frames | Deauth anomaly |
+| Wi-Fi encryption weakness | Wireless security issue |
+| Packet protocol analysis | Wireshark |
+| Automated custom capture program | Packet sniffer |
+| Wireless anomaly monitoring | WIDS |
+| Detection + prevention | WIPS |
+
+---
+
+# 54. 30-SECOND REVISION
+
+```text
+SSID  = Wi-Fi name
+BSSID = AP identifier
+
+WEP   = obsolete/insecure
+WPA   = older improvement
+WPA2  = strong modern legacy standard
+WPA3  = newer security standard
+
+PSK        = Personal
+RADIUS     = Enterprise authentication
+
+ARP spoof  = IP → fake MAC
+MITM       = attacker between parties
+Sniffing   = capture traffic
+Wireshark  = analyze packets
+
+Rogue AP   = unauthorized AP
+Evil Twin  = impersonating AP
+Deauth     = disconnect/disrupt clients
+
+WIDS       = Detect
+WIPS       = Detect + Prevent
+```
+
+---
+
+# 55. MASTER MEMORY MAP
+
+## Wireless
+
+> **S-B-C-S**
+
+```text
+SSID
+BSSID
+Channel
+Security
+```
+
+## MITM
+
+> **A-M-I-F**
+
+```text
+ARP
+MITM
+Intercept
+Forward
+```
+
+## Wireshark
+
+> **C-F-I-V-R**
+
+```text
+Capture
+Filter
+Inspect
+Validate
+Report
+```
+
+## WIDS
+
+> **D-B-M-A-I-R**
+
+```text
+Discover
+Baseline
+Monitor
+Analyze
+Investigate
+Respond
+```
+
+## Incident Response
+
+> **D-V-I-C-E-R**
+
+```text
+Detect
+Validate
+Investigate
+Contain
+Eradicate
+Recover
+```
+
+---
+
+# 56. DAY 35 GOLDEN RULES
+
+1. **SSID is not identity.**
+2. **BSSID helps identify an AP/radio.**
+3. **Same SSID does not automatically mean Evil Twin.**
+4. **Unknown AP does not automatically mean attacker.**
+5. **One suspicious packet rarely proves an attack.**
+6. **Correlate multiple indicators.**
+7. **ARP maps IPv4 addresses to MAC addresses.**
+8. **ARP spoofing can facilitate MITM.**
+9. **MITM impact depends heavily on protocol protections.**
+10. **HTTPS/TLS is critical against interception.**
+11. **WIDS detects; WIPS can prevent.**
+12. **Wireshark analyzes captured traffic.**
+13. **A custom packet sniffer is not automatically a full protocol analyzer.**
+14. **WEP is obsolete and insecure.**
+15. **Strong Wi-Fi authentication and configuration matter.**
+16. **Detection ≠ confirmation.**
+17. **Anomaly ≠ automatically attack.**
+18. **Always validate findings.**
+19. **Maintain a wireless baseline.**
+20. **Perform testing only with authorization.**
+
+---
+
+# 57. DAY 35 FINAL EXAM ANSWER
+
+> **Wireless and network security assessment combines wireless reconnaissance, Wi-Fi security analysis, packet capture, protocol analysis, MITM/ARP detection, packet-sniffer development, and wireless intrusion detection. Effective analysis requires establishing a baseline, monitoring traffic and devices, correlating multiple indicators, validating suspicious activity, and applying appropriate defensive controls.**
+
+# ⭐ MASTER FORMULA
+
+```text
+WIRELESS SECURITY
+       ↓
+Identify APs/Clients
+       ↓
+Establish Baseline
+       ↓
+Monitor
+       ↓
+Capture
+       ↓
+Analyze
+       ↓
+Detect Anomaly
+       ↓
+Correlate Evidence
+       ↓
+Validate
+       ↓
+Respond
+       ↓
+Document
+```
+
+**Days 29–35 are now one connected topic:**
+
+> **Wi-Fi → Wi-Fi Security → Wireless Attacks → MITM → Packet Capture → Packet Sniffing → Wireless Detection → Incident Response**

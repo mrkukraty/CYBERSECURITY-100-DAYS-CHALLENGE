@@ -1,0 +1,1341 @@
+# DAY 18 – WEB SERVER SCANNING
+
+## Nikto • Wappalyzer • HTTP Headers • Server Fingerprinting • Web Technologies • Security Findings
+
+---
+
+# 1. What is Web Server Scanning?
+
+**Web server scanning** is the process of examining a web server and its exposed web services to identify:
+
+- Web server technologies
+- Server versions
+- HTTP methods
+- Security headers
+- Common misconfigurations
+- Known files/directories
+- Potentially outdated components
+- Interesting web-server behavior
+
+### Simple Definition
+
+> **Web server scanning = examining a web server for technologies, configurations, and potential security weaknesses.**
+
+---
+
+# 2. Where Does Web Server Scanning Fit?
+
+Your previous days:
+
+```text
+Day 15 → Vulnerability Scanning
+Day 16 → Application Vulnerabilities
+Day 17 → Scan Automation
+Day 18 → Web Server Scanning
+```
+
+A simplified workflow:
+
+```text
+Target
+  ↓
+Web Server Discovery
+  ↓
+Technology Identification
+  ↓
+Server Scanning
+  ↓
+Potential Findings
+  ↓
+Manual Validation
+  ↓
+Risk Assessment
+  ↓
+Report
+```
+
+---
+
+# 3. What is Web Server Fingerprinting?
+
+**Web server fingerprinting** means identifying information about the technologies used by a web server.
+
+Examples:
+
+- Apache
+- Nginx
+- Microsoft IIS
+- PHP
+- ASP.NET
+- WordPress
+- React
+- Drupal
+
+Information may come from:
+
+- HTTP response headers
+- HTML
+- JavaScript
+- Cookies
+- URLs
+- Page structure
+- Technology-specific patterns
+
+### Memory
+
+> **Fingerprinting = Identify what technology is running.**
+
+---
+
+# 4. Why Identify Web Technologies?
+
+Technology identification helps security testers understand the application environment.
+
+For example:
+
+```text
+Website
+ ↓
+Nginx
+ ↓
+PHP
+ ↓
+WordPress
+ ↓
+MySQL
+```
+
+This tells the tester what technologies may need further security review.
+
+### Important
+
+> **Technology identification is reconnaissance, not proof of vulnerability.**
+
+---
+
+# 5. Nikto
+
+**Nikto** is an open-source web server scanner designed to identify potentially dangerous files, outdated server components, insecure configurations, and other common web-server issues.
+
+It is commonly used during authorized security assessments.
+
+### Nikto can help identify:
+
+- Interesting files
+- Default files
+- Potentially outdated software
+- Common misconfigurations
+- HTTP-related issues
+- Server information
+- Known web-server weaknesses
+
+---
+
+# 6. Basic Nikto Syntax
+
+In an authorized lab:
+
+```bash
+nikto -h http://192.168.56.101
+```
+
+Where:
+
+```text
+nikto → Scanner
+-h → Target host
+URL → Authorized web server
+```
+
+For a hostname:
+
+```bash
+nikto -h https://example.test
+```
+
+Only scan systems you are explicitly authorized to test.
+
+---
+
+# 7. Nikto Example Workflow
+
+```text
+Authorized Web Server
+        ↓
+      Nikto
+        ↓
+HTTP Requests
+        ↓
+Analyze Responses
+        ↓
+Potential Findings
+        ↓
+Manual Validation
+        ↓
+Report
+```
+
+---
+
+# 8. What Does Nikto Actually Do?
+
+Conceptually, Nikto:
+
+1. Connects to the web server.
+2. Sends HTTP requests.
+3. Examines responses.
+4. Identifies interesting behavior.
+5. Compares observations against known checks.
+6. Reports potential findings.
+
+Example conceptual output:
+
+```text
+Server: Apache
+Interesting header detected
+Potentially outdated component
+Interesting file found
+```
+
+These are **findings to investigate**, not automatically confirmed vulnerabilities.
+
+---
+
+# 9. Important Nikto Options
+
+Common options include:
+
+| Option | Purpose |
+|---|---|
+| `-h` | Target host |
+| `-p` | Specify port(s) |
+| `-ssl` | Force SSL/TLS testing where applicable |
+| `-o` | Save output |
+| `-Format` | Specify output format |
+| `-Tuning` | Select categories of tests |
+| `-timeout` | Set timeout |
+| `-Display` | Control displayed information |
+
+Exact behavior can vary by Nikto version.
+
+---
+
+# 10. Saving Nikto Results
+
+Saving results is important for documentation.
+
+Conceptually:
+
+```bash
+nikto -h http://192.168.56.101 -o nikto_report.txt
+```
+
+Then:
+
+```text
+Target
+ ↓
+Nikto
+ ↓
+Report file
+ ↓
+Review
+ ↓
+Validate
+ ↓
+Final security report
+```
+
+---
+
+# 11. Nikto Output
+
+A Nikto report may contain information such as:
+
+```text
++ Server: Apache
++ Retrieved X-Frame-Options header
++ Interesting file found
++ Potential configuration issue
+```
+
+The analyst should classify findings into:
+
+- Informational
+- Configuration issue
+- Potential vulnerability
+- Confirmed vulnerability
+- False positive
+
+---
+
+# 12. Important: Nikto Is Not a Complete Vulnerability Scanner
+
+Nikto is useful, but it does **not** replace:
+
+- Full vulnerability assessment
+- Manual penetration testing
+- Application security testing
+- Authentication testing
+- Authorization testing
+- Business logic testing
+
+### Memory
+
+> **Nikto = Web Server Scanner**
+
+Not:
+
+> **Nikto = Complete Web Application Pentest**
+
+---
+
+# 13. Nikto vs Nmap
+
+| Nmap | Nikto |
+|---|---|
+| Network/service discovery | Web-server scanning |
+| Port scanning | HTTP/web checks |
+| Service/version detection | Web-server configuration/content checks |
+| Broad network focus | Web-server focus |
+| Can identify web ports | Investigates web services |
+
+### Example
+
+```text
+Nmap
+ ↓
+80/tcp open http
+443/tcp open https
+
+Nikto
+ ↓
+Investigates the web service
+```
+
+### Memory
+
+> **Nmap finds the service.**
+
+> **Nikto examines the web server.**
+
+---
+
+# 14. Nikto vs Nessus/OpenVAS
+
+| Nikto | Nessus/OpenVAS |
+|---|---|
+| Focused on web servers | Broader vulnerability assessment |
+| Web-specific checks | Many system/network/application checks |
+| Lightweight reconnaissance/testing tool | More comprehensive vulnerability management |
+| Useful for web-server review | Useful for broader vulnerability assessment |
+
+---
+
+# 15. Wappalyzer
+
+**Wappalyzer** is a technology identification tool/service that can identify technologies used by websites.
+
+It can detect technologies such as:
+
+- Web servers
+- Programming languages
+- JavaScript frameworks
+- CMS platforms
+- Analytics tools
+- Web frameworks
+- E-commerce platforms
+- CDN technologies
+
+---
+
+# 16. What Does Wappalyzer Do?
+
+Conceptually:
+
+```text
+Website
+   ↓
+Inspect publicly observable characteristics
+   ↓
+Identify technology patterns
+   ↓
+Technology profile
+```
+
+Example:
+
+```text
+Website
+├── Nginx
+├── React
+├── Node.js
+├── Bootstrap
+└── Google Analytics
+```
+
+---
+
+# 17. Wappalyzer vs Nikto
+
+This is an important exam comparison.
+
+| Wappalyzer | Nikto |
+|---|---|
+| Technology identification | Web-server security scanning |
+| Fingerprinting | Security checks |
+| Identifies frameworks/CMS/server technologies | Looks for potential web-server weaknesses |
+| Primarily reconnaissance | Security assessment |
+| "What is being used?" | "What security issues might be present?" |
+
+### Memory
+
+> **Wappalyzer = WHAT technology?**
+
+> **Nikto = WHAT might be wrong with the web server?**
+
+---
+
+# 18. Technology Fingerprinting
+
+Suppose Wappalyzer identifies:
+
+```text
+Nginx
+PHP
+WordPress
+jQuery
+```
+
+This provides an attack-surface inventory.
+
+The next step is **not automatically exploitation**.
+
+Instead:
+
+```text
+Technology
+ ↓
+Version
+ ↓
+Known vulnerabilities?
+ ↓
+Configuration?
+ ↓
+Exposure?
+ ↓
+Validate
+```
+
+---
+
+# 19. HTTP Headers
+
+HTTP headers provide useful information about web-server behavior.
+
+Example:
+
+```text
+HTTP/1.1 200 OK
+Server: nginx
+Content-Type: text/html
+Content-Length: 5321
+```
+
+Security-related headers may include:
+
+```text
+Content-Security-Policy
+Strict-Transport-Security
+X-Content-Type-Options
+Referrer-Policy
+Permissions-Policy
+```
+
+---
+
+# 20. Server Header
+
+Example:
+
+```text
+Server: nginx
+```
+
+This can reveal the web-server software.
+
+However:
+
+> **A server header alone does not prove a vulnerability.**
+
+The server may also intentionally hide or modify version information.
+
+---
+
+# 21. Information Disclosure
+
+Information disclosure occurs when an application/server unnecessarily reveals sensitive technical information.
+
+Examples:
+
+```text
+Server version
+Framework version
+Internal paths
+Debug information
+Stack traces
+Internal hostnames
+```
+
+Potential impact:
+
+> Attackers may use the information to narrow down possible attack paths.
+
+### Important
+
+Not every information disclosure has the same severity.
+
+Risk depends on:
+
+- What information is revealed
+- Whether it enables another attack
+- Exposure
+- Business impact
+
+---
+
+# 22. HTTP Methods
+
+HTTP methods include:
+
+```text
+GET
+POST
+PUT
+PATCH
+DELETE
+HEAD
+OPTIONS
+```
+
+An assessment may determine which methods are accepted by a web server.
+
+### Important
+
+An HTTP method being enabled is not automatically a vulnerability.
+
+The security question is:
+
+> **Is the method unnecessarily enabled, improperly authorized, or dangerously configured?**
+
+---
+
+# 23. Security Misconfiguration
+
+Web servers can be incorrectly configured.
+
+Examples:
+
+- Directory listing enabled unnecessarily
+- Default files remaining
+- Debug information exposed
+- Unnecessary HTTP methods
+- Weak TLS configuration
+- Default configuration
+- Unnecessary server information
+- Insecure permissions
+
+---
+
+# 24. Directory Listing
+
+A web server may expose a directory listing:
+
+```text
+/files/
+├── report.pdf
+├── backup.zip
+├── old-config.txt
+└── test/
+```
+
+This can unintentionally reveal files.
+
+### Security concern
+
+Users may discover resources that were not intended to be publicly browsable.
+
+### Mitigation
+
+Disable unnecessary directory indexing and ensure sensitive files are not stored in publicly accessible locations.
+
+---
+
+# 25. Default Files
+
+Web servers or applications may contain:
+
+- Installation files
+- Test pages
+- Example files
+- Default administrative pages
+- Documentation
+- Backup files
+
+These may reveal information or create unnecessary exposure.
+
+### Best Practice
+
+Remove unnecessary files from production environments.
+
+---
+
+# 26. Backup Files
+
+Backup files may accidentally become web-accessible.
+
+Examples:
+
+```text
+config.php.bak
+database.sql.old
+backup.zip
+```
+
+Potential concern:
+
+> Backup files can contain source code, configuration information, or sensitive data.
+
+### Prevention
+
+- Keep backups outside the web root where possible.
+- Restrict access.
+- Use secure backup storage.
+- Regularly audit public directories.
+
+---
+
+# 27. TLS/HTTPS
+
+HTTPS protects data in transit using TLS.
+
+Security testing may examine:
+
+- Whether HTTPS is enabled
+- Certificate validity
+- Redirect behavior
+- TLS configuration
+- Insecure protocol support
+
+### Important
+
+HTTPS alone does not make an application secure.
+
+It protects communication in transit but does not fix:
+
+- SQL injection
+- Broken authorization
+- XSS
+- Business logic flaws
+
+---
+
+# 28. Web Server Scanning vs Web Application Testing
+
+### Web Server Scanning
+
+Focus:
+
+```text
+Server
+ ↓
+Configuration
+ ↓
+Headers
+ ↓
+Files
+ ↓
+Software
+```
+
+### Web Application Testing
+
+Focus:
+
+```text
+Application
+ ↓
+Authentication
+ ↓
+Authorization
+ ↓
+Input
+ ↓
+Sessions
+ ↓
+Business Logic
+ ↓
+APIs
+```
+
+Both are important.
+
+---
+
+# 29. Combining Wappalyzer + Nikto
+
+A useful authorized workflow:
+
+```text
+Target
+  ↓
+Wappalyzer
+  ↓
+Technology Identification
+  ↓
+Nmap
+  ↓
+Ports/Services
+  ↓
+Nikto
+  ↓
+Web Server Findings
+  ↓
+Manual Validation
+  ↓
+Vulnerability Assessment
+```
+
+### Example
+
+Wappalyzer:
+
+```text
+Nginx
+PHP
+WordPress
+```
+
+Nmap:
+
+```text
+80/tcp
+443/tcp
+```
+
+Nikto:
+
+```text
+Potential configuration issue
+Interesting file
+```
+
+Then the analyst validates the findings.
+
+---
+
+# 30. Practical Lab Setup
+
+Use your existing isolated lab:
+
+```text
+┌───────────────┐
+│ Kali Linux    │
+│               │
+│ Nmap          │
+│ Nikto         │
+│ Wappalyzer    │
+└───────┬───────┘
+        │
+        │ Host-Only /
+        │ Internal Network
+        ↓
+┌───────────────┐
+│ Lab Web Server│
+│               │
+│ Apache/Nginx  │
+└───────────────┘
+```
+
+This keeps testing within an environment you control.
+
+---
+
+# 31. Practical Lab – Step 1
+
+Find the web service using Nmap:
+
+```bash
+nmap -sV 192.168.56.101
+```
+
+Look for:
+
+```text
+80/tcp open http
+443/tcp open https
+8080/tcp open http
+```
+
+---
+
+# 32. Practical Lab – Step 2
+
+Run Nikto against the authorized lab web server:
+
+```bash
+nikto -h http://192.168.56.101
+```
+
+Observe:
+
+- Server information
+- Headers
+- Interesting files
+- Potential configuration issues
+- Scan messages
+
+---
+
+# 33. Practical Lab – Step 3
+
+Save the result:
+
+```bash
+nikto -h http://192.168.56.101 -o nikto_report.txt
+```
+
+Then inspect:
+
+```bash
+cat nikto_report.txt
+```
+
+---
+
+# 34. Practical Lab – Step 4
+
+Open the lab website in a browser and use Wappalyzer.
+
+Record:
+
+```text
+Web Server:
+Framework:
+CMS:
+Programming Language:
+JavaScript Framework:
+Other Technologies:
+```
+
+---
+
+# 35. Practical Lab – Step 5
+
+Compare the results.
+
+Example:
+
+| Source | Observation |
+|---|---|
+| Nmap | Port 80 open |
+| Wappalyzer | Nginx detected |
+| Nikto | Potential configuration issue |
+| Browser | HTTPS available |
+
+Now investigate whether the observations agree.
+
+---
+
+# 36. Evidence Collection
+
+For every interesting finding, record:
+
+```text
+Target
+Timestamp
+Tool
+Finding
+Evidence
+Severity
+Validation status
+Recommendation
+```
+
+Example:
+
+```text
+Target: Lab Server
+Tool: Nikto
+Finding: Directory listing
+Evidence: /files/ exposes directory contents
+Severity: Medium
+Status: Confirmed
+Recommendation: Disable unnecessary indexing
+```
+
+---
+
+# 37. False Positives in Web Scanning
+
+A scanner may report:
+
+```text
+Potential vulnerable component
+```
+
+But the component may:
+
+- Not actually be present
+- Be a different version
+- Have a vendor patch
+- Be protected by another control
+- Not be reachable in the relevant way
+
+Therefore:
+
+```text
+Scanner
+ ↓
+Potential Finding
+ ↓
+Verify
+ ↓
+Confirmed / False Positive
+```
+
+---
+
+# 38. Common Web Server Findings
+
+| Finding | Possible Concern |
+|---|---|
+| Directory listing | Files may be exposed |
+| Default page | Unnecessary information |
+| Backup file | Source/configuration disclosure |
+| Debug page | Internal information exposure |
+| Old software | Potential known vulnerabilities |
+| Weak TLS | Reduced transport security |
+| Excessive headers | Information disclosure |
+| Unnecessary HTTP methods | Expanded attack surface |
+| Default configuration | Security weaknesses |
+
+---
+
+# 39. What Nikto Does NOT Prove
+
+If Nikto says:
+
+```text
+Possible issue
+```
+
+it does **not** automatically mean:
+
+```text
+Confirmed exploitable vulnerability
+```
+
+Always consider:
+
+- Version
+- Configuration
+- Context
+- Exposure
+- Compensating controls
+- Actual impact
+
+---
+
+# 40. What Wappalyzer Does NOT Prove
+
+If Wappalyzer says:
+
+```text
+WordPress detected
+```
+
+that does NOT mean:
+
+```text
+WordPress is vulnerable
+```
+
+You still need to determine:
+
+- Version
+- Configuration
+- Installed components
+- Known vulnerabilities
+- Actual exposure
+
+### Exam Point
+
+> **Technology identification ≠ vulnerability confirmation.**
+
+---
+
+# 41. Web Server Scanning Report Structure
+
+A professional report can contain:
+
+## 1. Executive Summary
+
+Short overview.
+
+## 2. Scope
+
+What systems were tested.
+
+## 3. Methodology
+
+Tools and methods used.
+
+## 4. Technology Profile
+
+Technologies identified.
+
+## 5. Findings
+
+Potential/confirmed issues.
+
+## 6. Evidence
+
+Supporting observations.
+
+## 7. Risk
+
+Severity and business impact.
+
+## 8. Recommendations
+
+How to fix the issue.
+
+## 9. Retest
+
+Confirm remediation.
+
+---
+
+# 42. Remediation Examples
+
+### Directory Listing
+
+Disable unnecessary directory indexing.
+
+### Backup Files
+
+Remove them from public directories.
+
+### Debug Mode
+
+Disable debug mode in production.
+
+### Outdated Software
+
+Upgrade to a supported version after compatibility testing.
+
+### Excessive Information Disclosure
+
+Reduce unnecessary server/version information.
+
+### Weak TLS
+
+Use modern TLS configurations according to organizational requirements.
+
+---
+
+# 43. Nikto + Wappalyzer Memory Trick
+
+## **NIKTO**
+
+Think:
+
+> **N** → Network-facing web server  
+> **I** → Interesting files  
+> **K** → Known/common issues  
+> **T** → Technology/server checks  
+> **O** → Observations
+
+This is only a memory aid, not an official expansion of the tool's name.
+
+## **WAPPALYZER**
+
+Think:
+
+> **Wappalyzer = WHAT is running?**
+
+---
+
+# 44. Most Important Comparison Table
+
+| Tool | Main Purpose | Key Question |
+|---|---|---|
+| Nmap | Network/service discovery | What services are exposed? |
+| Wappalyzer | Technology identification | What technologies are being used? |
+| Nikto | Web-server scanning | What potential web-server issues exist? |
+| Nessus | Vulnerability assessment | What potential vulnerabilities exist? |
+| Burp Suite | Web application testing | How does the application behave? |
+| OWASP ZAP | Web application testing | What web security issues can be identified? |
+
+### Easy Memory
+
+```text
+Nmap       → SERVICES
+Wappalyzer → TECHNOLOGY
+Nikto      → WEB SERVER
+Burp       → WEB APPLICATION
+Nessus     → VULNERABILITIES
+```
+
+---
+
+# 45. Hard Scenario-Based MCQs
+
+## Q1
+
+Wappalyzer identifies that a website uses WordPress.
+
+What can you conclude?
+
+A. WordPress is definitely vulnerable  
+B. WordPress is definitely compromised  
+C. WordPress technology appears to be present  
+D. The database has been compromised
+
+**Answer: C**
+
+---
+
+## Q2
+
+Nikto reports a potentially outdated server component.
+
+What should the security analyst do first?
+
+A. Immediately declare the server compromised  
+B. Validate the component version and finding  
+C. Delete the server  
+D. Disable all network connectivity
+
+**Answer: B**
+
+---
+
+## Q3
+
+Nmap identifies port 80 as open.
+
+What is the most appropriate next step if assessing the authorized web service?
+
+A. Assume SQL injection  
+B. Investigate the HTTP service  
+C. Assume the server is compromised  
+D. Change the server password
+
+**Answer: B**
+
+---
+
+## Q4
+
+Wappalyzer reports:
+
+```text
+Nginx
+PHP
+WordPress
+```
+
+What does this information primarily provide?
+
+A. Confirmed vulnerabilities  
+B. Technology fingerprint  
+C. Passwords  
+D. Exploit code
+
+**Answer: B**
+
+---
+
+## Q5
+
+Nikto identifies a publicly accessible backup file.
+
+What is the main security concern?
+
+A. Better performance  
+B. Possible information disclosure  
+C. Strong authentication  
+D. Network segmentation
+
+**Answer: B**
+
+---
+
+## Q6
+
+A web server exposes directory listings containing old files.
+
+What should be investigated?
+
+A. Whether sensitive or unnecessary files are publicly accessible  
+B. Whether DNS is enabled  
+C. Whether DHCP is working  
+D. Whether the keyboard works
+
+**Answer: A**
+
+---
+
+## Q7
+
+A scanner reports that a web server supports an HTTP method that the application does not need.
+
+What should the tester determine?
+
+A. Whether the method creates an actual security risk or unnecessary attack surface  
+B. Whether the server has a GPU  
+C. Whether DNS uses UDP  
+D. Whether the website has a logo
+
+**Answer: A**
+
+---
+
+## Q8
+
+Which tool is primarily associated with technology fingerprinting?
+
+A. Wappalyzer  
+B. Nikto  
+C. Nmap  
+D. DHCP
+
+**Answer: A**
+
+---
+
+## Q9
+
+Which tool is specifically designed for web-server security scanning?
+
+A. Wappalyzer  
+B. Nikto  
+C. Wireshark  
+D. Traceroute
+
+**Answer: B**
+
+---
+
+## Q10
+
+A Nikto finding cannot be reproduced manually.
+
+What should the analyst consider?
+
+A. It may be a false positive  
+B. It must be critical  
+C. It proves compromise  
+D. It proves the server is secure
+
+**Answer: A**
+
+---
+
+## Q11
+
+A Wappalyzer result shows a JavaScript framework.
+
+What should a penetration tester conclude?
+
+A. The framework has been exploited  
+B. The framework is present or appears to be present  
+C. The database is vulnerable  
+D. Authentication is broken
+
+**Answer: B**
+
+---
+
+## Q12
+
+Which sequence is most appropriate?
+
+A. Exploit → Discover → Identify  
+B. Identify → Scan → Validate → Report  
+C. Report → Scan → Discover  
+D. Delete → Scan → Report
+
+**Answer: B**
+
+---
+
+# ⭐ DAY 18 – MOST IMPORTANT EXAM POINTS
+
+1. **Web server scanning examines web servers for technologies, configurations, files, and potential security weaknesses.**
+2. **Nikto is a web-server scanner.**
+3. **Wappalyzer is primarily a technology identification/fingerprinting tool.**
+4. Wappalyzer answers: **"What technologies are being used?"**
+5. Nikto answers: **"What potential web-server issues can be identified?"**
+6. Nmap can identify exposed web ports and services.
+7. Nikto can investigate the web service after discovery.
+8. Technology detection does not prove a vulnerability.
+9. A scanner finding must be validated.
+10. HTTP headers can reveal useful technology and security information.
+11. Directory listing can unintentionally expose files.
+12. Backup files can expose source/configuration information.
+13. Default/test files can increase attack surface.
+14. Debug information should not normally be exposed in production.
+15. HTTPS protects data in transit but does not fix application vulnerabilities.
+16. HTTP methods should be reviewed according to application requirements and authorization.
+17. Security misconfiguration is a common web-server security issue.
+18. Wappalyzer is primarily reconnaissance/fingerprinting.
+19. Nikto is primarily web-server security scanning.
+20. Nikto does not replace comprehensive vulnerability assessment.
+21. Wappalyzer does not confirm vulnerabilities.
+22. False positives must be investigated.
+23. Scan evidence should be documented.
+24. Findings should include remediation recommendations.
+25. Testing must remain within authorized scope.
+
+---
+
+# 🧠 MASTER MEMORY
+
+Remember the complete web assessment flow:
+
+```text
+NMAP
+"What is exposed?"
+      ↓
+WAPPALYZER
+"What technology is running?"
+      ↓
+NIKTO
+"What web-server issues are visible?"
+      ↓
+BURP / ZAP
+"How does the application behave?"
+      ↓
+VALIDATE
+"Is the finding real?"
+      ↓
+REPORT
+"What is the risk and how do we fix it?"
+```
+
+## 🔥 5-SECOND EXAM TRICK
+
+```text
+NMAP       = SERVICES
+WAPPALYZER = TECHNOLOGY
+NIKTO      = WEB SERVER
+BURP/ZAP   = WEB APP
+NESSUS     = VULNERABILITIES
+```
+
+# ⚡ ONE-LINE REVISION
+
+> **Web server scanning uses tools such as Nikto to identify potential web-server weaknesses and Wappalyzer to fingerprint technologies, after which findings must be validated, assessed for risk, documented, and remediated within an authorized scope.**

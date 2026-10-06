@@ -1,0 +1,1472 @@
+# DAY 12 – BUILDING AN OSINT TOOL
+## Python • Public Information Collection • Web Requests • Parsing • Reporting
+
+---
+
+# 1. What is OSINT?
+
+**OSINT = Open-Source Intelligence**
+
+OSINT is the process of collecting and analyzing information that is **legally and publicly available**.
+
+Examples:
+
+- Public websites
+- Public DNS information
+- Public company information
+- Public documentation
+- Public social-media posts
+- Public GitHub repositories
+- Search-engine results
+- Public APIs
+- Publicly accessible web pages
+
+### Simple Definition
+
+> **OSINT is collecting publicly available information and turning it into useful intelligence.**
+
+---
+
+# 2. What is an OSINT Tool?
+
+An OSINT tool automates the process of:
+
+```text
+Collect
+   ↓
+Extract
+   ↓
+Organize
+   ↓
+Analyze
+   ↓
+Report
+```
+
+Instead of manually checking many sources, a Python script can collect selected public information automatically.
+
+---
+
+# 3. Example OSINT Tool
+
+A simple educational OSINT tool might accept a domain:
+
+```text
+example.com
+```
+
+and collect non-sensitive information such as:
+
+```text
+Target: example.com
+
+Website: https://example.com
+Title: Example Domain
+Status: 200
+Server: ...
+Links Found: ...
+```
+
+The purpose is **information gathering**, not exploitation.
+
+---
+
+# 4. OSINT vs Hacking
+
+| OSINT | Hacking |
+|---|---|
+| Uses publicly available information | May involve unauthorized access |
+| Passive collection is common | Often involves active interaction |
+| No authentication bypass | May attempt to bypass controls |
+| Focuses on information | May attempt system compromise |
+| Can be used legally for research | Unauthorized access is illegal |
+
+### Important
+
+> **Publicly visible does not mean you are allowed to bypass restrictions or collect everything about a person.**
+
+Respect privacy, terms of service, robots/rate limits where applicable, and applicable laws.
+
+---
+
+# 5. Python for OSINT
+
+Python is useful because it has libraries for:
+
+- HTTP requests
+- HTML parsing
+- JSON processing
+- Regular expressions
+- DNS queries
+- APIs
+- Data storage
+- Report generation
+
+Common libraries:
+
+| Library | Purpose |
+|---|---|
+| `requests` | HTTP requests |
+| `BeautifulSoup` | HTML parsing |
+| `re` | Regular expressions |
+| `json` | JSON data |
+| `csv` | CSV files |
+| `urllib` | URL handling |
+| `socket` | Basic network/DNS functions |
+| `argparse` | Command-line arguments |
+
+---
+
+# 6. Basic OSINT Tool Architecture
+
+A simple tool can be designed like this:
+
+```text
+             User Input
+                 ↓
+           Target Validation
+                 ↓
+          Information Sources
+          ↙       ↓       ↘
+      Website    DNS      Public API
+          ↘       ↓       ↙
+             Data Collection
+                   ↓
+             Data Extraction
+                   ↓
+             Data Validation
+                   ↓
+              Report Output
+```
+
+---
+
+# 7. Step 1 – Define the Objective
+
+Before writing the script, decide:
+
+> **What information am I trying to collect?**
+
+Example:
+
+```text
+Objective:
+Collect basic public information about an authorized domain.
+```
+
+Possible fields:
+
+- Website status
+- Page title
+- Public links
+- HTTP headers
+- DNS information
+- Technology clues
+
+Do not collect unnecessary personal information.
+
+---
+
+# 8. Step 2 – Take User Input
+
+Python:
+
+```python
+target = input("Enter target domain: ")
+
+print("Target:", target)
+```
+
+Example:
+
+```text
+Enter target domain: example.com
+Target: example.com
+```
+
+---
+
+# 9. Step 3 – Validate Input
+
+Never blindly trust user input.
+
+Basic example:
+
+```python
+from urllib.parse import urlparse
+
+target = input("Enter URL: ").strip()
+
+if not target.startswith(("http://", "https://")):
+    target = "https://" + target
+
+parsed = urlparse(target)
+
+print("Host:", parsed.hostname)
+```
+
+This extracts the hostname from a URL.
+
+---
+
+# 10. Step 4 – Make a Public HTTP Request
+
+The `requests` library can retrieve a publicly accessible web page.
+
+```python
+import requests
+
+url = "https://example.com"
+
+response = requests.get(
+    url,
+    timeout=10
+)
+
+print("Status:", response.status_code)
+```
+
+Example result:
+
+```text
+Status: 200
+```
+
+---
+
+# 11. HTTP Status Codes
+
+| Code | Meaning |
+|---:|---|
+| 200 | OK |
+| 301 | Permanent redirect |
+| 302 | Temporary redirect |
+| 400 | Bad request |
+| 401 | Authentication required |
+| 403 | Forbidden |
+| 404 | Not found |
+| 429 | Too many requests |
+| 500 | Server error |
+| 503 | Service unavailable |
+
+### Important
+
+A `403` or `401` response should **not** be treated as an invitation to bypass access controls.
+
+---
+
+# 12. Step 5 – Extract the Page Title
+
+Install:
+
+```bash
+pip install requests beautifulsoup4
+```
+
+Python:
+
+```python
+import requests
+from bs4 import BeautifulSoup
+
+url = "https://example.com"
+
+response = requests.get(url, timeout=10)
+
+soup = BeautifulSoup(response.text, "html.parser")
+
+title = soup.title
+
+if title:
+    print("Title:", title.get_text(strip=True))
+else:
+    print("No title found")
+```
+
+---
+
+# 13. How BeautifulSoup Works
+
+Suppose HTML contains:
+
+```html
+<html>
+    <head>
+        <title>Example Website</title>
+    </head>
+</html>
+```
+
+BeautifulSoup parses the HTML:
+
+```text
+HTML
+ ↓
+Parser
+ ↓
+DOM-like structure
+ ↓
+Find <title>
+ ↓
+Extract text
+```
+
+Output:
+
+```text
+Example Website
+```
+
+---
+
+# 14. Extract Public Links
+
+Example:
+
+```python
+for link in soup.find_all("a", href=True):
+    print(link["href"])
+```
+
+This identifies links present in the retrieved page.
+
+### Important
+
+A link appearing on a page does not necessarily mean the linked resource is public or authorized for automated access.
+
+---
+
+# 15. Extract HTTP Headers
+
+HTTP responses contain headers.
+
+Example:
+
+```python
+print(response.headers)
+```
+
+You may inspect headers such as:
+
+```text
+Content-Type
+Server
+Date
+Cache-Control
+Content-Security-Policy
+```
+
+### Security Relevance
+
+Headers can provide useful information about:
+
+- Server behavior
+- Security controls
+- Content type
+- Caching
+- Technology clues
+
+---
+
+# 16. Do Not Trust the `Server` Header Completely
+
+Example:
+
+```text
+Server: ExampleServer
+```
+
+This may provide a technology clue.
+
+However:
+
+> Headers can be hidden, modified, generalized, or misleading.
+
+Therefore, OSINT information should be verified using multiple sources where possible.
+
+---
+
+# 17. DNS Information
+
+Python can also retrieve basic DNS-related information using standard networking functionality.
+
+Example:
+
+```python
+import socket
+
+hostname = "example.com"
+
+try:
+    ip = socket.gethostbyname(hostname)
+    print("IP Address:", ip)
+except socket.gaierror:
+    print("DNS lookup failed")
+```
+
+Possible output:
+
+```text
+IP Address: 93.184.216.34
+```
+
+Use example/lab domains when practicing.
+
+---
+
+# 18. Why DNS is Useful for OSINT
+
+DNS can reveal publicly available information such as:
+
+```text
+Domain
+   ↓
+DNS
+   ↓
+IP address
+   ↓
+Public infrastructure information
+```
+
+DNS-related records can include:
+
+- A
+- AAAA
+- MX
+- NS
+- TXT
+- CNAME
+- SOA
+
+---
+
+# 19. Regular Expressions
+
+Python's `re` module can identify patterns in text.
+
+Example:
+
+```python
+import re
+
+text = """
+Contact: security@example.com
+"""
+
+emails = re.findall(
+    r'[\w\.-]+@[\w\.-]+\.\w+',
+    text
+)
+
+print(emails)
+```
+
+Output:
+
+```text
+['security@example.com']
+```
+
+### Important Privacy Rule
+
+Do not use such techniques to collect or build unnecessary lists of private individuals' contact information.
+
+For learning, use:
+
+- Your own website
+- Lab data
+- Synthetic data
+- Public security contact information
+
+---
+
+# 20. Public Data vs Sensitive Data
+
+### Generally suitable for an educational OSINT project
+
+- Public website title
+- Public DNS records
+- Public HTTP status
+- Public documentation
+- Public technology information
+- Public links
+- Public company information
+
+### Avoid collecting unnecessarily
+
+- Passwords
+- Authentication tokens
+- Private messages
+- Personal financial information
+- Private contact information
+- Session cookies
+- Access credentials
+- Data behind authentication
+
+---
+
+# 21. OSINT Data Collection Pipeline
+
+Remember:
+
+```text
+INPUT
+  ↓
+COLLECT
+  ↓
+EXTRACT
+  ↓
+CLEAN
+  ↓
+VERIFY
+  ↓
+STORE
+  ↓
+REPORT
+```
+
+### Memory Trick
+
+> **I-C-E-C-V-S-R**
+
+**I** = Input  
+**C** = Collect  
+**E** = Extract  
+**C** = Clean  
+**V** = Verify  
+**S** = Store  
+**R** = Report
+
+---
+
+# 22. Handling Errors
+
+A good OSINT tool should not crash when a website is unavailable.
+
+Example:
+
+```python
+import requests
+
+try:
+    response = requests.get(
+        "https://example.com",
+        timeout=10
+    )
+
+    print("Status:", response.status_code)
+
+except requests.exceptions.Timeout:
+    print("Request timed out")
+
+except requests.exceptions.RequestException as e:
+    print("Request failed:", e)
+```
+
+---
+
+# 23. Respect Rate Limits
+
+An OSINT tool should not send requests continuously.
+
+Bad design:
+
+```text
+Request
+Request
+Request
+Request
+Request
+Request...
+```
+
+Better design:
+
+```text
+Request
+   ↓
+Wait / Respect rate limit
+   ↓
+Next request
+```
+
+### Why?
+
+Excessive requests can:
+
+- Overload services
+- Trigger security systems
+- Violate terms of service
+- Get the source blocked
+
+---
+
+# 24. User-Agent
+
+HTTP requests may identify the client using a User-Agent.
+
+Example:
+
+```python
+headers = {
+    "User-Agent": "Educational-OSINT-Tool/1.0"
+}
+
+response = requests.get(
+    "https://example.com",
+    headers=headers,
+    timeout=10
+)
+```
+
+Be transparent and do not pretend to be another browser/service for evasion.
+
+---
+
+# 25. Robots.txt
+
+Websites may publish:
+
+```text
+/robots.txt
+```
+
+It can provide instructions to automated crawlers.
+
+Example:
+
+```text
+https://example.com/robots.txt
+```
+
+### Important
+
+`robots.txt` is not an access-control mechanism.
+
+It does not grant permission to access restricted content.
+
+---
+
+# 26. Public APIs
+
+Many services provide APIs for structured information.
+
+Typical flow:
+
+```text
+Python
+   ↓
+API Request
+   ↓
+JSON Response
+   ↓
+Parse JSON
+   ↓
+Extract Information
+```
+
+Example:
+
+```python
+import requests
+
+response = requests.get(
+    "https://api.example.com/data",
+    timeout=10
+)
+
+data = response.json()
+
+print(data)
+```
+
+Only use APIs according to their documentation and authorization requirements.
+
+---
+
+# 27. JSON Data
+
+Example JSON:
+
+```json
+{
+    "domain": "example.com",
+    "status": 200,
+    "title": "Example Domain"
+}
+```
+
+Python:
+
+```python
+data = {
+    "domain": "example.com",
+    "status": 200,
+    "title": "Example Domain"
+}
+
+print(data["domain"])
+```
+
+Output:
+
+```text
+example.com
+```
+
+---
+
+# 28. Store Results in JSON
+
+Example:
+
+```python
+import json
+
+results = {
+    "target": "example.com",
+    "status": 200,
+    "title": "Example Domain"
+}
+
+with open("results.json", "w") as file:
+    json.dump(results, file, indent=4)
+```
+
+This creates a structured report.
+
+---
+
+# 29. Store Results in CSV
+
+Example:
+
+```python
+import csv
+
+results = [
+    ["Target", "Status", "Title"],
+    ["example.com", 200, "Example Domain"]
+]
+
+with open("results.csv", "w", newline="") as file:
+    writer = csv.writer(file)
+    writer.writerows(results)
+```
+
+CSV is useful for:
+
+- Spreadsheets
+- Data analysis
+- Reports
+- Importing into other tools
+
+---
+
+# 30. Simple Educational OSINT Tool
+
+The following example combines basic concepts.
+
+```python
+import requests
+import socket
+from bs4 import BeautifulSoup
+
+target = input("Enter authorized domain: ").strip()
+
+if not target.startswith(("http://", "https://")):
+    url = "https://" + target
+else:
+    url = target
+
+hostname = url.split("://", 1)[1].split("/", 1)[0]
+
+print("\n[+] Target:", hostname)
+
+# DNS lookup
+try:
+    ip = socket.gethostbyname(hostname)
+    print("[+] IP Address:", ip)
+except socket.gaierror:
+    print("[-] DNS lookup failed")
+    ip = None
+
+# HTTP request
+try:
+    response = requests.get(
+        url,
+        timeout=10,
+        headers={
+            "User-Agent": "Educational-OSINT-Tool/1.0"
+        }
+    )
+
+    print("[+] HTTP Status:", response.status_code)
+
+    soup = BeautifulSoup(
+        response.text,
+        "html.parser"
+    )
+
+    if soup.title:
+        print("[+] Page Title:",
+              soup.title.get_text(strip=True))
+    else:
+        print("[-] No page title found")
+
+    print("[+] Public Links:")
+
+    for link in soup.find_all("a", href=True):
+        print("   ", link["href"])
+
+except requests.exceptions.RequestException as e:
+    print("[-] HTTP request failed:", e)
+```
+
+### What this tool demonstrates
+
+```text
+User Input
+    ↓
+Target Parsing
+    ↓
+DNS Lookup
+    ↓
+HTTP Request
+    ↓
+HTML Parsing
+    ↓
+Title Extraction
+    ↓
+Link Extraction
+```
+
+---
+
+# 31. Improving the Tool
+
+A more complete OSINT tool could have modules:
+
+```text
+osint_tool/
+│
+├── main.py
+├── web.py
+├── dns_info.py
+├── parser.py
+├── reporter.py
+└── requirements.txt
+```
+
+### Example Architecture
+
+```text
+             main.py
+                |
+        +-------+-------+
+        |       |       |
+       Web     DNS    Reports
+        |       |       |
+     Parser   Lookup   JSON/CSV
+```
+
+This makes the program easier to maintain.
+
+---
+
+# 32. Command-Line Arguments
+
+Instead of:
+
+```python
+input()
+```
+
+you can use `argparse`.
+
+Example:
+
+```python
+import argparse
+
+parser = argparse.ArgumentParser(
+    description="Educational OSINT tool"
+)
+
+parser.add_argument(
+    "target",
+    help="Authorized target"
+)
+
+args = parser.parse_args()
+
+print("Target:", args.target)
+```
+
+Run:
+
+```bash
+python main.py example.com
+```
+
+---
+
+# 33. Requirements File
+
+Create:
+
+```text
+requirements.txt
+```
+
+Example:
+
+```text
+requests
+beautifulsoup4
+```
+
+Install:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+# 34. Data Verification
+
+OSINT information may be:
+
+- Outdated
+- Incorrect
+- Spoofed
+- Incomplete
+- Misinterpreted
+
+Therefore:
+
+```text
+Collected Information
+        ↓
+Verify Source
+        ↓
+Compare Sources
+        ↓
+Determine Confidence
+        ↓
+Report
+```
+
+### Key Principle
+
+> **Collection ≠ Intelligence**
+
+Raw information becomes intelligence only after analysis and verification.
+
+---
+
+# 35. Data, Information and Intelligence
+
+### Data
+
+Raw values.
+
+Example:
+
+```text
+192.0.2.10
+```
+
+### Information
+
+Context added to the data.
+
+```text
+example.com resolves to 192.0.2.10
+```
+
+### Intelligence
+
+Analyzed conclusion.
+
+```text
+The domain's public infrastructure appears to use
+the identified address.
+```
+
+---
+
+# 36. OSINT Tool Output
+
+A good report might look like:
+
+```text
+================================
+       OSINT REPORT
+================================
+
+Target:
+example.com
+
+DNS
+----------------
+IP Address:
+192.0.2.10
+
+HTTP
+----------------
+Status:
+200
+
+Page Title:
+Example Domain
+
+Links
+----------------
+https://example.com/about
+https://example.com/contact
+
+================================
+```
+
+---
+
+# 37. Logging
+
+Logging helps track what the tool did.
+
+Example:
+
+```python
+import logging
+
+logging.basicConfig(
+    level=logging.INFO
+)
+
+logging.info("Starting OSINT collection")
+logging.info("Target validated")
+```
+
+Useful levels:
+
+- DEBUG
+- INFO
+- WARNING
+- ERROR
+- CRITICAL
+
+---
+
+# 38. Security Considerations
+
+An OSINT tool should:
+
+### 1. Validate input
+
+Prevent malformed input.
+
+### 2. Use timeouts
+
+Avoid hanging forever.
+
+### 3. Handle errors
+
+Do not crash unnecessarily.
+
+### 4. Respect rate limits
+
+Avoid excessive requests.
+
+### 5. Protect collected data
+
+Reports may contain sensitive operational information.
+
+### 6. Avoid credential collection
+
+Never intentionally collect passwords or tokens.
+
+### 7. Follow authorization
+
+Only investigate targets you are permitted to investigate.
+
+---
+
+# 39. Passive vs Active OSINT
+
+## Passive OSINT
+
+Collect information without directly interacting with the target infrastructure.
+
+Examples:
+
+- Search engines
+- Public reports
+- Public repositories
+- Public records
+- Cached/public information
+
+## Active OSINT
+
+Interacts with the target's public infrastructure.
+
+Examples:
+
+- HTTP requests
+- DNS queries
+- Service probing
+
+### Memory
+
+> **Passive = Observe**
+
+> **Active = Interact**
+
+---
+
+# 40. OSINT Tools
+
+Common tools include:
+
+| Tool | Purpose |
+|---|---|
+| Maltego | Relationship analysis |
+| theHarvester | Public email/domain information |
+| Amass | Attack-surface/subdomain discovery |
+| Recon-ng | Recon framework |
+| SpiderFoot | Automated OSINT |
+| Shodan | Internet-exposed device/service search |
+| WHOIS/RDAP | Domain registration information |
+| DNS tools | DNS information |
+
+---
+
+# 41. Building Your Own Tool vs Existing Tools
+
+### Existing OSINT tools
+
+Advantages:
+
+- More features
+- Mature
+- Many data sources
+- Faster to use
+
+### Your own Python tool
+
+Advantages:
+
+- Learn programming
+- Customize workflow
+- Automate specific tasks
+- Understand how OSINT tools work internally
+
+### Day 12 Goal
+
+> **Learn how OSINT automation works, not necessarily build a replacement for professional OSINT frameworks.**
+
+---
+
+# 42. Common Mistakes
+
+### Mistake 1
+
+Scraping everything.
+
+**Better:**
+
+Collect only information relevant to the defined objective.
+
+---
+
+### Mistake 2
+
+Ignoring rate limits.
+
+**Better:**
+
+Use reasonable request frequency and respect service policies.
+
+---
+
+### Mistake 3
+
+Trusting one source.
+
+**Better:**
+
+Verify important findings.
+
+---
+
+### Mistake 4
+
+Confusing public with authorized.
+
+**Better:**
+
+Public information should still be handled responsibly.
+
+---
+
+### Mistake 5
+
+Storing secrets in reports.
+
+**Better:**
+
+Do not intentionally collect credentials, tokens, cookies, or private information.
+
+---
+
+### Mistake 6
+
+No error handling.
+
+**Better:**
+
+Use exceptions and timeouts.
+
+---
+
+# 43. Day 12 Practical Lab
+
+Use your own website, a deliberately provided lab target, or a safe example domain.
+
+### Task 1
+
+Take a domain as input.
+
+### Task 2
+
+Perform basic DNS lookup.
+
+### Task 3
+
+Request the public homepage.
+
+### Task 4
+
+Display HTTP status.
+
+### Task 5
+
+Extract page title.
+
+### Task 6
+
+Extract publicly visible links.
+
+### Task 7
+
+Display selected response headers.
+
+### Task 8
+
+Save results to JSON.
+
+### Task 9
+
+Add error handling.
+
+### Task 10
+
+Create a clean report.
+
+---
+
+# 44. Expected Workflow
+
+```text
+                TARGET
+                   |
+                   ↓
+             Validate Input
+                   |
+          +--------+--------+
+          |                 |
+          ↓                 ↓
+      DNS Lookup        HTTP Request
+          |                 |
+          ↓                 ↓
+       IP Info          HTML Page
+                            |
+                    +-------+-------+
+                    |               |
+                    ↓               ↓
+                  Title           Links
+                    |
+                    ↓
+               HTTP Headers
+                    |
+                    ↓
+              Verify Results
+                    |
+                    ↓
+                JSON Report
+```
+
+---
+
+# 45. Exam Questions
+
+### Q1. What does OSINT stand for?
+
+**Answer:** Open-Source Intelligence.
+
+### Q2. What is OSINT?
+
+**Answer:** Collection and analysis of publicly available information.
+
+### Q3. Which Python library is commonly used for HTTP requests?
+
+**Answer:** `requests`.
+
+### Q4. Which library can parse HTML?
+
+**Answer:** BeautifulSoup.
+
+### Q5. Which Python module handles JSON?
+
+**Answer:** `json`.
+
+### Q6. Which Python module handles regular expressions?
+
+**Answer:** `re`.
+
+### Q7. What is the purpose of `socket.gethostbyname()`?
+
+**Answer:** It can resolve a hostname to an IPv4 address.
+
+### Q8. Why is input validation important?
+
+**Answer:** It prevents malformed or unexpected input from causing problems.
+
+### Q9. Why should an OSINT tool use timeouts?
+
+**Answer:** To prevent requests from hanging indefinitely.
+
+### Q10. What is passive OSINT?
+
+**Answer:** Gathering information without directly interacting with the target infrastructure.
+
+### Q11. What is active OSINT?
+
+**Answer:** Gathering information by interacting with publicly accessible target infrastructure.
+
+### Q12. Does public information mean unlimited access is permitted?
+
+**Answer:** No. Laws, authorization, privacy, and service policies still apply.
+
+### Q13. Why verify OSINT information?
+
+**Answer:** Public information can be outdated, incomplete, or inaccurate.
+
+### Q14. What is the difference between data and intelligence?
+
+**Answer:** Data is raw information; intelligence is analyzed and verified information useful for a decision.
+
+---
+
+# 46. Quick Revision
+
+```text
+OSINT
+ ↓
+Open-Source Intelligence
+ ↓
+Public Information
+ ↓
+Collect
+ ↓
+Extract
+ ↓
+Verify
+ ↓
+Analyze
+ ↓
+Report
+```
+
+### Important Python Libraries
+
+```text
+requests      → HTTP requests
+BeautifulSoup → HTML parsing
+re            → Pattern matching
+json          → JSON data
+csv           → CSV files
+socket        → Basic DNS/network functions
+argparse      → Command-line arguments
+logging       → Program logging
+```
+
+---
+
+# 47. Memory Tricks
+
+## OSINT Workflow
+
+> **C-E-V-A-R**
+
+**C** → Collect  
+**E** → Extract  
+**V** → Verify  
+**A** → Analyze  
+**R** → Report
+
+---
+
+## Python OSINT Libraries
+
+> **R-B-R-J-C-S**
+
+**R** → Requests  
+**B** → BeautifulSoup  
+**R** → Regex  
+**J** → JSON  
+**C** → CSV  
+**S** → Socket
+
+---
+
+## Passive vs Active
+
+> **Passive = Observe**
+
+> **Active = Interact**
+
+---
+
+# ⭐ MOST IMPORTANT EXAM POINTS
+
+1. **OSINT = Open-Source Intelligence.**
+2. OSINT uses publicly available information.
+3. OSINT is commonly used during reconnaissance.
+4. Python can automate OSINT collection.
+5. `requests` is used for HTTP requests.
+6. BeautifulSoup is used for HTML parsing.
+7. `re` is used for regular expressions.
+8. `json` handles JSON data.
+9. `csv` handles CSV files.
+10. `socket` provides basic networking functions.
+11. HTTP status `200` generally means successful response.
+12. `403` means access is forbidden.
+13. `404` means resource not found.
+14. `429` commonly indicates too many requests.
+15. DNS can provide publicly resolvable domain information.
+16. Passive OSINT observes without directly interacting with target infrastructure.
+17. Active OSINT interacts with publicly accessible infrastructure.
+18. OSINT information should be verified.
+19. Public does not automatically mean unrestricted or authorized.
+20. OSINT tools should respect rate limits and service policies.
+21. Never intentionally collect passwords, tokens, cookies, or private information.
+22. Use timeouts and error handling in web requests.
+23. Store results in structured formats such as JSON or CSV.
+24. A good OSINT tool follows **Collect → Extract → Verify → Analyze → Report**.
+25. Only investigate systems and data you are authorized to investigate.
+
+# ONE-LINE REVISION
+
+> **An OSINT tool automates the collection, extraction, verification, organization, and reporting of publicly available information while respecting authorization, privacy, rate limits, and applicable laws.**

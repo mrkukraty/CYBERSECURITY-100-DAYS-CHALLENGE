@@ -1,0 +1,1550 @@
+# DAY 22 – INTRODUCTION TO WEB APPLICATION SECURITY
+
+## Web Applications • OWASP • OWASP Top 10 (2025) • Common Vulnerabilities • Secure Development
+
+---
+
+# 1. WHAT IS WEB APPLICATION SECURITY?
+
+**Web Application Security** is the practice of protecting websites and web applications from vulnerabilities, attacks, unauthorized access, data theft, and misuse.
+
+### Simple Definition
+
+> **Web application security = Protecting web applications, APIs, users, sessions, data, and backend systems from security threats.**
+
+---
+
+# 2. WHAT IS A WEB APPLICATION?
+
+A web application is software accessed through a web browser or HTTP-based interface.
+
+Examples:
+
+- Banking applications
+- Email systems
+- E-commerce websites
+- Government portals
+- Social media
+- Online booking systems
+- Enterprise dashboards
+- Web-based APIs
+
+---
+
+# 3. BASIC WEB APPLICATION ARCHITECTURE
+
+A typical application looks like:
+
+```text
+┌──────────────┐
+│    User      │
+│   Browser    │
+└──────┬───────┘
+       │ HTTPS
+       ▼
+┌──────────────┐
+│ Web Server   │
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│ Application  │
+│   Server     │
+└──────┬───────┘
+       │
+       ▼
+┌──────────────┐
+│  Database    │
+└──────────────┘
+```
+
+There may also be:
+
+- APIs
+- Authentication services
+- Cloud services
+- File storage
+- Message queues
+- Third-party services
+
+---
+
+# 4. HOW A WEB REQUEST WORKS
+
+Example:
+
+```text
+User
+ ↓
+Browser
+ ↓
+HTTPS Request
+ ↓
+Web Server
+ ↓
+Application Logic
+ ↓
+Database
+ ↓
+Response
+ ↓
+Browser
+```
+
+Security problems can occur at almost every stage.
+
+---
+
+# 5. WEB APPLICATION ATTACK SURFACE
+
+The **attack surface** is the collection of possible entry points that could be targeted.
+
+Examples:
+
+```text
+Login
+Registration
+Search
+File Upload
+API
+URL Parameters
+Forms
+Cookies
+Headers
+Admin Panel
+Password Reset
+Payment Function
+```
+
+### Memory
+
+> **Every input, function, endpoint, and access path can potentially become part of the attack surface.**
+
+---
+
+# 6. AUTHENTICATION VS AUTHORIZATION
+
+This is one of the most important exam concepts.
+
+## Authentication
+
+> **Who are you?**
+
+Examples:
+
+- Username/password
+- MFA
+- Passkeys
+- Biometrics
+
+## Authorization
+
+> **What are you allowed to do?**
+
+Example:
+
+```text
+User A
+→ Can view own profile
+
+Admin
+→ Can manage users
+```
+
+### Memory
+
+> **Authentication = Identity**
+
+> **Authorization = Permission**
+
+---
+
+# 7. INPUT VALIDATION
+
+Applications receive input from users.
+
+Examples:
+
+```text
+Username
+Password
+Search term
+File
+URL parameter
+JSON data
+API request
+```
+
+Applications should validate:
+
+- Type
+- Length
+- Format
+- Range
+- Allowed values
+
+### Example
+
+If a field expects:
+
+```text
+Age = integer between 1 and 120
+```
+
+the server should not blindly trust arbitrary input.
+
+---
+
+# 8. OUTPUT ENCODING
+
+Data displayed back to users should be handled safely.
+
+This is especially important for preventing client-side injection such as XSS.
+
+### Basic concept
+
+```text
+User Input
+    ↓
+Validate
+    ↓
+Process
+    ↓
+Encode appropriately
+    ↓
+Display
+```
+
+---
+
+# 9. SESSION MANAGEMENT
+
+After login, applications need to maintain a user's authenticated state.
+
+Common mechanisms:
+
+- Session cookies
+- Secure tokens
+- Server-side sessions
+- JWTs
+
+Security considerations include:
+
+- Session expiration
+- Secure cookie attributes
+- Session invalidation
+- Token protection
+- Session rotation where appropriate
+
+---
+
+# 10. IMPORTANT SECURITY HEADERS
+
+Common security-related HTTP headers include:
+
+| Header | Purpose |
+|---|---|
+| Content-Security-Policy | Helps control allowed content sources |
+| Strict-Transport-Security | Helps enforce HTTPS |
+| X-Content-Type-Options | Helps prevent MIME-type sniffing |
+| Referrer-Policy | Controls referrer information |
+| Permissions-Policy | Controls certain browser features |
+
+### Important
+
+Security headers improve security but **do not automatically make an application secure**.
+
+---
+
+# 11. WHAT IS OWASP?
+
+**OWASP = Open Worldwide Application Security Project**
+
+OWASP is a nonprofit organization focused on improving software security.
+
+It provides:
+
+- Security guidance
+- Testing resources
+- Developer guidance
+- Security standards/resources
+- Training materials
+- The OWASP Top 10
+
+---
+
+# 12. WHAT IS THE OWASP TOP 10?
+
+The **OWASP Top 10** is a widely used awareness document highlighting important categories of web application security risks.
+
+### Important
+
+It is:
+
+> **An awareness and risk-category resource, not a complete list of every web vulnerability.**
+
+---
+
+# 13. OWASP TOP 10 – 2025
+
+The **OWASP Top 10:2025** categories are:
+
+| # | Category |
+|---:|---|
+| A01 | Broken Access Control |
+| A02 | Security Misconfiguration |
+| A03 | Software Supply Chain Failures |
+| A04 | Cryptographic Failures |
+| A05 | Injection |
+| A06 | Insecure Design |
+| A07 | Authentication Failures |
+| A08 | Software or Data Integrity Failures |
+| A09 | Security Logging & Alerting Failures |
+| A10 | Mishandling of Exceptional Conditions |
+
+---
+
+# 14. A01 – BROKEN ACCESS CONTROL
+
+## Definition
+
+Broken Access Control occurs when an application fails to properly enforce what users are allowed to access or modify.
+
+### Simple Example
+
+Suppose:
+
+```text
+User A
+Account ID = 100
+```
+
+User A changes a request from:
+
+```text
+/account/100
+```
+
+to:
+
+```text
+/account/101
+```
+
+and can access User B's information.
+
+This could indicate an authorization problem.
+
+---
+
+# 15. IDOR
+
+**IDOR = Insecure Direct Object Reference**
+
+Example concept:
+
+```text
+/user/100
+/user/101
+/user/102
+```
+
+If changing an identifier allows unauthorized access, there may be an access-control vulnerability.
+
+### Important
+
+> **The problem is not the number itself; the problem is missing authorization enforcement.**
+
+---
+
+# 16. A01 PREVENTION
+
+Use:
+
+- Server-side authorization
+- Role-based access control
+- Object-level authorization
+- Least privilege
+- Deny-by-default
+- Centralized authorization checks
+- Proper testing
+
+### Critical Rule
+
+> **Never rely only on hidden UI elements for authorization.**
+
+If a button is hidden from a normal user, the backend must still enforce the restriction.
+
+---
+
+# 17. A02 – SECURITY MISCONFIGURATION
+
+Security misconfiguration occurs when systems or applications are configured insecurely.
+
+Examples:
+
+- Default credentials
+- Debug mode enabled in production
+- Unnecessary services
+- Excessive permissions
+- Detailed error messages
+- Missing security headers
+- Unnecessary features
+- Incorrect cloud permissions
+
+### Example
+
+Production application displays:
+
+```text
+Database connection failed:
+Host: internal-db
+User: application_user
+Database: production_db
+```
+
+This may reveal unnecessary sensitive information.
+
+---
+
+# 18. A02 PREVENTION
+
+Use:
+
+- Secure defaults
+- Remove unnecessary services
+- Disable debug mode in production
+- Change default credentials
+- Harden servers
+- Use least privilege
+- Automate configuration management
+- Regular security reviews
+
+### Memory
+
+> **Misconfiguration = Security problem caused by the way the system is configured.**
+
+---
+
+# 19. A03 – SOFTWARE SUPPLY CHAIN FAILURES
+
+This category focuses on security risks introduced through the software supply chain.
+
+Examples include:
+
+- Vulnerable dependencies
+- Compromised packages
+- Insecure third-party components
+- Build pipeline compromise
+- Dependency confusion
+- Compromised development tools
+- Untrusted software sources
+
+### Example
+
+```text
+Your Application
+      ↓
+Third-party Library
+      ↓
+Library has vulnerability
+      ↓
+Application inherits risk
+```
+
+---
+
+# 20. A03 PREVENTION
+
+Use:
+
+- Dependency inventory
+- Software composition analysis
+- Trusted package sources
+- Dependency pinning where appropriate
+- Software Bill of Materials (SBOM)
+- Dependency updates
+- CI/CD security
+- Build integrity controls
+- Vendor risk management
+
+### Memory
+
+> **Supply chain = Security risk can enter through software you depend on.**
+
+---
+
+# 21. A04 – CRYPTOGRAPHIC FAILURES
+
+Cryptographic failures occur when sensitive information is not adequately protected through cryptography.
+
+Examples:
+
+- Sensitive data transmitted without appropriate encryption
+- Weak cryptographic algorithms
+- Poor key management
+- Hard-coded secrets
+- Improper password storage
+- Inadequate protection of sensitive data
+
+### Example
+
+```text
+Password
+   ↓
+Stored as plaintext
+```
+
+This is extremely dangerous.
+
+A secure system should use an appropriate password-hashing mechanism.
+
+---
+
+# 22. ENCRYPTION VS HASHING
+
+### Encryption
+
+Designed to protect confidentiality and can be reversed with the appropriate key.
+
+```text
+Plaintext
+   ↓ Encrypt
+Ciphertext
+   ↓ Decrypt
+Plaintext
+```
+
+### Hashing
+
+One-way transformation generally used for integrity or password verification.
+
+```text
+Password
+   ↓
+Password Hash
+```
+
+### Important
+
+> **Passwords should generally be stored using a password-hashing scheme, not reversible encryption or plaintext.**
+
+---
+
+# 23. A04 PREVENTION
+
+Use:
+
+- Strong modern cryptography
+- TLS/HTTPS
+- Secure password hashing
+- Proper key management
+- Secure secret storage
+- Appropriate encryption for sensitive data
+- Avoid deprecated algorithms
+
+---
+
+# 24. A05 – INJECTION
+
+Injection occurs when untrusted input is interpreted as commands or queries.
+
+Common examples:
+
+- SQL injection
+- Command injection
+- LDAP injection
+- NoSQL injection
+- Template injection
+
+### Basic Concept
+
+```text
+Untrusted Input
+      ↓
+Application
+      ↓
+Interpreter
+      ↓
+Unexpected command/query behavior
+```
+
+---
+
+# 25. SQL INJECTION
+
+An application builds database queries unsafely from user input.
+
+Conceptually:
+
+```text
+User Input
+    ↓
+Application
+    ↓
+SQL Query
+    ↓
+Database
+```
+
+If input is improperly handled, the input may alter the intended query structure.
+
+### Prevention
+
+Use:
+
+- Parameterized queries
+- Prepared statements
+- Safe ORM usage
+- Input validation
+- Least-privileged database accounts
+
+### Key Rule
+
+> **Never build SQL queries by blindly concatenating untrusted input.**
+
+---
+
+# 26. A06 – INSECURE DESIGN
+
+Insecure Design focuses on security weaknesses that originate in the application's architecture, requirements, or design.
+
+### Example
+
+A password-reset system allows:
+
+```text
+Unlimited reset attempts
++
+No rate limiting
++
+Weak verification
+```
+
+The problem may exist at the **design level**, not simply because of a coding mistake.
+
+---
+
+# 27. SECURE DESIGN PRINCIPLES
+
+Use:
+
+- Threat modeling
+- Secure architecture
+- Least privilege
+- Defense in depth
+- Secure defaults
+- Rate limiting
+- Abuse-case analysis
+- Security requirements
+
+### Memory
+
+> **Secure coding fixes implementation problems; secure design prevents security weaknesses from being designed into the system.**
+
+---
+
+# 28. A07 – AUTHENTICATION FAILURES
+
+Authentication failures occur when identity verification or account/session management is implemented insecurely.
+
+Examples:
+
+- Weak password policies
+- Credential stuffing exposure
+- Missing MFA where appropriate
+- Weak password-reset mechanisms
+- Poor session management
+- Username enumeration
+- Brute-force protection weaknesses
+
+---
+
+# 29. AUTHENTICATION DEFENSE
+
+Use:
+
+- Strong authentication
+- MFA where appropriate
+- Secure password storage
+- Rate limiting
+- Account protection
+- Secure password recovery
+- Session management
+- Monitoring
+
+### Important
+
+> **Authentication answers "Who are you?"**
+
+---
+
+# 30. A08 – SOFTWARE OR DATA INTEGRITY FAILURES
+
+This category concerns situations where software or data is trusted without adequately verifying its integrity or source.
+
+Examples:
+
+- Unsigned/unverified software updates
+- Untrusted serialized data
+- Compromised build artifacts
+- Insecure CI/CD processes
+- Dependencies obtained without adequate integrity verification
+
+### Concept
+
+```text
+Software/Data
+      ↓
+Integrity Verification
+      ↓
+Trusted?
+   ↙       ↘
+ YES        NO
+ ↓           ↓
+Use       Reject/Investigate
+```
+
+---
+
+# 31. A08 PREVENTION
+
+Use:
+
+- Integrity verification
+- Signed artifacts
+- Secure CI/CD pipelines
+- Trusted sources
+- Access controls
+- Verification of dependencies
+- Protected build systems
+
+### Memory
+
+> **Integrity = "Has this software/data been changed or tampered with?"**
+
+---
+
+# 32. A09 – SECURITY LOGGING & ALERTING FAILURES
+
+Applications need useful security logging and alerting.
+
+Problems occur when:
+
+- Important security events aren't logged
+- Logs are incomplete
+- Alerts are missing
+- Logs are easily modified/deleted
+- Monitoring is ineffective
+- Excessive noise hides important events
+
+---
+
+# 33. WHAT SHOULD BE LOGGED?
+
+Depending on the application:
+
+- Login success/failure
+- Password changes
+- Privilege changes
+- Administrative actions
+- Important configuration changes
+- Suspicious activity
+- Security-relevant errors
+- Access-control failures
+
+### Important
+
+Do not log sensitive secrets such as:
+
+- Passwords
+- Authentication tokens
+- Private keys
+
+unless there is a carefully controlled security-specific reason and appropriate protection.
+
+---
+
+# 34. A09 PREVENTION
+
+Use:
+
+- Centralized logging
+- Access-controlled logs
+- Monitoring
+- Alerting
+- Time synchronization
+- Log integrity protection
+- Incident-response integration
+
+### Memory
+
+> **Logging records; alerting gets attention.**
+
+---
+
+# 35. A10 – MISHANDLING OF EXCEPTIONAL CONDITIONS
+
+This category covers security problems caused by improperly handling unexpected or exceptional conditions.
+
+Examples:
+
+- Unexpected errors
+- Failed transactions
+- Timeouts
+- Resource exhaustion
+- Partial failures
+- Incorrect error handling
+- Fail-open behavior
+- Inconsistent state
+
+### Example
+
+Suppose:
+
+```text
+Payment = ₹10,000
+```
+
+During a failure, the payment system incorrectly marks the transaction as successful without confirming the payment.
+
+This can be a serious integrity/business-logic problem.
+
+---
+
+# 36. A10 PREVENTION
+
+Use:
+
+- Proper exception handling
+- Secure failure behavior
+- Transaction integrity
+- Consistent state management
+- Timeouts
+- Resource limits
+- Error monitoring
+- Safe rollback mechanisms
+
+### Memory
+
+> **Unexpected condition → application must fail safely and preserve security/integrity.**
+
+---
+
+# 37. OWASP TOP 10 – 2025 QUICK TABLE
+
+| # | OWASP 2025 Category | Easy Meaning |
+|---:|---|---|
+| A01 | Broken Access Control | Wrong user gets access |
+| A02 | Security Misconfiguration | System configured insecurely |
+| A03 | Software Supply Chain Failures | Risk through software/dependencies |
+| A04 | Cryptographic Failures | Sensitive data not adequately protected |
+| A05 | Injection | Untrusted input becomes commands/queries |
+| A06 | Insecure Design | Security weakness built into design |
+| A07 | Authentication Failures | Identity/session protection is weak |
+| A08 | Software or Data Integrity Failures | Software/data integrity isn't properly trusted/verified |
+| A09 | Security Logging & Alerting Failures | Important security events aren't properly detected |
+| A10 | Mishandling of Exceptional Conditions | Unexpected conditions handled insecurely |
+
+---
+
+# 38. OWASP 2025 MEMORY TRICK
+
+Remember the sequence:
+
+## **B S S C I I A S S M**
+
+**B** → Broken Access Control  
+**S** → Security Misconfiguration  
+**S** → Software Supply Chain Failures  
+**C** → Cryptographic Failures  
+**I** → Injection  
+**I** → Insecure Design  
+**A** → Authentication Failures  
+**S** → Software/Data Integrity Failures  
+**S** → Security Logging & Alerting Failures  
+**M** → Mishandling Exceptional Conditions
+
+### Easier Grouping
+
+```text
+A01 → ACCESS
+A02 → CONFIGURATION
+A03 → SUPPLY CHAIN
+A04 → CRYPTO
+A05 → INJECTION
+A06 → DESIGN
+A07 → AUTHENTICATION
+A08 → INTEGRITY
+A09 → LOGGING
+A10 → EXCEPTIONS
+```
+
+---
+
+# 39. OWASP TOP 10 – SCENARIO MEMORY
+
+## A01
+
+> User accesses another user's account.
+
+**Broken Access Control**
+
+## A02
+
+> Debug mode is enabled in production.
+
+**Security Misconfiguration**
+
+## A03
+
+> Application uses a compromised/vulnerable dependency.
+
+**Software Supply Chain Failures**
+
+## A04
+
+> Sensitive information is poorly protected cryptographically.
+
+**Cryptographic Failures**
+
+## A05
+
+> User input changes a database query.
+
+**Injection**
+
+## A06
+
+> Security weakness exists because the application was designed insecurely.
+
+**Insecure Design**
+
+## A07
+
+> Weak login/password-reset/session controls.
+
+**Authentication Failures**
+
+## A08
+
+> Application trusts software/data without proper integrity verification.
+
+**Software/Data Integrity Failures**
+
+## A09
+
+> Suspicious login events aren't logged or alerted.
+
+**Security Logging & Alerting Failures**
+
+## A10
+
+> Application handles an unexpected failure in a way that compromises security or integrity.
+
+**Mishandling of Exceptional Conditions**
+
+---
+
+# 40. OWASP TOP 10 VS SPECIFIC VULNERABILITY
+
+The Top 10 contains **categories**, not simply ten individual bugs.
+
+For example:
+
+```text
+A05 Injection
+ ├── SQL Injection
+ ├── Command Injection
+ ├── LDAP Injection
+ └── Other injection types
+```
+
+Similarly:
+
+```text
+A01 Broken Access Control
+ ├── IDOR
+ ├── Privilege escalation
+ ├── Unauthorized access
+ └── Missing authorization checks
+```
+
+---
+
+# 41. WEB APPLICATION SECURITY TESTING WORKFLOW
+
+```text
+1. Define Scope
+       ↓
+2. Map Application
+       ↓
+3. Identify Endpoints
+       ↓
+4. Identify Inputs
+       ↓
+5. Test Authentication
+       ↓
+6. Test Authorization
+       ↓
+7. Test Input Handling
+       ↓
+8. Test Sessions
+       ↓
+9. Test Configuration
+       ↓
+10. Validate Findings
+       ↓
+11. Report
+       ↓
+12. Remediate
+       ↓
+13. Retest
+```
+
+---
+
+# 42. TOOLS FOR WEB APPLICATION SECURITY
+
+Common tools include:
+
+| Tool | Purpose |
+|---|---|
+| Burp Suite | Web security testing/proxy |
+| OWASP ZAP | Web application security testing |
+| Browser DevTools | Inspect requests/responses/client behavior |
+| Postman | API testing |
+| curl | HTTP requests |
+| Nmap | Network/service discovery |
+| Nikto | Web-server scanning |
+| Wappalyzer | Technology identification |
+
+### Memory
+
+> **Burp/ZAP = Web Testing**
+
+> **Nmap = Network**
+
+> **Nikto = Web Server**
+
+> **Wappalyzer = Technology**
+
+---
+
+# 43. BURP SUITE BASIC CONCEPT
+
+A proxy can sit between:
+
+```text
+Browser
+   ↓
+Proxy
+   ↓
+Web Application
+```
+
+This allows an authorized tester to inspect:
+
+- Requests
+- Responses
+- Headers
+- Parameters
+- Cookies
+- API calls
+
+---
+
+# 44. OWASP ZAP
+
+**OWASP ZAP (Zed Attack Proxy)** is an open-source web application security testing tool.
+
+It can assist with:
+
+- Request/response inspection
+- Automated scanning
+- Passive analysis
+- Active testing in authorized environments
+
+### Important
+
+> Automated results still require validation.
+
+---
+
+# 45. SECURITY TESTING PRINCIPLE
+
+Always distinguish:
+
+```text
+Potential Finding
+       ↓
+Evidence
+       ↓
+Validation
+       ↓
+Confirmed Finding
+       ↓
+Risk Assessment
+       ↓
+Remediation
+       ↓
+Retest
+```
+
+---
+
+# 46. SECURE DEVELOPMENT LIFECYCLE
+
+Security should not be added only after deployment.
+
+A secure development lifecycle can include:
+
+```text
+Requirements
+     ↓
+Threat Modeling
+     ↓
+Secure Design
+     ↓
+Secure Coding
+     ↓
+Code Review
+     ↓
+Security Testing
+     ↓
+Deployment
+     ↓
+Monitoring
+     ↓
+Patch & Remediation
+```
+
+### Key Principle
+
+> **Security should be built into the lifecycle, not added only at the end.**
+
+---
+
+# 47. COMMON WEB SECURITY MISTAKES
+
+### Mistake 1
+
+Trusting client-side validation.
+
+**Fix:** Validate on the server.
+
+### Mistake 2
+
+Hiding an admin button and assuming authorization is secure.
+
+**Fix:** Enforce authorization server-side.
+
+### Mistake 3
+
+Storing passwords in plaintext.
+
+**Fix:** Use an appropriate password-hashing scheme.
+
+### Mistake 4
+
+Displaying stack traces to users.
+
+**Fix:** Use safe user-facing errors and secure server-side logging.
+
+### Mistake 5
+
+Assuming HTTPS fixes all vulnerabilities.
+
+**Fix:** HTTPS protects transport; application vulnerabilities can still exist.
+
+### Mistake 6
+
+Trusting third-party dependencies blindly.
+
+**Fix:** Monitor and assess dependencies.
+
+### Mistake 7
+
+Logging passwords or tokens.
+
+**Fix:** Protect sensitive secrets from logs.
+
+---
+
+# 48. SCENARIO-BASED MCQs
+
+## Q1
+
+A normal user changes `/account/100` to `/account/101` and sees another user's information.
+
+Which OWASP category is most relevant?
+
+A. Cryptographic Failures  
+B. Broken Access Control  
+C. Security Logging Failures  
+D. Supply Chain Failures
+
+**Answer: B**
+
+---
+
+## Q2
+
+A production application accidentally has debug mode enabled and exposes detailed stack traces.
+
+Which category?
+
+A. Security Misconfiguration  
+B. Injection  
+C. Authentication Failures  
+D. Insecure Design
+
+**Answer: A**
+
+---
+
+## Q3
+
+An application uses a third-party library containing a known security weakness.
+
+Which 2025 category is most directly relevant?
+
+A. Software Supply Chain Failures  
+B. Broken Access Control  
+C. Mishandling Exceptional Conditions  
+D. Logging Failures
+
+**Answer: A**
+
+---
+
+## Q4
+
+A website stores user passwords in plaintext.
+
+Which category is most directly relevant?
+
+A. Cryptographic Failures  
+B. Broken Access Control  
+C. Supply Chain Failures  
+D. Logging Failures
+
+**Answer: A**
+
+---
+
+## Q5
+
+User input is inserted unsafely into a database query.
+
+Which category?
+
+A. Injection  
+B. Security Misconfiguration  
+C. Authentication Failures  
+D. Logging Failures
+
+**Answer: A**
+
+---
+
+## Q6
+
+A password-reset system was designed without sufficient verification and rate limiting.
+
+Which category may be most relevant?
+
+A. Insecure Design  
+B. Cryptographic Failures  
+C. Supply Chain Failures  
+D. Logging Failures
+
+**Answer: A**
+
+---
+
+## Q7
+
+An application allows unlimited login attempts and provides weak account protection.
+
+Which category?
+
+A. Authentication Failures  
+B. Cryptographic Failures  
+C. Supply Chain Failures  
+D. Security Misconfiguration
+
+**Answer: A**
+
+---
+
+## Q8
+
+An application installs software updates without verifying their source or integrity.
+
+Which category?
+
+A. Software or Data Integrity Failures  
+B. Broken Access Control  
+C. Injection  
+D. Authentication Failures
+
+**Answer: A**
+
+---
+
+## Q9
+
+An application does not record failed administrator logins and produces no alerts.
+
+Which category?
+
+A. Security Logging & Alerting Failures  
+B. Injection  
+C. Cryptographic Failures  
+D. Insecure Design
+
+**Answer: A**
+
+---
+
+## Q10
+
+A payment application encounters an unexpected database failure and incorrectly marks a transaction as completed.
+
+Which category is most relevant?
+
+A. Mishandling of Exceptional Conditions  
+B. Supply Chain Failures  
+C. Security Misconfiguration  
+D. Authentication Failures
+
+**Answer: A**
+
+---
+
+# 49. HARDER SCENARIO MCQs
+
+## Q11
+
+An application hides the "Delete User" button from normal users. However, a normal user manually sends the deletion request and the server accepts it.
+
+What is the root problem?
+
+A. Missing client-side validation  
+B. Broken server-side authorization  
+C. Cryptographic failure  
+D. Logging failure
+
+**Answer: B**
+
+### OWASP Category:
+
+**A01 – Broken Access Control**
+
+---
+
+## Q12
+
+A company has a secure login system, but its password-reset design allows anyone who knows a user's email address to reset the password without adequate verification.
+
+Which category is most relevant?
+
+A. Insecure Design  
+B. Software Supply Chain Failures  
+C. Security Logging & Alerting Failures  
+D. Cryptographic Failures
+
+**Answer: A**
+
+---
+
+## Q13
+
+A developer uses parameterized SQL queries, but an unrelated application component constructs shell commands from untrusted input.
+
+Can the application still have injection vulnerabilities?
+
+A. No  
+B. Yes  
+C. Only if HTTPS is disabled  
+D. Only if the database is exposed
+
+**Answer: B**
+
+---
+
+## Q14
+
+A web application uses HTTPS, but its authorization system allows users to access other users' records.
+
+Is the application secure?
+
+A. Yes, because HTTPS is enabled  
+B. No, HTTPS does not replace authorization  
+C. Yes, if passwords are strong  
+D. Yes, if cookies are enabled
+
+**Answer: B**
+
+---
+
+## Q15
+
+A scanner reports missing CSP headers.
+
+What should the analyst conclude?
+
+A. The application is definitely compromised  
+B. It may indicate a security-hardening issue requiring contextual assessment  
+C. SQL injection is confirmed  
+D. Authentication is broken
+
+**Answer: B**
+
+---
+
+# 50. MOST IMPORTANT EXAM POINTS
+
+1. Web application security protects applications, APIs, users, sessions, and data.
+2. Authentication = **Who are you?**
+3. Authorization = **What are you allowed to do?**
+4. Client-side controls cannot replace server-side security controls.
+5. OWASP = Open Worldwide Application Security Project.
+6. OWASP Top 10 is an awareness/risk-category resource.
+7. **A01 = Broken Access Control**
+8. **A02 = Security Misconfiguration**
+9. **A03 = Software Supply Chain Failures**
+10. **A04 = Cryptographic Failures**
+11. **A05 = Injection**
+12. **A06 = Insecure Design**
+13. **A07 = Authentication Failures**
+14. **A08 = Software or Data Integrity Failures**
+15. **A09 = Security Logging & Alerting Failures**
+16. **A10 = Mishandling of Exceptional Conditions**
+17. IDOR is an example of an access-control problem.
+18. SQL injection belongs to Injection.
+19. Plaintext password storage is a cryptographic/security failure.
+20. Vulnerable dependencies can create supply-chain risk.
+21. Debug mode in production is a common misconfiguration.
+22. Poor security architecture can be an insecure-design problem.
+23. Weak password-reset mechanisms can involve design/authentication failures depending on the root cause.
+24. Security logging and alerting are different but complementary.
+25. Applications should fail safely when exceptional conditions occur.
+26. HTTPS protects data in transit but does not fix application-level vulnerabilities.
+27. Security headers improve defenses but do not guarantee security.
+28. Automated scanner results require validation.
+29. Secure development should include security from requirements through deployment and maintenance.
+30. **OWASP categories describe classes of risk, not just individual bugs.**
+
+---
+
+# 🧠 OWASP 2025 MASTER MEMORY
+
+## **A01 → ACCESS**
+Broken Access Control
+
+## **A02 → CONFIG**
+Security Misconfiguration
+
+## **A03 → SUPPLY**
+Software Supply Chain Failures
+
+## **A04 → CRYPTO**
+Cryptographic Failures
+
+## **A05 → INJECT**
+Injection
+
+## **A06 → DESIGN**
+Insecure Design
+
+## **A07 → AUTH**
+Authentication Failures
+
+## **A08 → INTEGRITY**
+Software/Data Integrity Failures
+
+## **A09 → LOG**
+Security Logging & Alerting Failures
+
+## **A10 → EXCEPTION**
+Mishandling of Exceptional Conditions
+
+### Super-short sequence:
+
+> **ACCESS → CONFIG → SUPPLY → CRYPTO → INJECT → DESIGN → AUTH → INTEGRITY → LOG → EXCEPTION**
+
+---
+
+# ⚡ 30-SECOND REVISION
+
+```text
+A01 = Broken Access Control
+      → Wrong access
+
+A02 = Security Misconfiguration
+      → Wrong configuration
+
+A03 = Software Supply Chain Failures
+      → Risk through dependencies/supply chain
+
+A04 = Cryptographic Failures
+      → Poor protection of sensitive data
+
+A05 = Injection
+      → Input becomes command/query
+
+A06 = Insecure Design
+      → Security weakness in design
+
+A07 = Authentication Failures
+      → Weak identity/session protection
+
+A08 = Software/Data Integrity Failures
+      → Integrity/source not properly verified
+
+A09 = Security Logging & Alerting Failures
+      → Poor detection/monitoring
+
+A10 = Mishandling of Exceptional Conditions
+      → Unexpected situations handled insecurely
+```
+
+---
+
+# 🔥 FINAL EXAM FORMULA
+
+```text
+WEB APPLICATION
+      ↓
+IDENTIFY ATTACK SURFACE
+      ↓
+AUTHENTICATION
+      ↓
+AUTHORIZATION
+      ↓
+INPUT VALIDATION
+      ↓
+SESSION SECURITY
+      ↓
+CONFIGURATION
+      ↓
+DEPENDENCIES
+      ↓
+CRYPTOGRAPHY
+      ↓
+LOGGING & MONITORING
+      ↓
+ERROR/EXCEPTION HANDLING
+      ↓
+VALIDATE
+      ↓
+REMEDIATE
+      ↓
+RETEST
+```
+
+# 🎯 ONE-LINE EXAM ANSWER
+
+> **Web application security is the practice of protecting web applications, APIs, users, sessions, and data from security threats, with OWASP Top 10 providing a widely used awareness framework for major categories of application-security risk.**
